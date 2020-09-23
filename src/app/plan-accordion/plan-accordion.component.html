@@ -1,6 +1,6 @@
 
 <mat-accordion>
-  <mat-expansion-panel *ngFor="let hero of heroes" >
+  <mat-expansion-panel *ngFor="let hero  of heroes" >
     <mat-expansion-panel-header>
       <mat-panel-title>
         {{ hero.name}}
@@ -9,7 +9,6 @@
         5433344
       </mat-panel-description>
     </mat-expansion-panel-header>
-
     <table>
       <tr>
         <th></th><th> {{ headText }} </th><th *ngIf = "headText2Bool"> {{ headText2 }}</th>
@@ -22,13 +21,11 @@
                 <mat-option value="ArcCheck2" (click) = 'setType($event)' >ArcCheck2</mat-option>
                 <mat-option value="Mobius" (click) = 'setType($event)'>Mobius</mat-option>
                 <mat-option value="Matrix"  (click) = 'setType($event)'>Matrix</mat-option>
-    
             </mat-select>
         </mat-form-field>
         </td>
         <td *ngIf = heading><input type='text' size='10' ></td>
         <td><input type='text' size='10'  (change) = 'addRow();'></td>
-
       </tr>
     </table>
   </mat-expansion-panel>
