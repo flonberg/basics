@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-
+import { GenService } from '../gen.service';
 
 @Component({
   selector: 'app-plan-accordion',
@@ -13,12 +13,31 @@ export class PlanAccordionComponent implements OnInit {
   headText = 'Measurement';
   headText2Bool = false;
   headText2 = 'QA Check';
-  constructor() { }
 
+  constructor(private genSvce: GenService) {
+    this.genSvce = genSvce;
+   }
   
+
+
   ngOnInit() {
+    this.getData();
   }
-  setPatients(res){
+  getData(){
+    this.genSvce.setPlatform();
+    //  this.genEditSvce.getPMDs('fjl3').subscribe(
+        this.genSvce.getWithSelString('SELECT top(3) * FROM physicists' ).subscribe(  
+        (res) => {
+          this.setData(res);
+        },
+        err => {
+          console.log("error 223");
+          console.log(err);
+        }
+      );
+    }
+
+  setData(res){
     const patients = res;
     console.log("pasritnet is  %o", patients);
   }
@@ -37,7 +56,5 @@ export class PlanAccordionComponent implements OnInit {
       this .headText2Bool = false;
       this .headText = "Measurement";
     }
-
   }
-
 }

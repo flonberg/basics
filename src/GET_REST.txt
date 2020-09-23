@@ -1,0 +1,3 @@
+
+ offset is 4
+ Connection established with phsqlweb242.
