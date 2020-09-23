@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-@Component({
+@ Component({
   selector: 'app-expand-rows',
   templateUrl: './expand-rows.component.html',
   styleUrls: ['./expand-rows.component.css']
@@ -14,7 +14,7 @@ export class ExpandRowsComponent implements OnInit {
   ngOnInit() {
   }
   addRow(){
-    this.bars.push(1);
+    this .bars.push(1);
   }
   setType() {
     console.log('setType');

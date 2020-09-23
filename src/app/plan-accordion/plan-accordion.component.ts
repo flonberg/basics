@@ -7,7 +7,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./plan-accordion.component.css']
 })
 export class PlanAccordionComponent implements OnInit {
-  heroes = ['Windstorm', 'Bombasto', 'Magneta', 'Tornado'];
+  heroes = [{'name':'Agiligy'}];
   bars = new Array(1);
   heading = false;
   headText = 'Measurement';

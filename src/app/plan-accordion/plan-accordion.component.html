@@ -3,38 +3,33 @@
   <mat-expansion-panel *ngFor="let hero of heroes" >
     <mat-expansion-panel-header>
       <mat-panel-title>
-        2Agiligy
+        {{ hero.name}}
       </mat-panel-title>
       <mat-panel-description>
         5433344
       </mat-panel-description>
-
     </mat-expansion-panel-header>
 
- 
     <table>
       <tr>
         <th></th><th> {{ headText }} </th><th *ngIf = "headText2Bool"> {{ headText2 }}</th>
       </tr>
-    <tr *ngFor="let number of bars " >
-      <td>
-      <mat-form-field  style='width:100px;'>
-          <mat-select required>
-              <mat-option value="ArcCheckTest"  (click) = 'setType($event)'>ArcCheck1</mat-option>
-              <mat-option value="ArcCheck2" (click) = 'setType($event)' >ArcCheck2</mat-option>
-              <mat-option value="Mobius" (click) = 'setType($event)'>Mobius</mat-option>
-              <mat-option value="Matrix"  (click) = 'setType($event)'>Matrix</mat-option>
-   
-          </mat-select>
-      </mat-form-field>
-      </td>
-      <td *ngIf = heading><input type='text' size='10' ></td>
-      <td><input type='text' size='10'  (change) = 'addRow();'></td>
+      <tr *ngFor="let number of bars " >
+        <td>
+        <mat-form-field  style='width:100px;'>
+            <mat-select required>
+                <mat-option value="ArcCheck1"  (click) = 'setType($event)'>ArcCheck1</mat-option>
+                <mat-option value="ArcCheck2" (click) = 'setType($event)' >ArcCheck2</mat-option>
+                <mat-option value="Mobius" (click) = 'setType($event)'>Mobius</mat-option>
+                <mat-option value="Matrix"  (click) = 'setType($event)'>Matrix</mat-option>
+    
+            </mat-select>
+        </mat-form-field>
+        </td>
+        <td *ngIf = heading><input type='text' size='10' ></td>
+        <td><input type='text' size='10'  (change) = 'addRow();'></td>
 
-    </tr>
- 
+      </tr>
     </table>
-  
   </mat-expansion-panel>
- 
 </mat-accordion>
