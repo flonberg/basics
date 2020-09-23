@@ -15,6 +15,7 @@ export class PlanAccordionComponent implements OnInit {
   headText2 = 'QA Check';
   constructor() { }
 
+  
   ngOnInit() {
   }
   setPatients(res){

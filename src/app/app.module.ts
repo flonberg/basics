@@ -17,19 +17,19 @@ import { MatGridListModule } from '@angular/material';
 
 
 import { AppComponent } from './app.component';
-import { AutocompleteFilterExample } from './autocomplete-filter-example/autocomplete-filter-example.component';
+
 import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { ExpandRowsComponent } from './expand-rows/expand-rows.component';
 import { PlanAccordionComponent } from './plan-accordion/plan-accordion.component';
 
-@NgModule({
+@ NgModule({
   declarations: [
     AppComponent,
-    AutocompleteFilterExample,
+
     ExpandRowsComponent,
     PlanAccordionComponent,
-    
+
 
   ],
   imports: [
