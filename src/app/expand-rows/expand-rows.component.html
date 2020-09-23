@@ -1,0 +1,16 @@
+<table>
+  <tr><th>Target</th><th>Volume</th><th>To at Least</th></tr>
+  <tr  *ngFor="let number of bars ">
+    <td>
+                <mat-select  required>
+                    <mat-option value="GTV">GTV</mat-option>
+                    <option value="CTV" (click) = 'setType()'>CTV</option>
+                    <option value="PTV">PTV</option>
+                    <option value="ITV">ITV</option>
+                  </mat-select>
+    </td>
+      <td><input type='text' size='10' ></td>
+      <td><input type='text' size='10'  (change) = 'addRow();'></td>
+
+  </tr>
+</table>

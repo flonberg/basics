@@ -1,0 +1,19 @@
+th{
+    font-size:10px;
+    color:blue;
+    font-weight:normal;
+}
+td {
+    size:12;
+}
+
+caption {
+    font-size:10px;
+}
+table {
+    table-layout: fixed;
+  }
+
+  .mat-input-wrapper{
+    width:400px !important;
+  }
