@@ -22,17 +22,19 @@ import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { ExpandRowsComponent } from './expand-rows/expand-rows.component';
 import { PlanAccordionComponent } from './plan-accordion/plan-accordion.component';
+import { OutputGraphComponent } from './output-graph/output-graph.component';
 
 @ NgModule({
   declarations: [
     AppComponent,
-
+    OutputGraphComponent,
     ExpandRowsComponent,
     PlanAccordionComponent,
 
 
   ],
   imports: [
+
     BrowserModule,
     BrowserAnimationsModule,
     MatCheckboxModule,
