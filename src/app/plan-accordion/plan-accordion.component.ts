@@ -13,22 +13,23 @@ export class PlanAccordionComponent implements OnInit {
   headText = 'Measurement';
   headText2Bool = false;
   headText2 = 'QA Check';
+  data: any;
 
-  constructor(private genSvce: GenService) {
+  constructor(private genSvce: GenService) {  
     this.genSvce = genSvce;
    }
   
 
 
   ngOnInit() {
-    this.getData();
+    this .getData();
   }
   getData(){
-    this.genSvce.setPlatform();
+    this .genSvce.setPlatform();
     //  this.genEditSvce.getPMDs('fjl3').subscribe(
-        this.genSvce.getWithSelString('SELECT top(3) * FROM physicists' ).subscribe(  
+        this  .genSvce.getWithSelString("SELECT StartDateTime, EndDateTime, ProcedureCode FROM ProtomTiming WHERE PatientID ='700-57-44' AND ProcedureCode = '121726'" ).subscribe (  
         (res) => {
-          this.setData(res);
+          this .setData(res);
         },
         err => {
           console.log("error 223");
@@ -38,8 +39,8 @@ export class PlanAccordionComponent implements OnInit {
     }
 
   setData(res){
-    const patients = res;
-    console.log("pasritnet is  %o", patients);
+    this .data = res;
+    console.log("43  pasritnet is  %o", this .data);
   }
   addRow(){
     this .bars.push(1);

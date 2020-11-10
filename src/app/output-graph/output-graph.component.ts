@@ -11,7 +11,7 @@ noData(Highcharts);
 More(Highcharts);
 noData(Highcharts);
 
-@Component({
+@ Component({
   selector: 'app-output-graph',
   templateUrl: './output-graph.component.html',
   styleUrls: ['./output-graph.component.css']
@@ -31,8 +31,8 @@ export class OutputGraphComponent implements OnInit {
     xAxis: {
       type: 'datetime',
       labels: {
-        formatter: function() {
-          return Highcharts.dateFormat('%e %b %y', this.value);
+        formatter: function () {
+          return Highcharts.dateFormat('%e %b %y', this .value);
         }
       }
     },
@@ -40,7 +40,10 @@ export class OutputGraphComponent implements OnInit {
       {
         name: 'Normal',
         turboThreshold: 500000,
-        data: [[new Date('2018-01-25 18:38:31').getTime(), 2]]
+        data: [
+          [new Date('2018-01-25 18:38:31').getTime(), 2],
+           [new Date('2018-01-26 18:38:31').getTime(), 4],
+      ]
       },
       {
         name: 'Abnormal',
@@ -53,7 +56,7 @@ export class OutputGraphComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    Highcharts.chart('container', this.options);
+    Highcharts.chart('container', this .options);
   }
 
 }
