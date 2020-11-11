@@ -27,7 +27,7 @@ export class OutputGraphComponent implements OnInit {
       height: 700
     },
     title: {
-      text: 'Sample Scatter Plot'
+      text: 'Procedure Duration'
     },
     credits: {
       enabled: false
@@ -40,40 +40,37 @@ export class OutputGraphComponent implements OnInit {
         }
       }
     },
+    tooltip: {
+      formatter: function (){
+        return  Highcharts.dateFormat('%e %b %y %H:%M:%S', this .x) + " Duration:" + this .y + " minutes"
+      }
+    },
+
     series: [
       {
-        name: 'Normal',
+        name: 'Procedure',
         turboThreshold: 500000,
         data: [
          // [new Date('2018-01-25 18:38:31').getTime(), 2],
          //  [new Date('2018-01-26 18:38:31').getTime(), 4],
       ]
       },
-      {
-        name: 'Abnormal',
-        turboThreshold: 500000,
-        data: [[new Date('2020-10-05 18:38:31').getTime(), 7]]
-      },
-      {
-        name: 'real',
-        turboThreshold: 500000,
-        data: []
-      }
+
     ]
   }
 
   constructor(private genSvce: GenService) { }
 
   ngOnInit() {
-    this .getData();
-    Highcharts.chart('container', this .options);
+    this .getData('121726');
+  //  Highcharts.chart('container', this .options);
   }
-  getData(){
-
+  getData(code){
     this .genSvce.setPlatform();
-    this .genSvce.getWithSelString("SELECT StartDateTime, EndDateTime, ProcedureCode FROM ProtomTiming WHERE PatientID ='700-57-44' AND ProcedureCode = '121726'" ).subscribe (  
+    this .genSvce.getWithSelString("SELECT StartDateTime, EndDateTime, ProcedureCode, PatientID FROM ProtomTiming WHERE ProcedureCode = " + code ).subscribe (  
         (res) => {
-          this .options.series[0]['data'] = res;
+          this .options.series[0]['data'] = res['Rdata'];
+          console.log("73 data is %o", res )
           Highcharts.chart('container', this.options);
         },
         err => {
