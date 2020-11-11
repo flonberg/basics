@@ -15,11 +15,9 @@ export class PlanAccordionComponent implements OnInit {
   headText2 = 'QA Check';
   data: any;
 
-  constructor(private genSvce: GenService) {  
-    this.genSvce = genSvce;
+  constructor(private genSvce: GenService) {
+    this .genSvce = genSvce;
    }
-  
-
 
   ngOnInit() {
     this .getData();

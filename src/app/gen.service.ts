@@ -11,7 +11,7 @@ export class GenService {
 
  /*********  get using selStr from GET param  */
  getWithSelString(arg){
-  var url = this .urlBase + "REST_GET.php?action=getWithSelString&selStr=" + arg;
+  var url = this .urlBase + "timeInterval.php?&selStr=" + arg;
   console.log("getWithSelString URL is " + url);
   return this .http.get(url)
 }
