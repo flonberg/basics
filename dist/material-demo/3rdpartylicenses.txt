@@ -1,3 +1,6 @@
+highcharts
+https://www.highcharts.com/license
+
 tslib
 Apache-2.0
 Apache License

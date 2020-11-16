@@ -1,10 +1,8 @@
-<p>
-  output 888 graph works!
-</p>
+
 <div id='container'></div>
 <div id='control'>
   <mat-form-field  style='width:100px;'>
-    <mat-select required>
+    <mat-select [(value)] = "selected">
         <mat-option value="Treatment"  (click) = 'getData(121726)' >Treatment</mat-option>
         <mat-option value="ArcCheck2" (click) ='getData(121724)' >VSim</mat-option>
         <mat-option value="Mobius" (click) = 'getData(121733)'>QA</mat-option>

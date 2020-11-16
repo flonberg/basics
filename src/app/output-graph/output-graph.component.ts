@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import * as Highcharts from 'highcharts';
 import { GenService } from '../gen.service';
 import { throwMatDialogContentAlreadyAttachedError } from '@angular/material';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
 declare var require: any;
 let Boost = require('highcharts/modules/boost');
@@ -20,7 +21,8 @@ noData(Highcharts);
 })
 export class OutputGraphComponent implements OnInit {
   data: any;
-
+  selected:string;
+  tst = "hellow world";
   public options: any = {
     chart: {
       type: 'scatter',
@@ -42,7 +44,7 @@ export class OutputGraphComponent implements OnInit {
     },
     tooltip: {
       formatter: function (){
-        return  Highcharts.dateFormat('%e %b %y %H:%M:%S', this .x) + " Duration:" + this .y + " minutes"
+        return  Highcharts.dateFormat('%e %b %y %H:%M:%S', this .x) + " Duration:" + this .y + " minutes and test  %o " + this .z ;
       }
     },
 
@@ -59,7 +61,9 @@ export class OutputGraphComponent implements OnInit {
     ]
   }
 
-  constructor(private genSvce: GenService) { }
+  constructor(private genSvce: GenService) {
+    this .selected = "Treatment";
+   }
 
   ngOnInit() {
     this .getData('121726');
@@ -69,9 +73,14 @@ export class OutputGraphComponent implements OnInit {
     this .genSvce.setPlatform();
     this .genSvce.getWithSelString("SELECT StartDateTime, EndDateTime, ProcedureCode, PatientID FROM ProtomTiming WHERE ProcedureCode = " + code ).subscribe (  
         (res) => {
+          for (let key of Object.keys(res)) {
+      //      console.log("77 key is " + key + "ob is %o", res[key]);
+          }
+        
           this .options.series[0]['data'] = res['Rdata'];
+          this .options.series[0]['name'] = 'test';
           console.log("73 data is %o", res )
-          Highcharts.chart('container', this.options);
+          Highcharts.chart('container', this .options);
         },
         err => {
           console.log("error 223");
