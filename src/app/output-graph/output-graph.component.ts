@@ -76,10 +76,12 @@ export class OutputGraphComponent implements OnInit {
         (res) => {
           var i = 0;
           for (let key of Object.keys(res['Patients'])) {
+            this .options.series[i] = [];
+            this .options.series[i]['name'] = key;
+
              console.log("77 key is " + key + "ob is %o", res['Patients'][key]);
-             this .options.series[i]['data'] = res['Patients'][key];
-             this .options.series[i++]['name'] = key;
-             this .options.series[i] = [];
+             this .options.series[i++]['data'] = res['Patients'][key];
+        
           }
 
        //   this .options.series[0]['data'] = res['Rdata'];
