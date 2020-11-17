@@ -3,6 +3,7 @@ import * as Highcharts from 'highcharts';
 import { GenService } from '../gen.service';
 import { throwMatDialogContentAlreadyAttachedError } from '@angular/material';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { keyframes } from '@angular/animations';
 
 declare var require: any;
 let Boost = require('highcharts/modules/boost');
@@ -73,12 +74,16 @@ export class OutputGraphComponent implements OnInit {
     this .genSvce.setPlatform();
     this .genSvce.getWithSelString("SELECT StartDateTime, EndDateTime, ProcedureCode, PatientID FROM ProtomTiming WHERE ProcedureCode = " + code ).subscribe (  
         (res) => {
-          for (let key of Object.keys(res)) {
-      //      console.log("77 key is " + key + "ob is %o", res[key]);
+          var i = 0;
+          for (let key of Object.keys(res['Patients'])) {
+             console.log("77 key is " + key + "ob is %o", res['Patients'][key]);
+             this .options.series[i]['data'] = res['Patients'][key];
+             this .options.series[i++]['name'] = key;
+             this .options.series[i] = [];
           }
-        
-          this .options.series[0]['data'] = res['Rdata'];
-          this .options.series[0]['name'] = 'test';
+
+       //   this .options.series[0]['data'] = res['Rdata'];
+       //   this .options.series[0]['name'] = 'test';
           console.log("73 data is %o", res )
           Highcharts.chart('container', this .options);
         },
