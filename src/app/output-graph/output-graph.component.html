@@ -4,8 +4,9 @@
   <mat-form-field  style='width:100px;'>
     <mat-select [(value)] = "selected">
         <mat-option value="Treatment"  (click) = 'getData(121726)' >Treatment</mat-option>
-        <mat-option value="ArcCheck2" (click) ='getData(121724)' >VSim</mat-option>
-        <mat-option value="Mobius" (click) = 'getData(121733)'>QA</mat-option>
+        <mat-option value="VSim" (click) ='getData(121724)' >VSim</mat-option>
+        <mat-option value="QA" (click) = 'getData(121733)'>QA</mat-option>
+        <mat-option value="All" (click) = 'getData(0)'>All</mat-option>
     </mat-select>
 </mat-form-field>
 </div>

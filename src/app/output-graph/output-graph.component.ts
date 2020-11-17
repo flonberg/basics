@@ -23,7 +23,7 @@ noData(Highcharts);
 export class OutputGraphComponent implements OnInit {
   data: any;
   selected:string;
-  tst = "hellow world";
+  procedureCode: string;
   public options: any = {
     chart: {
       type: 'scatter',
@@ -45,52 +45,38 @@ export class OutputGraphComponent implements OnInit {
     },
     tooltip: {
       formatter: function (){
-        return  Highcharts.dateFormat('%e %b %y %H:%M:%S', this .x) + " Duration:" + this .y + " minutes and test  %o " + this .z ;
+        return  Highcharts.dateFormat('%e %b %y %H:%M:%S', this .x) + " Duration:" + this .y + " minutes. "  ;
       }
     },
-
     series: [
-      {
-        name: 'Procedure',
-        turboThreshold: 500000,
-        data: [
-         // [new Date('2018-01-25 18:38:31').getTime(), 2],
-         //  [new Date('2018-01-26 18:38:31').getTime(), 4],
-      ]
-      },
-
+      {},
     ]
   }
-
   constructor(private genSvce: GenService) {
     this .selected = "Treatment";
    }
 
   ngOnInit() {
-    this .getData('121726');
-  //  Highcharts.chart('container', this .options);
+    this .getData('121726');                                      // set for 'Treatment'
   }
   getData(code){
+    this .procedureCode = code;
     this .genSvce.setPlatform();
-    this .genSvce.getWithSelString("SELECT StartDateTime, EndDateTime, ProcedureCode, PatientID FROM ProtomTiming WHERE ProcedureCode = " + code ).subscribe (  
+    this .options.series = [];
+    var selStr = "SELECT StartDateTime, EndDateTime, ProcedureCode, PatientID FROM ProtomTiming ";
+    if (+code > 0 )
+      selStr += " WHERE ProcedureCode = " + code
+    this .genSvce.getWithSelString(selStr  ).subscribe (
         (res) => {
           var i = 0;
           for (let key of Object.keys(res['Patients'])) {
             this .options.series[i] = [];
             this .options.series[i]['name'] = key;
-
-             console.log("77 key is " + key + "ob is %o", res['Patients'][key]);
-             this .options.series[i++]['data'] = res['Patients'][key];
-        
+            this .options.series[i++]['data'] = res['Patients'][key];
           }
-
-       //   this .options.series[0]['data'] = res['Rdata'];
-       //   this .options.series[0]['name'] = 'test';
-          console.log("73 data is %o", res )
           Highcharts.chart('container', this .options);
         },
         err => {
-          console.log("error 223");
           console.log(err);
         }
       );
