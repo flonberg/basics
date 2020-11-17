@@ -32,6 +32,23 @@ export class OutputGraphComponent implements OnInit {
     title: {
       text: 'Procedure Duration'
     },
+    click: function(e) {
+      console.log(
+          Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', e.xAxis[0].value),
+          e.yAxis[0].value
+      )
+  },
+  plotOptions: {
+    series: {
+        events: {
+            legendItemClick: function (ev) {
+                console.log("this is %o", ev.target.userOptions.name);
+                document.getElementById('vidx').innerText = ev.target.userOptions.name;
+            }
+        }
+    }
+},
+
     credits: {
       enabled: false
     },
