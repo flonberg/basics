@@ -70,7 +70,7 @@ export class OutputGraphComponent implements OnInit {
   }
   public options2: any = {
     chart: {
-      type: 'scatter',
+      type: 'column',
       height: 300
     },
     title: {
@@ -96,20 +96,7 @@ export class OutputGraphComponent implements OnInit {
       enabled: false
     },
     xAxis: {
-      categories: [
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec'
-      ],
+      
       crosshair: true
   },
     tooltip: {
@@ -117,7 +104,9 @@ export class OutputGraphComponent implements OnInit {
         return  Highcharts.dateFormat('%e %b %y %H:%M:%S', this .x) + " Duration:" + this .y + " minutes. "  ;
       }
     },
-    series: [{
+    
+    series: [
+      {
       name: 'Tokyo',
       data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
 
@@ -133,7 +122,8 @@ export class OutputGraphComponent implements OnInit {
       name: 'Berlin',
       data: [42.4, 33.2, 34.5, 39.7, 52.6, 75.5, 57.4, 60.4, 47.6, 39.1, 46.8, 51.1]
 
-  }]
+  }
+]
   }
   constructor(private genSvce: GenService) {
     this .selected = "Treatment";
@@ -155,11 +145,15 @@ export class OutputGraphComponent implements OnInit {
           for (let key of Object.keys(res['Patients'])) {
             this .options.series[i] = [];
             this .options.series[i]['name'] = key;
-            this .options.series[i++]['data'] = res['Patients'][key];
+            this .options.series[i]['data'] = res['Patients'][key];
+            this .options2.series[i]['name'] = key;
+            this .options2.series[i]['data'] = res['hist']['count'];
+            i++;
           }
+          this .options2.xAxis.categories =  res['hist']['name'];
+
           Highcharts.chart('container', this .options);
           Highcharts.chart('container2', this .options2);
-          
         },
         err => {
           console.log(err);
