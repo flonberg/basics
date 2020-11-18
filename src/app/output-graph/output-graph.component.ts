@@ -44,6 +44,9 @@ export class OutputGraphComponent implements OnInit {
             legendItemClick: function (ev) {
                 console.log("this is %o", ev.target.userOptions.name);
                 document.getElementById('vidx').innerText = ev.target.userOptions.name;
+              //  var visibility = this.visible ? 'visible' : 'hidden';
+                return false;
+
             }
         }
     }
