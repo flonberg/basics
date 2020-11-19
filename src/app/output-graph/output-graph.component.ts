@@ -24,6 +24,8 @@ export class OutputGraphComponent implements OnInit {
   data: any;
   selected:string;
   procedureCode: string;
+  binSizeC: number = 10;
+  binsC: any
   public options: any = {
     chart: {
       type: 'scatter',
@@ -121,8 +123,17 @@ export class OutputGraphComponent implements OnInit {
       selStr += " WHERE ProcedureCode = " + code
     this .genSvce.getWithSelString(selStr  ).subscribe (
         (res) => {
+          this .makeBins();
           var i = 0;
-          for (let key of Object.keys(res['Patients'])) {
+          for (let key of Object.keys(res['Patients'])) {                   // loop through the Patients
+            console.log("patine is %o", res['Patients'][key])
+            for (let key2 of Object.keys( res['Patients'][key] )){
+              for (let entry of this.binsC ){
+                console.log("binsC is %o ", entry );
+                if ( res['Patients'][key][1])
+                console.log( "duration is %o",   res['Patients'][key][1][1]  )
+                }
+            }
             this .options.series[i] = [];
           //  this .options.series2[i] = [];
             this .options.series[i]['name'] = key;
@@ -141,5 +152,14 @@ export class OutputGraphComponent implements OnInit {
         }
       );
     }
+  makeBins(){
+    this .binsC = [];                                                         // create the array
+    var numBins = 60 / this .binSizeC;                                        // create the number of bins = longestExpectedTime / numBins
+    for (let i = 0; i < numBins; i++) {
+      this .binsC[i] = [i * this .binSizeC, (i + 1) * this .binSizeC];        // set lower and upper bounds for each bin.
+      this .binsC[i]['count'] = 0;                                            // make the bin. 
+    }
+    console.log("binsC is %o ", this .binsC)
+  }
 
 }
