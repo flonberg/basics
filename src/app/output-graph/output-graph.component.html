@@ -10,7 +10,15 @@
     </mat-select>
 </mat-form-field>
 <div id='container2' style='height: 300px;'></div>
-
+<mat-label> Histogram Bin Size [min]</mat-label>
+<mat-form-field  style='width:100px;'>
+    <mat-select [(value)] = "selected">
+        <mat-option value="Treatment"  (click) = 'setBinSize(5)' >5</mat-option>
+        <mat-option value="VSim" (click) ='setBinSize(10)' >10</mat-option>
+        <mat-option value="QA" (click) = 'setBinSize(15)'>15</mat-option>
+        <mat-option value="All" (click) = 'setBinSize(20)'>20</mat-option>
+    </mat-select>
+</mat-form-field>
 
 <div id="vidx"  style="display:block"> rrrr </div>
 </div>

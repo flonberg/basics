@@ -35,7 +35,7 @@ export class OutputGraphComponent implements OnInit {
     title: {
       text: 'Procedure Duration'
     },
-    click: function(e) {
+    click: function (e) {
       console.log(
           Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', e.xAxis[0].value),
           e.yAxis[0].value
@@ -71,7 +71,7 @@ export class OutputGraphComponent implements OnInit {
       {},
     ]
   }
-  public options2: any = 
+  public options2: any =
   {
     chart: {
       type: 'column',
@@ -94,11 +94,11 @@ export class OutputGraphComponent implements OnInit {
       xAxis: {
         crosshair: true
     },
-      tooltip: {
-        formatter: function (){
-          return  Highcharts.dateFormat('%e %b %y %H:%M:%S', this .x) +  this .y + " Plans. "  ;
-        }
-      },
+    tooltip: {
+      formatter: function (){
+        return  Highcharts.dateFormat('%e %b %y %H:%M:%S', this .x) +  this .y + " Plans. "  ;
+      }
+    },
       series: []
   }
 
@@ -109,6 +109,13 @@ export class OutputGraphComponent implements OnInit {
   ngOnInit() {
     this .getData('121726');                                      // set for 'Treatment'
   }
+  setBinSize(n){
+    this .binSizeC = n;
+    this .makeBins();
+    this .binData();
+    Highcharts.chart('container2', this .options2);
+
+  }
   getData(code){
     this .procedureCode = code;
     this .genSvce.setPlatform();
@@ -118,34 +125,11 @@ export class OutputGraphComponent implements OnInit {
       selStr += " WHERE ProcedureCode = " + code
     this .genSvce.getWithSelString(selStr  ).subscribe (
         (res) => {
+          this .setData(res);
           this .makeBins();
-          var i = 0;
-          for (let key of Object.keys(res['Patients'])) {                   // loop through the Patients
-            for (let key2 of  res['Patients'][key] ){                       // loop thru the patients Session Durations
-              var binCount = 0;
-              for (let entry of this .binsC ){                              // loop thry the bins
-                if (  key2[1] > entry[0] && key2[1]   <= entry[1] ){      // if the Duration is in the bin
-                  console.log("125 entry is %o duration is %o", entry, key2[1])
-                  entry.count++;                                          // increment that Bin count.
-                  this .numInBin[binCount]++
-                }
-                binCount++;
-              }
-         
-            }
-            console.log("142   binsC is %o", this .numInBin)
-            this .options.series[i] = [];
-            this .options2.series[i] = [];
-            this .options.series[i]['name'] = key;
-            this .options.series[i]['data'] = res['Patients'][key];
-            this .options2.series[i]['name'] = key;
-         //   this .options2.series[i]['data'] = res['hist']['count'];
-            console.log('137 res[hist]is 5o', res['hist']['count'])
-            this .options2.series[i]['data'] = this .numInBin;
-            i++;
-          }
-          this .options2.xAxis.categories =  res['hist']['name'];
+          this .binData();
 
+          this .options2.xAxis.categories =  res['hist']['name'];
           Highcharts.chart('container', this .options);
           Highcharts.chart('container2', this .options2);
         },
@@ -154,6 +138,35 @@ export class OutputGraphComponent implements OnInit {
         }
       );
     }
+  setData(inpData){
+    this .data = inpData;
+  }
+  binData(){
+    var i = 0;
+    for (let key of Object.keys(this .data['Patients'])) {                   // loop through the Patients
+      for (let key2 of  this .data['Patients'][key] ){                       // loop thru the patients Session Durations
+        var binCount = 0;
+        for (let entry of this .binsC ){                              // loop thry the bins
+          if (  key2[1] > entry[0] && key2[1]   <= entry[1] ){      // if the Duration is in the bin
+            console.log("125 entry is %o duration is %o", entry, key2[1])
+            entry.count++;                                          // increment that Bin count.
+            this .numInBin[binCount]++
+          }
+          binCount++;
+        }
+      }
+      console.log("142   binsC is %o", this .numInBin)
+      this .options.series[i] = [];
+      this .options.series[i]['name'] = key;
+      this .options.series[i]['data'] = this .data['Patients'][key];
+
+      this .options2.series[0] = [];
+      this .options2.series[0]['name'] = 'Minutes';
+      console.log('137 res[hist]is 5o', this .data['hist']['count'])
+      this .options2.series[0]['data'] = this .numInBin;
+      i++;
+    }
+  }
   makeBins(){
     this .binsC = [];                                                         // create the array
     this .numInBin = [];
