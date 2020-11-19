@@ -126,14 +126,23 @@ export class OutputGraphComponent implements OnInit {
           this .makeBins();
           var i = 0;
           for (let key of Object.keys(res['Patients'])) {                   // loop through the Patients
-            console.log("patine is %o", res['Patients'][key])
-            for (let key2 of Object.keys( res['Patients'][key] )){
-              for (let entry of this.binsC ){
-                console.log("binsC is %o ", entry );
-                if ( res['Patients'][key][1])
-                console.log( "duration is %o",   res['Patients'][key][1][1]  )
-                }
+            console.log("129  patine is %o", res['Patients'][key])
+            for (let key2 of  res['Patients'][key] ){
+           
+              
+              for (let entry of this .binsC ){
+    
+                  console.log( "duration is %o",   res['Patients'][key][1]  )
+                    if (  key2[1] > entry[0] && key2[1]   <= entry[1] ){
+                  //    console.log("entry is  is %o , durations is %o ", entry, res['Patients'][key][1][1] );
+                      entry.count++;
+                      console.log("137  entry coune is %o", entry.count)
+                    }
+                  }
+
+                
             }
+            console.log("142   binsC is %o", this .binsC)
             this .options.series[i] = [];
           //  this .options.series2[i] = [];
             this .options.series[i]['name'] = key;
