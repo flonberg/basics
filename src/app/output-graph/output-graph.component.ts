@@ -80,7 +80,11 @@ export class OutputGraphComponent implements OnInit {
     title: {
       text: 'Procedure Duration'
     },
-    click: function(e) {
+    xAxis: {
+      crosshair: true,
+      format: "test"
+      },
+    click: function (e) {
       console.log(
           Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', e.xAxis[0].value),
           e.yAxis[0].value
@@ -91,12 +95,10 @@ export class OutputGraphComponent implements OnInit {
       credits: {
         enabled: false
       },
-      xAxis: {
-        crosshair: true
-    },
+
     tooltip: {
       formatter: function (){
-        return  Highcharts.dateFormat('%e %b %y %H:%M:%S', this .x) +  this .y + " Plans. "  ;
+        return   this .y + " Plans. "  ;
       }
     },
       series: []
@@ -129,7 +131,7 @@ export class OutputGraphComponent implements OnInit {
           this .makeBins();
           this .binData();
 
-          this .options2.xAxis.categories =  res['hist']['name'];
+      //    this .options2.xAxis.categories =  res['hist']['name'];
           Highcharts.chart('container', this .options);
           Highcharts.chart('container2', this .options2);
         },
@@ -148,35 +150,36 @@ export class OutputGraphComponent implements OnInit {
         var binCount = 0;
         for (let entry of this .binsC ){                              // loop thry the bins
           if (  key2[1] > entry[0] && key2[1]   <= entry[1] ){      // if the Duration is in the bin
-            console.log("125 entry is %o duration is %o", entry, key2[1])
             entry.count++;                                          // increment that Bin count.
             this .numInBin[binCount]++
           }
           binCount++;
         }
       }
-      console.log("142   binsC is %o", this .numInBin)
+
       this .options.series[i] = [];
       this .options.series[i]['name'] = key;
       this .options.series[i]['data'] = this .data['Patients'][key];
 
       this .options2.series[0] = [];
       this .options2.series[0]['name'] = 'Minutes';
-      console.log('137 res[hist]is 5o', this .data['hist']['count'])
       this .options2.series[0]['data'] = this .numInBin;
+      this .options2.xAxis['categories'] = this .binsC['Label'];
       i++;
     }
   }
   makeBins(){
     this .binsC = [];                                                         // create the array
     this .numInBin = [];
+    this .binsC['Label'] = [];
     var numBins = 60 / this .binSizeC;                                        // create the number of bins = longestExpectedTime / numBins
     for (let i = 0; i < numBins; i++) {
       this .binsC[i] = [i * this .binSizeC, (i + 1) * this .binSizeC];        // set lower and upper bounds for each bin.
-      this .binsC[i]['count'] = 0;                                            // make the bin. 
+      this .binsC['Label'][i] = i * this .binSizeC + " to " +( i + 1) * this .binSizeC;
+      this .binsC[i]['count'] = 0;                                            // make the bin.
       this .numInBin[i] = 0;
     }
-    console.log("binsC is %o ", this .binsC)
+
   }
 
 }
