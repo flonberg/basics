@@ -26,6 +26,7 @@ export class OutputGraphComponent implements OnInit {
   procedureCode: string;
   binSizeC: number = 10;
   binsC: any
+  numInBin: any;
   public options: any = {
     chart: {
       type: 'scatter',
@@ -70,7 +71,8 @@ export class OutputGraphComponent implements OnInit {
       {},
     ]
   }
-  public options2: any = {
+  public options2: any = 
+  {
     chart: {
       type: 'column',
       height: 300
@@ -83,30 +85,23 @@ export class OutputGraphComponent implements OnInit {
           Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', e.xAxis[0].value),
           e.yAxis[0].value
       )
-  },
-  plotOptions: {
-    series: {
-        events: {
-            legendItemClick: function (ev) {
-                document.getElementById('vidx').innerText = ev.target.userOptions.name;     // load UserID to DOM
-                return false;                                                               // do NOT hide data
-            }
+    },
+    plotOptions: {
+    },
+      credits: {
+        enabled: false
+      },
+      xAxis: {
+        crosshair: true
+    },
+      tooltip: {
+        formatter: function (){
+          return  Highcharts.dateFormat('%e %b %y %H:%M:%S', this .x) +  this .y + " Plans. "  ;
         }
-    }
-  },
-    credits: {
-      enabled: false
-    },
-    xAxis: {
-      crosshair: true
-  },
-    tooltip: {
-      formatter: function (){
-        return  Highcharts.dateFormat('%e %b %y %H:%M:%S', this .x) +  this .y + " Plans. "  ;
-      }
-    },
-    series: [{}, {}, {}, {}]
+      },
+      series: []
   }
+
   constructor(private genSvce: GenService) {
     this .selected = "Treatment";
    }
@@ -126,29 +121,27 @@ export class OutputGraphComponent implements OnInit {
           this .makeBins();
           var i = 0;
           for (let key of Object.keys(res['Patients'])) {                   // loop through the Patients
-            console.log("129  patine is %o", res['Patients'][key])
-            for (let key2 of  res['Patients'][key] ){
-           
-              
-              for (let entry of this .binsC ){
-    
-                  console.log( "duration is %o",   res['Patients'][key][1]  )
-                    if (  key2[1] > entry[0] && key2[1]   <= entry[1] ){
-                  //    console.log("entry is  is %o , durations is %o ", entry, res['Patients'][key][1][1] );
-                      entry.count++;
-                      console.log("137  entry coune is %o", entry.count)
-                    }
-                  }
-
-                
+            for (let key2 of  res['Patients'][key] ){                       // loop thru the patients Session Durations
+              var binCount = 0;
+              for (let entry of this .binsC ){                              // loop thry the bins
+                if (  key2[1] > entry[0] && key2[1]   <= entry[1] ){      // if the Duration is in the bin
+                  console.log("125 entry is %o duration is %o", entry, key2[1])
+                  entry.count++;                                          // increment that Bin count.
+                  this .numInBin[binCount]++
+                }
+                binCount++;
+              }
+         
             }
-            console.log("142   binsC is %o", this .binsC)
+            console.log("142   binsC is %o", this .numInBin)
             this .options.series[i] = [];
-          //  this .options.series2[i] = [];
+            this .options2.series[i] = [];
             this .options.series[i]['name'] = key;
             this .options.series[i]['data'] = res['Patients'][key];
             this .options2.series[i]['name'] = key;
-            this .options2.series[i]['data'] = res['hist']['count'];
+         //   this .options2.series[i]['data'] = res['hist']['count'];
+            console.log('137 res[hist]is 5o', res['hist']['count'])
+            this .options2.series[i]['data'] = this .numInBin;
             i++;
           }
           this .options2.xAxis.categories =  res['hist']['name'];
@@ -163,10 +156,12 @@ export class OutputGraphComponent implements OnInit {
     }
   makeBins(){
     this .binsC = [];                                                         // create the array
+    this .numInBin = [];
     var numBins = 60 / this .binSizeC;                                        // create the number of bins = longestExpectedTime / numBins
     for (let i = 0; i < numBins; i++) {
       this .binsC[i] = [i * this .binSizeC, (i + 1) * this .binSizeC];        // set lower and upper bounds for each bin.
       this .binsC[i]['count'] = 0;                                            // make the bin. 
+      this .numInBin[i] = 0;
     }
     console.log("binsC is %o ", this .binsC)
   }
