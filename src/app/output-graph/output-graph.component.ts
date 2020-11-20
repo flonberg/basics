@@ -4,6 +4,7 @@ import { GenService } from '../gen.service';
 import { throwMatDialogContentAlreadyAttachedError } from '@angular/material';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { keyframes } from '@angular/animations';
+import { ActivatedRoute } from '@angular/router';
 
 declare var require: any;
 let Boost = require('highcharts/modules/boost');
@@ -28,35 +29,37 @@ export class OutputGraphComponent implements OnInit {
   binsC: any
   numInBin: any;
 
-    ngOnInit() {
-      const targetNode = document.getElementById('vidx');
-      // Options for the observer (which mutations to observe)
-const config = { attributes: true, childList: true, subtree: true };
+  ngOnChanges(){
+    console.log("change")
+    this .getData('121726')
+  }
+ // ngDoCheck(ev) {
+ //   console.log('Docheck %o' + ev);
+ // }
 
-// Callback function to execute when mutations are observed
-const callback = function(mutationsList, observer) {
-    // Use traditional 'for loops' for IE 11
-    for(const mutation of mutationsList) {
-        if (mutation.type === 'childList') {
-            console.log('A child node has been added or removed.');
-        }
-        else if (mutation.type === 'attributes') {
-            console.log('The ' + mutation.attributeName + ' attribute was modified.');
-        }
-    }
-};
+  ngOnInit() {
+    const observer = new MutationObserver(mutation => {
+      console.log('DOM mutation detected');
+      this.handleDomChange(mutation)
+    });
+    const tNode = document.getElementById('vidx2')
+    observer.observe(tNode, {
+      childList: true,
+      attributes: true,
+      subtree: true,
+      characterData: true
+    });
+  //  const targetNode = document.getElementById('vidx2');                        // Select the node that will be observed for mutation
 
-// Create an observer instance linked to the callback function
-const observer = new MutationObserver(callback);
-
-// Start observing the target node for configured mutations
-observer.observe(targetNode, config);
-
-    this .getData('121726');                                      // set for 'Treatment'
+    this .getData('121726');                                                // set for 'Treatment'
     var myFunction=()=> {
       alert("myFunction is now properly executed");
    }
   }
+  handleDomChange(ev){
+    console.log("event %", ev);
+  }
+  
     public options: any = {
       chart: {
         type: 'scatter',
@@ -75,9 +78,10 @@ observer.observe(targetNode, config);
       series: {
           events: {
               legendItemClick: function (ev) {
-                  document.getElementById('vidx').innerText = ev.target.userOptions.name;     // load UserID to DOM
-                  document.getElementById('container2').style.display = 'none';
-                  document.getElementById('container2').style.display = 'block';
+             //     (<HTMLInputElement>document.getElementById('vidx2').value) = ev.target.userOptions.name;     // load UserID to DOM
+
+                  var inputElement = <HTMLInputElement>document.getElementById('vidx2');
+                  inputElement.value = ev.target.userOptions.name;
                   var url = window.location.href;
                         if (url.indexOf('?') > -1){                                          // if there IS already a param
                           url = url.split('?')[0]
@@ -85,7 +89,7 @@ observer.observe(targetNode, config);
                         }else{
                           url += '?param='+ ev.target.userOptions.name
                         }
-               //   window.location.href = url;
+                 window.location.href = url;
                 //  this .myFunction();
                   return false;                                                               // do NOT hide data
               }
@@ -145,8 +149,14 @@ observer.observe(targetNode, config);
         series: []
     }
     observer:any;
-  constructor(private genSvce: GenService) {
+    param1:string;
+  constructor(private genSvce: GenService, private route: ActivatedRoute) {
     this .selected = "Treatment";
+    this.route.queryParams.subscribe(params => {
+      this.param1 = params['param'];
+      console.log("157 param1 is %o", this.param1)
+
+  });
    }
    ngAfterViewInit() {
     this.observer = new MutationObserver(mutations => {
@@ -167,6 +177,7 @@ observer.observe(targetNode, config);
 
   }
   getData(code){
+    console.log("164");
     this .procedureCode = code;                                             // code -> e.g 121726 = Treatment
     this .genSvce.setPlatform();                                            // switch Dev = BB or Prod = 242
     this .options.series = [];
