@@ -173,6 +173,7 @@ export class OutputGraphComponent implements OnInit {
     this .binSizeC = n;
     this .makeBins();
     this .binData();
+
     Highcharts.chart('container2', this .options2);
 
   }
@@ -189,6 +190,7 @@ export class OutputGraphComponent implements OnInit {
           this .setData(res);                                               // store the data
           this .makeBins();                                                 // make Histogram bins
           this .binData();
+      //    this .make2dBins();
           Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
           Highcharts.chart('container2', this .options2);                   // Draw bottom graph Histogram 
         },
@@ -202,7 +204,6 @@ export class OutputGraphComponent implements OnInit {
   }
   public toSeePatID: string;
   binData(){
-
     var i = 0;
     for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
       for (let key2 of  this .data['Patients'][key] ){                        // loop thru the patients Session Durations
@@ -227,9 +228,12 @@ export class OutputGraphComponent implements OnInit {
       i++;
     }
   }
+
   makeBins(){
     this .binsC = [];                                                         // create the array of bins
     this .numInBin = [];
+
+
     this .binsC['Label'] = [];
     var numBins = 60 / this .binSizeC;                                        // create max number of bins = longestExpectedTime / numBins
     for (let i = 0; i < numBins; i++) {
@@ -238,7 +242,22 @@ export class OutputGraphComponent implements OnInit {
       this .binsC[i]['count'] = 0;                                            // make the bin.
       this .numInBin[i] = 0;                                                  // zero out the count in each bin. 
     }
-
-  }
-
+   }
+   bins2C: any;
+   num2InBin = [[]];
+   patCount = 4;
+ make2dBins(){
+  var numBins = 60 / this .binSizeC;                                        // create max number of bins = longestExpectedTime / numBins
+  this .bins2C =[this .numInBin] ;                                                         // create the array of bins
+  this .num2InBin = new Array(new Array());
+    for (let i = 0; i < numBins; i++) {
+      for (let j = 0; j < this .patCount; j++ ){
+        if (!this .bins2C[i])
+          this .bins2C[i] = new Array();
+          this .bins2C[i][j]  = [i * this .binSizeC, (i + 1) * this .binSizeC];        // set lower and upper bounds for each bin.
+//          this .bins2C[i][j]  = [i * this .binSizeC, (i + 1) * this .binSizeC];        // set lower and upper bounds for each bin.
+        }
+      }
+      console.log("254  bins2C is %o", this .bins2C)
+ }
 }
