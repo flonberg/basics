@@ -202,18 +202,26 @@ export class OutputGraphComponent implements OnInit {
   setData(inpData){
     this .data = inpData;
   }
+  public tst: any;
   public toSeePatID: string;
   binData(){
+    this .tst = new Array();
     var i = 0;
+    var oLoopCount = 0;
     for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
+
+
       for (let key2 of  this .data['Patients'][key] ){                        // loop thru the patients Session Durations
         var binCount = 0;                                                     // the index of the bin, e.g first, second, third ...
         for (let entry of this .binsC ){                                      // loop thry the bins
+
+          this .tst[binCount] = new Array();
           if (  key2[1] > entry[0] && key2[1]   <= entry[1] ){                // if the Duration is in the bin
-          //  entry.count++;                                                  // increment that Bin count.
+         
             this .numInBin[binCount]++                                        // increment the count in the bin
           }
           binCount++;                                                         // go to the next bin
+
         }
       }
 ////////      Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
@@ -226,6 +234,7 @@ export class OutputGraphComponent implements OnInit {
       this .options2.series[0]['data'] = this .numInBin;
       this .options2.xAxis['categories'] = this .binsC['Label'];
       i++;
+      console.log("tst is %o ", this .tst)
     }
   }
 
