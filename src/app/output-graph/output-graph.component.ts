@@ -238,9 +238,10 @@ export class OutputGraphComponent implements OnInit {
       this .options.series[i]['name'] = key;
       this .options.series[i]['data'] = this .data['Patients'][key];
 ////////      Bottom Graph Histogram       \\\\\\\\\\\\\\\\\\\\
-      this .options2.series[0] = [];
-      this .options2.series[0]['name'] = 'Minutes';
-      this .options2.series[0]['data'] = this .numInBin;
+   //   this .options2.series[0] = [];
+  //    this .options2.series[0]['name'] = 'Minutes';
+      this .options2.series = this .tst2;
+//      this .options2.series[0]['data'] = this .numInBin;
       this .options2.xAxis['categories'] = this .binsC['Label'];
       i++;
 
@@ -260,9 +261,9 @@ export class OutputGraphComponent implements OnInit {
     var patCount2 = 0;
     for (let key of Object.keys(this .data['Patients'])) {                    // loop over patients
 
-      console.log("253 key is %o pardata is %o", key, this .data['Patients'][key])
+    //  console.log("253 key is %o pardata is %o", key, this .data['Patients'][key])
       for (let entry of this .data['Patients'][key]) {                        // loop over each patient's durations
-        console.log(entry[1]); // 1, "string", false
+   //     console.log(entry[1]); // 1, "string", false
         var binCount2 = 0;
         for (let binEntry of this .binsC ){
           if (entry[1] > binEntry[0] && entry[1] <= binEntry[1]){
@@ -273,10 +274,10 @@ export class OutputGraphComponent implements OnInit {
         }
       }
       patCount2++;
-      console.log("tst2 is %o ", this .tst2)
+
     //  break;
     }
-
+    console.log("tst2 is %o ", this .tst2)
  
   }
 
