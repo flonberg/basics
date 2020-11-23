@@ -203,22 +203,31 @@ export class OutputGraphComponent implements OnInit {
     this .data = inpData;
   }
   public tst: any;
+  public tst2: any;
   public toSeePatID: string;
   binData(){
     this .tst = new Array();
+    this .tst2 = new Array();
     var i = 0;
     var oLoopCount = 0;
+    var keyCount = 0;
     for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
 
-
+      console.log("212 key is %o", key);
       for (let key2 of  this .data['Patients'][key] ){                        // loop thru the patients Session Durations
         var binCount = 0;                                                     // the index of the bin, e.g first, second, third ...
         for (let entry of this .binsC ){                                      // loop thry the bins
 
           this .tst[binCount] = new Array();
+
           if (  key2[1] > entry[0] && key2[1]   <= entry[1] ){                // if the Duration is in the bin
-         
+      
+            if (!this .tst[binCount][key]){
+              this .tst[binCount][key] = 1;
+
+            }
             this .numInBin[binCount]++                                        // increment the count in the bin
+
           }
           binCount++;                                                         // go to the next bin
 
@@ -234,8 +243,32 @@ export class OutputGraphComponent implements OnInit {
       this .options2.series[0]['data'] = this .numInBin;
       this .options2.xAxis['categories'] = this .binsC['Label'];
       i++;
-      console.log("tst is %o ", this .tst)
+
     }
+    var patCount2 = 0;
+    for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
+      var tstObj = {'name': key, 'data': []}                                  // make an objest to hole the patient bin data
+      this .tst2.push(tstObj);  
+      var binCount2 = 0;                                              // push the object into the main array;
+      for (let binEntry of this .binsC){
+        console.log("253 binEntry is %o", binEntry);
+        this .tst2[patCount2].data[binCount2++] = 0
+      }
+      patCount2++;
+
+    }
+
+    for (let key of Object.keys(this .data['Patients'])) {                    // loop over patients
+    //  console.log("253 key is %o pardata is %o", key, this .data['Patients'][key])
+      for (let entry of this .data['Patients'][key]) {                        // loop over each patient's durations
+      //  console.log(entry[1]); // 1, "string", false
+     //   for (let binEntry of this .binsC ){     
+     //     console.log("257 bincC endty is %o duration is %o this bin has %o", binEntry,  entry[1], this .tst2)
+     //   }
+      }
+    }
+
+    console.log("tst2 is %o ", this .tst2)
   }
 
   makeBins(){
