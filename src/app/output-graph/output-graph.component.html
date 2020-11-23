@@ -13,8 +13,8 @@
     <mat-form-field  style='width:200px;'  appearance='fill' >
         <mat-label>Time Range</mat-label>
         <mat-select [(value)] = "timeRangeSelected" >
-            <mat-option value="Last_30_Days"  (click) = "setDataRange('last30')" >Last 30 Days </mat-option>
-            <mat-option value="Epoch" (click) ="setDataRange('currentWeek)">Current Week </mat-option>
+            <mat-option value="Last_30_Days"  (click) = "getData('last30')" >Last 30 Days </mat-option>
+            <mat-option value="Epoch" (click) ='getData(121724)' >VSim</mat-option>
             <mat-option value="Current_Month" (click) = 'getData(121733)'>QA</mat-option>
             <mat-option value="All" (click) = 'getData(0)'>All</mat-option>
         </mat-select>

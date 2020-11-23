@@ -30,7 +30,7 @@ export class OutputGraphComponent implements OnInit {
   numInBin: any;
   treatSelected = "Treatment";
   binSizeCSelected = "5"
-  timeRangeSelected = "Last_30_Days";
+  dateRange = "Last_30_Days";
   ngOnInit() {
     this .procedureCode = 121726;
     this .getData();                                                // set for 'Treatment'
