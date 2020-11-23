@@ -245,30 +245,39 @@ export class OutputGraphComponent implements OnInit {
       i++;
 
     }
+/////////  make the bins for each patient  \\\\\\\\\\\\\\\\\\\\\    
     var patCount2 = 0;
     for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
       var tstObj = {'name': key, 'data': []}                                  // make an objest to hole the patient bin data
-      this .tst2.push(tstObj);  
-      var binCount2 = 0;                                              // push the object into the main array;
+      this .tst2.push(tstObj);
+      var binCount2 = 0;                                                       // push the object into the main array;
       for (let binEntry of this .binsC){
-        console.log("253 binEntry is %o", binEntry);
+   //     console.log("253 binEntry is %o", binEntry);
         this .tst2[patCount2].data[binCount2++] = 0
       }
       patCount2++;
-
     }
-
+    var patCount2 = 0;
     for (let key of Object.keys(this .data['Patients'])) {                    // loop over patients
-    //  console.log("253 key is %o pardata is %o", key, this .data['Patients'][key])
+
+      console.log("253 key is %o pardata is %o", key, this .data['Patients'][key])
       for (let entry of this .data['Patients'][key]) {                        // loop over each patient's durations
-      //  console.log(entry[1]); // 1, "string", false
-     //   for (let binEntry of this .binsC ){     
-     //     console.log("257 bincC endty is %o duration is %o this bin has %o", binEntry,  entry[1], this .tst2)
-     //   }
+        console.log(entry[1]); // 1, "string", false
+        var binCount2 = 0;
+        for (let binEntry of this .binsC ){
+          if (entry[1] > binEntry[0] && entry[1] <= binEntry[1]){
+     //       console.log("257 bincC endty is %o duration is %o this bin has %o", binEntry[0],  entry[1], this .tst2)
+            this .tst2[patCount2]['data'][binCount2]++
+          }
+          binCount2++;
+        }
       }
+      patCount2++;
+      console.log("tst2 is %o ", this .tst2)
+    //  break;
     }
 
-    console.log("tst2 is %o ", this .tst2)
+ 
   }
 
   makeBins(){
