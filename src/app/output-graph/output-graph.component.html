@@ -1,8 +1,9 @@
 
 <div id='container'></div>
 <div id='control'>
-  <mat-form-field  style='width:100px;'>
-    <mat-select [(value)] = "selected">
+  <mat-form-field  style='width:200px;'  appearance='fill' >
+    <mat-label>Activity Type]</mat-label>
+    <mat-select [(value)] = "treatSelected" id='procType'>
         <mat-option value="Treatment"  (click) = 'getData(121726)' >Treatment</mat-option>
         <mat-option value="VSim" (click) ='getData(121724)' >VSim</mat-option>
         <mat-option value="QA" (click) = 'getData(121733)'>QA</mat-option>
@@ -10,16 +11,18 @@
     </mat-select>
 </mat-form-field>
 <div id='container2' style='height: 300px;'> </div>
-<mat-label> Histogram Bin Size [min]</mat-label>
-<mat-form-field  style='width:100px;'>
-    <mat-select [(value)] = "selected">
-        <mat-option value="Treatment"  (click) = 'setBinSize(5)' >5</mat-option>
-        <mat-option value="VSim" (click) ='setBinSize(10)' >10</mat-option>
-        <mat-option value="QA" (click) = 'setBinSize(15)'>15</mat-option>
-        <mat-option value="All" (click) = 'setBinSize(20)'>20</mat-option>
+
+
+<mat-form-field  style='width:120px;' appearance='fill'>
+    <mat-label>Bins Size [min]</mat-label>
+    <mat-select [(value)] = "binSizeCSelected">
+        <mat-option value="5"  (click) = 'setBinSize(5)' >5</mat-option>
+        <mat-option value="10" (click) ='setBinSize(10)' >10</mat-option>
+        <mat-option value="15" (click) = 'setBinSize(15)'>15</mat-option>
+        <mat-option value="20" (click) = 'setBinSize(20)'>20</mat-option>
     </mat-select>
 </mat-form-field>
 
-<div id="vidx"  style="display:block"> rrrr </div>
+<div id="vidx"  style="display:none">  
 <input id='vidx2'  >
 </div>

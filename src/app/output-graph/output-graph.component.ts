@@ -25,9 +25,11 @@ export class OutputGraphComponent implements OnInit {
   data: any;
   selected:string;
   procedureCode: string;
-  binSizeC: number = 10;
+  binSizeC: number = 5;                                                 // default number of minutes per bin
   binsC: any
   numInBin: any;
+  treatSelected = "Treatment";
+  binSizeCSelected = "5"
 
   ngOnChanges(){
     console.log("change")
@@ -59,11 +61,10 @@ export class OutputGraphComponent implements OnInit {
   handleDomChange(ev){
     console.log("event %", ev);
   }
-  
     public options: any = {
       chart: {
         type: 'scatter',
-        height: 700
+        height: 500
       },
       title: {
         text: 'Procedure Duration'
@@ -107,6 +108,12 @@ export class OutputGraphComponent implements OnInit {
           }
         }
       },
+      yAxis: {
+        min: 0,
+        title: {
+            text: 'Minutes  '
+          },
+      },
       tooltip: {
         formatter: function (){
           return  Highcharts.dateFormat('%e %b %y %H:%M:%S', this .x) + " Duration:" + this .y + " minutes. "  ;
@@ -124,27 +131,27 @@ export class OutputGraphComponent implements OnInit {
         height: 300
       },
       title: {
-        text: 'Procedure Duration'
+        text: ''
       },
       xAxis: {
         crosshair: true,
         format: "test"
         },
-        yAxis: {
-          min: 0,
-          title: {
-              text: 'Total fruit consumption'
+      yAxis: {
+        min: 0,
+        title: {
+            text: 'Procedures'
           },
-          stackLabels: {
-              enabled: true,
-              style: {
-                  fontWeight: 'bold',
-                  color: ( // theme
-                      Highcharts.defaultOptions.title.style &&
-                      Highcharts.defaultOptions.title.style.color
-                  ) || 'gray'
-              }
-          }
+        stackLabels: {
+            enabled: true,
+            style: {
+                fontWeight: 'bold',
+                color: ( // theme
+                    Highcharts.defaultOptions.title.style &&
+                    Highcharts.defaultOptions.title.style.color
+                ) || 'gray'
+            }
+        }
       },
       plotOptions: {
         column: {
@@ -160,7 +167,6 @@ export class OutputGraphComponent implements OnInit {
             e.yAxis[0].value
         )
       },
-   
         credits: {
           enabled: false
         },
@@ -176,30 +182,23 @@ export class OutputGraphComponent implements OnInit {
     param1:string;
   constructor(private genSvce: GenService, private route: ActivatedRoute) {
     this .selected = "Treatment";
-    this.route.queryParams.subscribe(params => {
-      this.param1 = params['param'];
-      console.log("157 param1 is %o", this.param1)
-
+    this .route.queryParams.subscribe(params => {
+      this .param1 = params['param'];
   });
    }
    ngAfterViewInit() {
-    this.observer = new MutationObserver(mutations => {
+    this .observer = new MutationObserver(mutations => {
       mutations.forEach(function(mutation) {
         console.log(" 8888 " + mutation.type);
-      });   
+      });
     });
-  //  var config = { attributes: true, childList: true, characterData: true };
-
-  //  this.observer.observe(this.elRef.nativeElement, config);
   }
 
   setBinSize(n){
     this .binSizeC = n;
-    this .makeBins();
-    this .binData();
-
-    Highcharts.chart('container2', this .options2);
-
+    this .makeBins();                                                     // make the bins
+    this .binData();                                                      // bin the data
+    Highcharts.chart('container2', this .options2);                       // redo the Graph with new binSize
   }
   getData(code){
     console.log("164");
