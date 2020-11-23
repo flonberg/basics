@@ -2,14 +2,23 @@
 <div id='container'></div>
 <div id='control'>
   <mat-form-field  style='width:200px;'  appearance='fill' >
-    <mat-label>Activity Type]</mat-label>
+    <mat-label>Activity Type</mat-label>
     <mat-select [(value)] = "treatSelected" id='procType'>
-        <mat-option value="Treatment"  (click) = 'getData(121726)' >Treatment</mat-option>
-        <mat-option value="VSim" (click) ='getData(121724)' >VSim</mat-option>
-        <mat-option value="QA" (click) = 'getData(121733)'>QA</mat-option>
-        <mat-option value="All" (click) = 'getData(0)'>All</mat-option>
+        <mat-option value="Treatment"  (click) = 'setProcedureCode(121726)' >Treatment</mat-option>
+        <mat-option value="VSim" (click) ='setProcedureCode(121724)' >VSim</mat-option>
+        <mat-option value="QA" (click) = 'setProcedureCode(121733)'>QA</mat-option>
+        <mat-option value="All" (click) = 'setProcedureCode(0)'>All</mat-option>
     </mat-select>
-</mat-form-field>
+    </mat-form-field>
+    <mat-form-field  style='width:200px;'  appearance='fill' >
+        <mat-label>Time Range</mat-label>
+        <mat-select [(value)] = "timeRangeSelected" >
+            <mat-option value="Last_30_Days"  (click) = "setDataRange('last30')" >Last 30 Days </mat-option>
+            <mat-option value="Epoch" (click) ="setDataRange('currentWeek)">Current Week </mat-option>
+            <mat-option value="Current_Month" (click) = 'getData(121733)'>QA</mat-option>
+            <mat-option value="All" (click) = 'getData(0)'>All</mat-option>
+        </mat-select>
+        </mat-form-field>
 <div id='container2' style='height: 300px;'> </div>
 
 

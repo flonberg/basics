@@ -24,43 +24,18 @@ noData(Highcharts);
 export class OutputGraphComponent implements OnInit {
   data: any;
   selected:string;
-  procedureCode: string;
+  procedureCode: number;
   binSizeC: number = 5;                                                 // default number of minutes per bin
   binsC: any
   numInBin: any;
   treatSelected = "Treatment";
   binSizeCSelected = "5"
-
-  ngOnChanges(){
-    console.log("change")
-    this .getData('121726')
-  }
- // ngDoCheck(ev) {
- //   console.log('Docheck %o' + ev);
- // }
-
+  timeRangeSelected = "Last_30_Days";
   ngOnInit() {
-    const observer = new MutationObserver(mutation => {
-      console.log('DOM mutation detected');
-      this.handleDomChange(mutation)
-    });
-    const tNode = document.getElementById('vidx2')
-    observer.observe(tNode, {
-      childList: true,
-      attributes: true,
-      subtree: true,
-      characterData: true
-    });
-  //  const targetNode = document.getElementById('vidx2');                        // Select the node that will be observed for mutation
-
-    this .getData('121726');                                                // set for 'Treatment'
-    var myFunction=()=> {
-      alert("myFunction is now properly executed");
-   }
+    this .procedureCode = 121726;
+    this .getData();                                                // set for 'Treatment'
   }
-  handleDomChange(ev){
-    console.log("event %", ev);
-  }
+  //////////   set parameters for upper graph  \\\\\\\\\\\\\\
     public options: any = {
       chart: {
         type: 'scatter',
@@ -119,9 +94,7 @@ export class OutputGraphComponent implements OnInit {
           return  Highcharts.dateFormat('%e %b %y %H:%M:%S', this .x) + " Duration:" + this .y + " minutes. "  ;
         }
       },
-      series: [
-        {},
-      ]
+      series: [{}]
     }
 
     public options2: any =
@@ -167,9 +140,9 @@ export class OutputGraphComponent implements OnInit {
             e.yAxis[0].value
         )
       },
-        credits: {
-          enabled: false
-        },
+      credits: {
+        enabled: false
+      },
 
       tooltip: {
         formatter: function (){
@@ -178,42 +151,40 @@ export class OutputGraphComponent implements OnInit {
       },
         series: []
     }
-    observer:any;
     param1:string;
   constructor(private genSvce: GenService, private route: ActivatedRoute) {
     this .selected = "Treatment";
     this .route.queryParams.subscribe(params => {
       this .param1 = params['param'];
-  });
-   }
-   ngAfterViewInit() {
-    this .observer = new MutationObserver(mutations => {
-      mutations.forEach(function(mutation) {
-        console.log(" 8888 " + mutation.type);
       });
-    });
+    }
+  setProcedureCode(n){
+    this .procedureCode = n;
+    this .getData()
   }
-
+  setDateRange(str){
+    this .dateRange = str;
+  }
+   ////////////  make the bins and bin the data       \\\\\\\\\\\\\\
   setBinSize(n){
     this .binSizeC = n;
     this .makeBins();                                                     // make the bins
     this .binData();                                                      // bin the data
     Highcharts.chart('container2', this .options2);                       // redo the Graph with new binSize
   }
-  getData(code){
-    console.log("164");
-    this .procedureCode = code;                                             // code -> e.g 121726 = Treatment
+  ////////   get the data from BB or 242   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+  getData(){
+  //  this .procedureCode = code;                                             // code -> e.g 121726 = Treatment
     this .genSvce.setPlatform();                                            // switch Dev = BB or Prod = 242
-    this .options.series = [];
+   // this .options.series = [];
     var selStr = "SELECT StartDateTime, EndDateTime, ProcedureCode, PatientID FROM ProtomTiming ";
-    if (+code > 0 )
-      selStr += " WHERE ProcedureCode = " + code
+    selStr += " WHERE ProcedureCode = " + this .procedureCode
+    console.log("190 selStr is %o", selStr)
     this .genSvce.getWithSelString(selStr  ).subscribe (
         (res) => {
           this .setData(res);                                               // store the data
           this .makeBins();                                                 // make Histogram bins
-          this .binData();
-      //    this .make2dBins();
+          this .binData();                                                  // put the data in bins
           Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
           Highcharts.chart('container2', this .options2);                   // Draw bottom graph Histogram 
         },
@@ -225,42 +196,37 @@ export class OutputGraphComponent implements OnInit {
   setData(inpData){
     this .data = inpData;
   }
-  public tst: any;
-  public tst2: any;
+  public stackedBins: any;
   public toSeePatID: string;
   binData(){
-    this .tst = new Array();
-    this .tst2 = new Array();
+    this .stackedBins = new Array();
     var i = 0;
-    var oLoopCount = 0;
-    var keyCount = 0;
-
-/////////  make the bins for each patient  \\\\\\\\\\\\\\\\\\\\\
-    var patCount2 = 0;
+    /////////  make the bins for each patient  \\\\\\\\\\\\\\\\\\\\\
+    var patCount2 = 0;                                                        // counter => index for patientLoop
     for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
       var tstObj = {'name': key, 'data': []}                                  // make an objest to hole the patient bin data
-      this .tst2.push(tstObj);
-      var binCount2 = 0;                                                       // push the object into the main array;
+      this .stackedBins.push(tstObj);                                         // push the object into the main array;
+      var binCount2 = 0;                                                      // counter => index for bin loop
       for (let binEntry of this .binsC){
-        this .tst2[patCount2].data[binCount2++] = 0
+        this .stackedBins[patCount2].data[binCount2++] = 0                    // create the bin with count = 0
       }
       patCount2++;
     }
-////////   bin the data  \\\\\\\\\\\\\\\\\\\\\\\
+    ////////   bin the data  \\\\\\\\\\\\\\\\\\\\\\\
     var patCount2 = 0;                                                        // patient loop counter
     for (let key of Object.keys(this .data['Patients'])) {                    // loop over patients
       for (let entry of this .data['Patients'][key]) {                        // loop over each patient's durations
         var binCount2 = 0;                                                    // loop counter
         for (let binEntry of this .binsC ){
           if (entry[1] > binEntry[0] && entry[1] <= binEntry[1]){             // if duration is withing the bin limits
-            this .tst2[patCount2]['data'][binCount2]++                        // increment the count in that bin
+            this .stackedBins[patCount2]['data'][binCount2]++                        // increment the count in that bin
           }
           binCount2++;
         }
       }
       patCount2++;
     }
-          ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
+    ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
     for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
             this .options.series[i] = [];
             this .options.series[i]['name'] = key;
@@ -268,10 +234,10 @@ export class OutputGraphComponent implements OnInit {
             i++;
           }
     ////////    Load data into Bottom Graph Histogram       \\\\\\\\\\\\\\\\\\\\
-    this .options2.series = this .tst2;
-    this .options2.xAxis['categories'] = this .binsC['Label'];
+    this .options2.series = this .stackedBins;                                // load the data into lower graph
+    this .options2.xAxis['categories'] = this .binsC['Label'];                
   }
-///////////  create the bins for the selected binSize. 
+///////////  create the bins for the selected binSize.
   makeBins(){
     var maxDurationExpected = 60;                                             // set the maximum expected activityID duration
     this .binsC = [];                                                         // create the array of bins
