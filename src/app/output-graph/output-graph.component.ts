@@ -57,9 +57,14 @@ export class OutputGraphComponent implements OnInit {
         series: {
             events: {
                 legendItemClick: function (ev) {
-                    this .testBind(ev);                                                      // do NOT hide data
-                }.bind(this )                                                        // allows acces to outside functions. 
-            }
+                    this .testBind(ev);
+                    let cornerY = document.getElementById('vidx'),
+                    value = "test"
+                    cornerY.innerHTML = "Y value: " + value
+                    return false ;
+                  }.bind(this )                                                        // allows acces to outside functions. 
+           
+              }
         }
       },
       credits: {
