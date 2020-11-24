@@ -49,29 +49,27 @@ export class OutputGraphComponent implements OnInit {
             Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', e.xAxis[0].value),
             e.yAxis[0].value
         )
-    },
-    plotOptions: {
-      series: {
-          events: {
-              legendItemClick: function (ev) {
-             //     (<HTMLInputElement>document.getElementById('vidx2').value) = ev.target.userOptions.name;     // load UserID to DOM
-
-                  var inputElement = <HTMLInputElement>document.getElementById('vidx2');
-                  inputElement.value = ev.target.userOptions.name;
-                  var url = window.location.href;
-                        if (url.indexOf('?') > -1){                                          // if there IS already a param
-                          url = url.split('?')[0]
-                          url += '?param='+ ev.target.userOptions.name
-                        }else{
-                          url += '?param='+ ev.target.userOptions.name
-                        }
-                 window.location.href = url;
-                //  this .myFunction();
-                  return false;                                                               // do NOT hide data
-              }
-          }
-      }
-    },
+      },
+      plotOptions: {
+        series: {
+            events: {
+                legendItemClick: function (ev) {
+              //     (<HTMLInputElement>document.getElementById('vidx2').value) = ev.target.userOptions.name;     // load UserID to DOM
+                    var inputElement = <HTMLInputElement>document.getElementById('vidx2');
+                    inputElement.value = ev.target.userOptions.name;
+                    var url = window.location.href;
+                          if (url.indexOf('?') > -1){                                          // if there IS already a param
+                            url = url.split('?')[0]
+                            url += '?param='+ ev.target.userOptions.name
+                          }else{
+                            url += '?param='+ ev.target.userOptions.name
+                          }
+                  window.location.href = url;
+                    return false;                                                               // do NOT hide data
+                }
+            }
+        }
+      },
       credits: {
         enabled: false
       },
@@ -96,7 +94,6 @@ export class OutputGraphComponent implements OnInit {
       },
       series: [{}]
     }
-
     public options2: any =
     {
       chart: {
@@ -164,6 +161,7 @@ export class OutputGraphComponent implements OnInit {
   }
   setDateRange(str){
     this .dateRange = str;
+    this .getData(str);
   }
    ////////////  make the bins and bin the data       \\\\\\\\\\\\\\
   setBinSize(n){
@@ -173,14 +171,12 @@ export class OutputGraphComponent implements OnInit {
     Highcharts.chart('container2', this .options2);                       // redo the Graph with new binSize
   }
   ////////   get the data from BB or 242   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-  getData(){
-  //  this .procedureCode = code;                                             // code -> e.g 121726 = Treatment
+  getData(dateRange?){
     this .genSvce.setPlatform();                                            // switch Dev = BB or Prod = 242
-   // this .options.series = [];
     var selStr = "SELECT StartDateTime, EndDateTime, ProcedureCode, PatientID FROM ProtomTiming ";
-    selStr += " WHERE ProcedureCode = " + this .procedureCode
+    selStr += " WHERE ProcedureCode = " + this .procedureCode               // reflect user-selected activityType
     console.log("190 selStr is %o", selStr)
-    this .genSvce.getWithSelString(selStr  ).subscribe (
+    this .genSvce.getWithSelString(selStr, dateRange  ).subscribe (
         (res) => {
           this .setData(res);                                               // store the data
           this .makeBins();                                                 // make Histogram bins

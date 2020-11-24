@@ -10,8 +10,10 @@ export class GenService {
   constructor(private http: HttpClient) { }
 
  /*********  get using selStr from GET param  */
- getWithSelString(arg){
+ getWithSelString(arg, param?){
   var url = this .urlBase + "timeInterval.php?&selStr=" + arg;
+  if (param)
+    url += "&param=" + param;
   console.log("getWithSelString URL is " + url);
   return this .http.get(url)
 }
