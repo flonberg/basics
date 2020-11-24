@@ -35,6 +35,9 @@ export class OutputGraphComponent implements OnInit {
     this .procedureCode = 121726;
     this .getData();                                                // set for 'Treatment'
   }
+  testBind(ev){
+    console.log("3333 %o", ev.target.userOptions);
+  }
   //////////   set parameters for upper graph  \\\\\\\\\\\\\\
     public options: any = {
       chart: {
@@ -54,19 +57,8 @@ export class OutputGraphComponent implements OnInit {
         series: {
             events: {
                 legendItemClick: function (ev) {
-              //     (<HTMLInputElement>document.getElementById('vidx2').value) = ev.target.userOptions.name;     // load UserID to DOM
-                    var inputElement = <HTMLInputElement>document.getElementById('vidx2');
-                    inputElement.value = ev.target.userOptions.name;
-                    var url = window.location.href;
-                          if (url.indexOf('?') > -1){                                          // if there IS already a param
-                            url = url.split('?')[0]
-                            url += '?param='+ ev.target.userOptions.name
-                          }else{
-                            url += '?param='+ ev.target.userOptions.name
-                          }
-                  window.location.href = url;
-                    return false;                                                               // do NOT hide data
-                }
+                    this .testBind(ev);                                                      // do NOT hide data
+                }.bind(this )                                                        // allows acces to outside functions. 
             }
         }
       },
@@ -199,15 +191,17 @@ export class OutputGraphComponent implements OnInit {
     var i = 0;
     /////////  make the bins for each patient  \\\\\\\\\\\\\\\\\\\\\
     var patCount2 = 0;                                                        // counter => index for patientLoop
-    for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
-      var tstObj = {'name': key, 'data': []}                                  // make an objest to hole the patient bin data
-      this .stackedBins.push(tstObj);                                         // push the object into the main array;
-      var binCount2 = 0;                                                      // counter => index for bin loop
-      for (let binEntry of this .binsC){
-        this .stackedBins[patCount2].data[binCount2++] = 0                    // create the bin with count = 0
+    if ( this .data['Patients']  ){                                           // User can select dateRange with no data
+      for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
+        var tstObj = {'name': key, 'data': []}                                  // make an objest to hole the patient bin data
+        this .stackedBins.push(tstObj);                                         // push the object into the main array;
+        var binCount2 = 0;                                                      // counter => index for bin loop
+        for (let binEntry of this .binsC){
+          this .stackedBins[patCount2].data[binCount2++] = 0                    // create the bin with count = 0
+        }
+        patCount2++;
       }
-      patCount2++;
-    }
+    
     ////////   bin the data  \\\\\\\\\\\\\\\\\\\\\\\
     var patCount2 = 0;                                                        // patient loop counter
     for (let key of Object.keys(this .data['Patients'])) {                    // loop over patients
@@ -222,6 +216,7 @@ export class OutputGraphComponent implements OnInit {
       }
       patCount2++;
     }
+  }
     ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
     for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
             this .options.series[i] = [];
