@@ -28,6 +28,7 @@ export class OutputGraphComponent implements OnInit {
   binSizeC: number = 5;                                                 // default number of minutes per bin
   binsC: any
   numInBin: any;
+  typeSelected = "Duration by Date";
   treatSelected = "Treatment";
   binSizeCSelected = "5"
   dateRange = "Last_30_Days";
@@ -35,12 +36,17 @@ export class OutputGraphComponent implements OnInit {
     this .procedureCode = 121726;
     this .getData();                                                // set for 'Treatment'
   }
-  modalString1 = '';
+  modalString1 = ''; modalString2 = '';
   testBind(ev){
     var modal = document.getElementById('myModal');
     modal.style.display = "block";
-    this .modalString1 = ev.target.userOptions.name;
-    console.log("3333 %o", ev.target.userOptions);
+    var av = this .data.average[ev.target.userOptions.name];
+    this .modalString1 =this .data.average[ev.target.userOptions.name] + " min";
+    this .modalString2 =this .data.sigma[ev.target.userOptions.name] + " min";
+
+    ;
+    console.log("44 data %o", this .data.average.index)
+    console.log("3333 %o", ev.target.userOptions.name);
   }
   closeModal(){
     var modal = document.getElementById('myModal');
