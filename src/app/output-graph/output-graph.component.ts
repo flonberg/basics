@@ -35,8 +35,16 @@ export class OutputGraphComponent implements OnInit {
     this .procedureCode = 121726;
     this .getData();                                                // set for 'Treatment'
   }
+  modalString1 = '';
   testBind(ev){
+    var modal = document.getElementById('myModal');
+    modal.style.display = "block";
+    this .modalString1 = ev.target.userOptions.name;
     console.log("3333 %o", ev.target.userOptions);
+  }
+  closeModal(){
+    var modal = document.getElementById('myModal');
+    modal.style.display = "none";
   }
   //////////   set parameters for upper graph  \\\\\\\\\\\\\\
     public options: any = {
@@ -57,13 +65,12 @@ export class OutputGraphComponent implements OnInit {
         series: {
             events: {
                 legendItemClick: function (ev) {
-                    this .testBind(ev);
+                    this .testBind(ev);                             // this function is known because of the 'bind(this )'
                     let cornerY = document.getElementById('vidx'),
                     value = "test"
                     cornerY.innerHTML = "Y value: " + value
                     return false ;
-                  }.bind(this )                                                        // allows acces to outside functions. 
-           
+                  }.bind(this )                                         // !!!!!!allows acces to outside functions. 
               }
         }
       },
@@ -188,6 +195,7 @@ export class OutputGraphComponent implements OnInit {
     }
   setData(inpData){
     this .data = inpData;
+    console.log("190 this.data is %o", this .data);
   }
   public stackedBins: any;
   public toSeePatID: string;
