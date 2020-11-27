@@ -37,7 +37,7 @@ export class OutputGraphComponent implements OnInit {
     this .getData();                                                // set for 'Treatment'
   }
   modalString1 = ''; modalString2 = '';
-  testBind(ev){
+  showAvStdDev(ev){
     var modal = document.getElementById('myModal');
     modal.style.display = "block";
     var av = this .data.average[ev.target.userOptions.name];
@@ -71,7 +71,7 @@ export class OutputGraphComponent implements OnInit {
         series: {
             events: {
                 legendItemClick: function (ev) {
-                    this .testBind(ev);                             // this function is known because of the 'bind(this )'
+                    this .showAvStdDev(ev);                             // this function is known because of the 'bind(this )'
                     let cornerY = document.getElementById('vidx'),
                     value = "test"
                     cornerY.innerHTML = "Y value: " + value
@@ -166,6 +166,7 @@ export class OutputGraphComponent implements OnInit {
       title: {
           text: 'Patient Duration Average and Standard Devieation'
       },
+      xAxis: {}
 
 
     }
@@ -238,7 +239,7 @@ export class OutputGraphComponent implements OnInit {
       for (let entry of this .data['Patients'][key]) {                        // loop over each patient's durations
         var binCount2 = 0;                                                    // loop counter
         for (let binEntry of this .binsC ){
-          if (entry[1] > binEntry[0] && entry[1] <= binEntry[1]){             // if duration is withing the bin limits
+          if (entry[1] > binEntry[0] && entry[1] <= binEntry[1]){             // if duration is withing the bin limits  
             this .stackedBins[patCount2]['data'][binCount2]++                        // increment the count in that bin
           }
           binCount2++;
@@ -275,20 +276,24 @@ export class OutputGraphComponent implements OnInit {
       this .numInBin[i] = 0;                                                  // zero out the count in each bin. 
     }
    }
+
    setDurationErrorBar(){
-     this .options.series =[{
-      name: 'Rainfall',
+  //   this .options.xAxis.categories = ['1', '2', '3', '4'];
+     this .options3.xAxis.categories = this .data.categoriesForAv;
+     this .options3.xAxis.labels ={};                                          // don't format as Date. 
+     this .options3.series =[{
+      name: 'Duration',
       color: '#4572A7',
       type: 'column',
       data: this .data['average']
   }, {
-      name: 'Rainfall error',
+      name: 'Duration error',
       type: 'errorbar',
       data: this .data['error']
     //  data: [[48, 51], [68, 73], [92, 110], [128, 136], [140, 150], [171, 179], [135, 143], 
     //  [142, 149], [204, 220], [189, 199], [95, 110], [52, 56]]
   }]
-     Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
+     Highcharts.chart('container', this .options3);                     // Draw top graph scatter plot
    }
  setDurationByDate(){
       ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
@@ -299,6 +304,7 @@ export class OutputGraphComponent implements OnInit {
         this .options.series[i]['data'] = this .data['Patients'][key];
         i++;
       }
+      this .options.xAxis['categories'] = null;
       Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
  }  
 }
