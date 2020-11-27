@@ -4,8 +4,8 @@
   <mat-form-field  style='width:200px;'  appearance='fill' >
     <mat-label>Plot Type</mat-label>
     <mat-select [(value)] = "typeSelected" id='procType'>
-        <mat-option value="Duration by Date"  (click) = 'setProcedureCode(121726)' >Duration by date</mat-option>
-        <mat-option value="VSim" (click) ='setProcedureCode(121724)' >Average Duration by PatienId</mat-option>
+        <mat-option value="Duration by Date"  (click) = 'setDurationByDate()' >Duration by date</mat-option>
+        <mat-option value="VSim" (click) = 'setDurationErrorBar()' >Average Duration by PatienId</mat-option>
 
     </mat-select>
 </mat-form-field>

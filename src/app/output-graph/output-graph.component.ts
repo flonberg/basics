@@ -32,6 +32,7 @@ export class OutputGraphComponent implements OnInit {
   treatSelected = "Treatment";
   binSizeCSelected = "5"
   dateRange = "Last_30_Days";
+  durationErrorBar = false;
   ngOnInit() {
     this .procedureCode = 121726;
     this .getData();                                                // set for 'Treatment'
@@ -247,7 +248,6 @@ export class OutputGraphComponent implements OnInit {
       patCount2++;
     }
   }
-  
     ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
     for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
             this .options.series[i] = [];
@@ -258,19 +258,8 @@ export class OutputGraphComponent implements OnInit {
     ////////    Load data into Bottom Graph Histogram       \\\\\\\\\\\\\\\\\\\\
     this .options2.series = this .stackedBins;                                // load the data into lower graph
     this .options2.xAxis['categories'] = this .binsC['Label'];
-   // this .options3.series = new Array();
-   // this .options3//.series['data'] =  this .data['average'];
-    console.log("250 average %o", this .options.series[0]);
-    this .options.series =[{
-      name: 'Rainfall',
-      color: '#4572A7',
-      type: 'column',
-      data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
-  }, { 
-      name: 'Rainfall error',
-      type: 'errorbar',
-      data: [[48, 51], [68, 73], [92, 110], [128, 136], [140, 150], [171, 179], [135, 143], [142, 149], [204, 220], [189, 199], [95, 110], [52, 56]]
-  }]
+
+
   }
 
 ///////////  create the bins for the selected binSize.
@@ -287,4 +276,30 @@ export class OutputGraphComponent implements OnInit {
       this .numInBin[i] = 0;                                                  // zero out the count in each bin. 
     }
    }
+   setDurationErrorBar(){
+     this .durationErrorBar = true;
+     this .options.series =[{
+      name: 'Rainfall',
+      color: '#4572A7',
+      type: 'column',
+      data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
+  }, { 
+      name: 'Rainfall error',
+      type: 'errorbar',
+      data: [[48, 51], [68, 73], [92, 110], [128, 136], [140, 150], [171, 179], [135, 143], 
+      [142, 149], [204, 220], [189, 199], [95, 110], [52, 56]]
+  }]
+     Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
+   }
+ setDurationByDate(){
+      ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
+      var i = 0;
+      for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
+        this .options.series[i] = [];
+        this .options.series[i]['name'] = key;
+        this .options.series[i]['data'] = this .data['Patients'][key];
+        i++;
+      }
+      Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
+ }  
 }
