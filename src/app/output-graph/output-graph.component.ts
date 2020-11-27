@@ -32,7 +32,6 @@ export class OutputGraphComponent implements OnInit {
   treatSelected = "Treatment";
   binSizeCSelected = "5"
   dateRange = "Last_30_Days";
-  durationErrorBar = false;
   ngOnInit() {
     this .procedureCode = 121726;
     this .getData();                                                // set for 'Treatment'
@@ -277,17 +276,18 @@ export class OutputGraphComponent implements OnInit {
     }
    }
    setDurationErrorBar(){
-     this .durationErrorBar = true;
      this .options.series =[{
       name: 'Rainfall',
       color: '#4572A7',
       type: 'column',
-      data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
-  }, { 
+     // data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
+     data: this .data['average']
+  }, {
       name: 'Rainfall error',
       type: 'errorbar',
-      data: [[48, 51], [68, 73], [92, 110], [128, 136], [140, 150], [171, 179], [135, 143], 
-      [142, 149], [204, 220], [189, 199], [95, 110], [52, 56]]
+      data: this .data['error']
+    //  data: [[48, 51], [68, 73], [92, 110], [128, 136], [140, 150], [171, 179], [135, 143], 
+    //  [142, 149], [204, 220], [189, 199], [95, 110], [52, 56]]
   }]
      Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
    }

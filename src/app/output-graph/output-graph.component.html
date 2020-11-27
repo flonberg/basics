@@ -20,7 +20,7 @@
     </mat-form-field>
     <mat-form-field  style='width:200px;'  appearance='fill' >
         <mat-label>Time Range</mat-label>
-        <mat-select [(value)] = "timeRangeSelected" >
+        <mat-select [(value)] = "dateRange" >
             <mat-option value="Last_30_Days"  (click) = "setDateRange('last30')" >Last 30 Days </mat-option>
             <mat-option value="Epoch" (click) ="setDateRange('last20')" >Last 20 Days</mat-option>
             <mat-option value="Current_Month" (click) = "setDateRange('Epoch')">Epoch</mat-option>
