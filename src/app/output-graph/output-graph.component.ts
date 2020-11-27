@@ -158,6 +158,17 @@ export class OutputGraphComponent implements OnInit {
       },
         series: []
     }
+    public options3: any =
+    {
+      chart: {
+        zoomType: 'xy'
+      },
+      title: {
+          text: 'Patient Duration Average and Standard Devieation'
+      },
+
+
+    }
     param1:string;
   constructor(private genSvce: GenService, private route: ActivatedRoute) {
     this .selected = "Treatment";
@@ -236,6 +247,7 @@ export class OutputGraphComponent implements OnInit {
       patCount2++;
     }
   }
+  
     ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
     for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
             this .options.series[i] = [];
@@ -245,8 +257,22 @@ export class OutputGraphComponent implements OnInit {
           }
     ////////    Load data into Bottom Graph Histogram       \\\\\\\\\\\\\\\\\\\\
     this .options2.series = this .stackedBins;                                // load the data into lower graph
-    this .options2.xAxis['categories'] = this .binsC['Label'];                
+    this .options2.xAxis['categories'] = this .binsC['Label'];
+   // this .options3.series = new Array();
+   // this .options3//.series['data'] =  this .data['average'];
+    console.log("250 average %o", this .options.series[0]);
+    this .options.series =[{
+      name: 'Rainfall',
+      color: '#4572A7',
+      type: 'column',
+      data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
+  }, { 
+      name: 'Rainfall error',
+      type: 'errorbar',
+      data: [[48, 51], [68, 73], [92, 110], [128, 136], [140, 150], [171, 179], [135, 143], [142, 149], [204, 220], [189, 199], [95, 110], [52, 56]]
+  }]
   }
+
 ///////////  create the bins for the selected binSize.
   makeBins(){
     var maxDurationExpected = 60;                                             // set the maximum expected activityID duration
