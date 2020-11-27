@@ -41,7 +41,7 @@ export class OutputGraphComponent implements OnInit {
     var modal = document.getElementById('myModal');
     modal.style.display = "block";
     var av = this .data.average[ev.target.userOptions.name];
-    this .modalString1 =this .data.average[ev.target.userOptions.name] + " min";
+    this .modalString1 =this .data.averageByKey[ev.target.userOptions.name] + " min";
     this .modalString2 =this .data.sigma[ev.target.userOptions.name] + " min";
 
     ;
@@ -280,8 +280,7 @@ export class OutputGraphComponent implements OnInit {
       name: 'Rainfall',
       color: '#4572A7',
       type: 'column',
-     // data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
-     data: this .data['average']
+      data: this .data['average']
   }, {
       name: 'Rainfall error',
       type: 'errorbar',
