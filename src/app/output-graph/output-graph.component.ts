@@ -164,7 +164,7 @@ export class OutputGraphComponent implements OnInit {
         zoomType: 'xy'
       },
       title: {
-          text: 'Patient Duration Average and Standard Devieation'
+          text: 'Patient Duration Average and Standard Deviation'
       },
       xAxis: {}
 
@@ -224,7 +224,7 @@ export class OutputGraphComponent implements OnInit {
     var patCount2 = 0;                                                        // counter => index for patientLoop
     if ( this .data['Patients']  ){                                           // User can select dateRange with no data
       for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
-        var tstObj = {'name': key, 'data': []}                                  // make an objest to hole the patient bin data
+        var tstObj = {'name': key, 'data': []}                                  // make an objest to hold the patient bin data
         this .stackedBins.push(tstObj);                                         // push the object into the main array;
         var binCount2 = 0;                                                      // counter => index for bin loop
         for (let binEntry of this .binsC){
@@ -232,7 +232,6 @@ export class OutputGraphComponent implements OnInit {
         }
         patCount2++;
       }
-    
     ////////   bin the data  \\\\\\\\\\\\\\\\\\\\\\\
     var patCount2 = 0;                                                        // patient loop counter
     for (let key of Object.keys(this .data['Patients'])) {                    // loop over patients
@@ -290,8 +289,6 @@ export class OutputGraphComponent implements OnInit {
       name: 'Duration error',
       type: 'errorbar',
       data: this .data['error']
-    //  data: [[48, 51], [68, 73], [92, 110], [128, 136], [140, 150], [171, 179], [135, 143], 
-    //  [142, 149], [204, 220], [189, 199], [95, 110], [52, 56]]
   }]
      Highcharts.chart('container', this .options3);                     // Draw top graph scatter plot
    }
