@@ -195,8 +195,8 @@ export class OutputGraphComponent implements OnInit {
   ////////   get the data from BB or 242   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
   getData(dateRange?){
     this .genSvce.setPlatform();                                            // switch Dev = BB or Prod = 242
-    var selStr = "SELECT StartDateTime, EndDateTime, ProcedureCode, PatientID FROM ProtomTiming ";
-    selStr += " WHERE ProcedureCode = " + this .procedureCode               // reflect user-selected activityType
+    var selStr = "SELECT top(1000) StartDateTime, EndDateTime, ProcedureCode, PatientID, SessionID, ActivityID FROM ProtomTiming ";
+    selStr += " WHERE ProcedureCode = '" + this .procedureCode + "' AND StartDateTime > '2020-11-15' ORDER By ActivityID desc";
     console.log("190 selStr is %o", selStr)
     this .genSvce.getWithSelString(selStr, dateRange  ).subscribe (
         (res) => {
