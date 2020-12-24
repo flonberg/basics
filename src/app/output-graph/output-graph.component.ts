@@ -71,13 +71,20 @@ export class OutputGraphComponent implements OnInit {
         series: {
             events: {
                 legendItemClick: function (ev) {
-                    this .showAvStdDev(ev);                             // this function is known because of the 'bind(this )'
+                    this .showAvStdDev(ev); // this function is known because of the 'bind(this )'
                     let cornerY = document.getElementById('vidx'),
                     value = "test"
                     cornerY.innerHTML = "Y value: " + value
                     return false ;
-                  }.bind(this )                                         // !!!!!!allows acces to outside functions. 
-              }
+                  }.bind(this )    // !!!!!!allows acces to outside functions. 
+              },
+              point: {
+                events: {
+                    click: function () {
+                        alert('Category: ' + this.category + ', value: ' + this.y);
+                    }
+                }
+            }
         }
       },
       credits: {
@@ -99,10 +106,10 @@ export class OutputGraphComponent implements OnInit {
       },
       tooltip: {
         formatter: function (){
-          return  Highcharts.dateFormat('%e %b %y %H:%M:%S', this .x) + " Duration:" + this .y + " minutes. "  ;
+          return  Highcharts.dateFormat('%e %b ', this .x) + " Duration:" + this .y + " minutes. "  ;
         }
       },
-      series: [{}]
+      series: [{}]                                // data is loaded in the binData() function
     }
     public options2: any =
     {
@@ -221,8 +228,8 @@ export class OutputGraphComponent implements OnInit {
     this .stackedBins = new Array();
     var i = 0;
     /////////  make the bins for each patient  \\\\\\\\\\\\\\\\\\\\\
-    var patCount2 = 0;                                                        // counter => index for patientLoop
-    if ( this .data['Patients']  ){                                           // User can select dateRange with no data
+    var patCount2 = 0;                                                          // counter => index for patientLoop
+    if ( this .data['Patients']  ){                                             // User can select dateRange with no data
       for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
         var tstObj = {'name': key, 'data': []}                                  // make an objest to hold the patient bin data
         this .stackedBins.push(tstObj);                                         // push the object into the main array;
@@ -232,21 +239,21 @@ export class OutputGraphComponent implements OnInit {
         }
         patCount2++;
       }
-    ////////   bin the data  \\\\\\\\\\\\\\\\\\\\\\\
-    var patCount2 = 0;                                                        // patient loop counter
-    for (let key of Object.keys(this .data['Patients'])) {                    // loop over patients
-      for (let entry of this .data['Patients'][key]) {                        // loop over each patient's durations
-        var binCount2 = 0;                                                    // loop counter
-        for (let binEntry of this .binsC ){
-          if (entry[1] > binEntry[0] && entry[1] <= binEntry[1]){             // if duration is withing the bin limits  
-            this .stackedBins[patCount2]['data'][binCount2]++                        // increment the count in that bin
+      ////////   bin the data  \\\\\\\\\\\\\\\\\\\\\\\
+      var patCount2 = 0;                                                        // patient loop counter
+      for (let key of Object.keys(this .data['Patients'])) {                    // loop over patients
+        for (let entry of this .data['Patients'][key]) {                        // loop over each patient's durations
+          var binCount2 = 0;                                                    // loop counter
+          for (let binEntry of this .binsC ){
+            if (entry[1] > binEntry[0] && entry[1] <= binEntry[1]){             // if duration is withing the bin limits  
+              this .stackedBins[patCount2]['data'][binCount2]++                        // increment the count in that bin
+            }
+            binCount2++;
           }
-          binCount2++;
         }
+        patCount2++;
       }
-      patCount2++;
     }
-  }
     ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
     for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
             this .options.series[i] = [];
@@ -257,7 +264,6 @@ export class OutputGraphComponent implements OnInit {
     ////////    Load data into Bottom Graph Histogram       \\\\\\\\\\\\\\\\\\\\
     this .options2.series = this .stackedBins;                                // load the data into lower graph
     this .options2.xAxis['categories'] = this .binsC['Label'];
-
 
   }
 
