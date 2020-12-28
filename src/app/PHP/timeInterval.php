@@ -28,21 +28,19 @@ $numActivities = array();                                                       
 while ($assoc = $dB->getAssoc())
 { 
   fwrite($fp, "\r\n activityiID is ". $assoc['ActivityID'] ." patientID is ". $assoc['PatientID']." starteDateTime is ".$assoc['StartDateTime']->format('Y-m-d') );
-    $duration = $assoc['StartDateTime']->diff($assoc['EndDateTime']);                      // the DURATION
-  //  fwrite($fp, "\r\n tst is $tst");
-    $ssss = print_r($assoc, true);                                                       // DO NOT REMOVE -- the next line does NOT work without this???
+    $duration = $assoc['StartDateTime']->diff($assoc['EndDateTime']);               // the DURATION
+    $ssss = print_r($assoc, true);                              // DO NOT REMOVE -- the next line does NOT work without this???
     $row['Rdata'][$i][0] =strtotime($assoc['StartDateTime']->date) * 1000;            // StartDateTime --  HighCharts uses milliSec since Epoch
-    $row['Rdata'][$i++][1] = $duration->i;      
+    $row['Rdata'][$i][1] = $duration->i;      
+    $row['Rdata'][$i++][2] = $assoc['ProcedureCode'];                                // add ProcedureCode
                                        // the Diff in Minutes
     if(preg_match('/(^[0-9]{3}-[0-9]{2}-[0-9]{2}$)/i', trim($assoc['PatientID'])))    // match 'nnn-nn-nn' to select patients
     {
         $backNHours = goBackHrs($assoc['StartDateTime']->date, 15 );                // SOAP
         if (!isset( $row['Patients'][$assoc['PatientID']]  )){                          // if datum for this patients NOT exist
-   //       $row['Patients'][$assoc['PatientID']][0] = array();    // create it    
           $row['Patients'][$assoc['PatientID']][0] = array(strtotime($backNHours) * 1000, $duration->i);    // create it    
           $total[$assoc['PatientID']] = $duration->i;
           $numActivities[$assoc['PatientID']] = 1;
-    //      $srs = print_r($row['Patients'][$assoc['PatientID']], true); fwrite($fp, $srs);
         }
         else   
         {                                                                         // if it DOES 

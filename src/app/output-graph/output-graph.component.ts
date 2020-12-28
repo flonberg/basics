@@ -184,6 +184,17 @@ export class OutputGraphComponent implements OnInit {
       this .param1 = params['param'];
       });
     }
+  /*********   DICOM Procedure codes   */  
+  procStr = [
+    {'Description':'RT Position Acquisition single plane kV', 'code':'121704', 'n':0},
+    {'Description':'RT Position Acquisition dual plane kV', 'code':'121705', 'n':0 },
+    {'Description':'RT RT Position Acquisition CT kV', 'code':'121707', 'n':0 },
+    {'Description':'RT Treatment with Internal Verification', 'code':'121726', 'n':0 },
+    {'Description':'RT Patient Position Registration 2D on 3D Reference', 'code':'121787', 'n':0 },
+    {'Description':'Patient Position Acquisition Fluoroscopy 2DkV', 'code':'99I001`', 'n':0 },
+    {'Description':'Patient Position Acquisition Fluoroscopy CBCT ', 'code':'99I002`', 'n':0 },
+    {'Description':'RT Position Acquisition single plane CBCT', 'code':'99I003`', 'n':0 },
+  ]
   setProcedureCode(n){
     this .procedureCode = n;
     this .getData()
@@ -264,8 +275,7 @@ export class OutputGraphComponent implements OnInit {
     ////////    Load data into Bottom Graph Histogram       \\\\\\\\\\\\\\\\\\\\
     this .options2.series = this .stackedBins;                                // load the data into lower graph
     this .options2.xAxis['categories'] = this .binsC['Label'];
-
-  }
+  }                                                                           // end of binData function
 
 ///////////  create the bins for the selected binSize.
   makeBins(){
