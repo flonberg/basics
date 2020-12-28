@@ -1,4 +1,5 @@
 <?php
+/*********  save to    'http://blackboard-dev.partners.org/dev/FJL/AngProd/';  */
 header("Access-Control-Allow-Origin: *");	
 require_once "sql_libFL.php";                    
 require_once "libFuncs.php";                    
@@ -35,9 +36,8 @@ while ($assoc = $dB->getAssoc())
                                        // the Diff in Minutes
     if(preg_match('/(^[0-9]{3}-[0-9]{2}-[0-9]{2}$)/i', trim($assoc['PatientID'])))    // match 'nnn-nn-nn' to select patients
     {
-       $backNHours = goBackHrs($assoc['StartDateTime']->date, 15 );
-  //    $tA = strtotime($assoc['StartDateTime']->date )* 1000;                          // make array to add to data
-      if (!isset( $row['Patients'][$assoc['PatientID']]  )){                          // if datum for this patients NOT exist
+        $backNHours = goBackHrs($assoc['StartDateTime']->date, 15 );                // SOAP
+        if (!isset( $row['Patients'][$assoc['PatientID']]  )){                          // if datum for this patients NOT exist
    //       $row['Patients'][$assoc['PatientID']][0] = array();    // create it    
           $row['Patients'][$assoc['PatientID']][0] = array(strtotime($backNHours) * 1000, $duration->i);    // create it    
           $total[$assoc['PatientID']] = $duration->i;
