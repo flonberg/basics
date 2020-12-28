@@ -55,7 +55,7 @@ echo "<br> 11 <br> ";
 				foreach ($timeSlot['Session']['Operations'] as $key=>$val){				// 
 				{     
 					foreach ($val['Activities'] as $kkey=>$vval){
-                        echo "<br> Description is ". $vval['Description'];
+                        echo "<br> Description is ". $vval['Description']  ." procedureCode is ". $vval['ProcedureCode'];
                         if ($ct++ == 10000){    
                             echo "<pre>"; print_r($vval['OutputObjects']); echo "</pre>";
                         }
@@ -71,7 +71,8 @@ echo "<br> 11 <br> ";
 		}
 	}
 	$jData = json_encode($tsData['Activities']);
-	echo "<br> $jData <br>"; 
+    echo "<br> $jData <br>"; 
+    /***********  call ProtomTimingUpdata.php to get the Activities  */
 		$ch = curl_init();
                 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
