@@ -23,7 +23,8 @@ if (isset($_GET['param']) ){
 $dB = new getDBData($selStr, $handle);
 $i = 0;
 $k = 0;
-$total = array();                                                                   // used to compute Average for PatID Activities
+$total = array();        
+$timeVproc = array();                                                           // used to compute Average for PatID Activities
 $numActivities = array();                                                           // used to compute Average for PatID Activities
 while ($assoc = $dB->getAssoc())
 { 
@@ -36,15 +37,19 @@ while ($assoc = $dB->getAssoc())
                                        // the Diff in Minutes
     if(preg_match('/(^[0-9]{3}-[0-9]{2}-[0-9]{2}$)/i', trim($assoc['PatientID'])))    // match 'nnn-nn-nn' to select patients
     {
-        $backNHours = goBackHrs($assoc['StartDateTime']->date, 15 );                // SOAP
-        if (!isset( $row['Patients'][$assoc['PatientID']]  )){                          // if datum for this patients NOT exist
-          $row['Patients'][$assoc['PatientID']][0] = array(strtotime($backNHours) * 1000, $duration->i);    // create it    
+        $backNHours = goBackHrs($assoc['StartDateTime']->date, 15 );                // SOAP correct the time
+        if (!isset( $row['Patients'][$assoc['PatientID']]  )){                      // if datum for this patients NOT exist
+          $timeVproc[strtotime($backNHours) * 1000] =  $assoc['ProcedureCode'];
+          $row['Patients'][$assoc['PatientID']][0] = array(strtotime($backNHours) * 1000, $duration->i, $assoc['ProcedureCode']);    // create it    
+//          $row['Patients'][$assoc['PatientID']][0] = array(strtotime($backNHours) * 1000, $duration->i);    // create it    
           $total[$assoc['PatientID']] = $duration->i;
           $numActivities[$assoc['PatientID']] = 1;
         }
         else   
-        {                                                                         // if it DOES 
-           $tmp =  array(strtotime($backNHours) * 1000, $duration->i);    // make  the datum 
+        {     
+          $timeVproc[strtotime($backNHours) * 1000] =  $assoc['ProcedureCode'];//                                                                    // if it DOES 
+           $tmp =  array(strtotime($backNHours) * 1000, $duration->i, $assoc['ProcedureCode']);    // make  the datum 
+//           $tmp =  array(strtotime($backNHours) * 1000, $duration->i);    // make  the datum 
     //        $tmp =  array(strtotime($assoc['StartDateTime']->date) * 1000, $duration->i);    // make  the datum 
             array_push($row['Patients'][$assoc['PatientID']], $tmp);                    // push the datum into the array. 
             $total[$assoc['PatientID']] += $duration->i;    
@@ -94,6 +99,7 @@ if ($debug2 == 1){
   fwrite($fp, "\r\n $tring");
   fflush($fp);
   }
+$row['PCode'] = $timeVproc;  
 $st = print_r($row['Patients'], true);  fwrite($fp, "\r\n  69 \r\n ". $st);  
 $st = print_r($row['average'], true);  fwrite($fp, "\r\n  69 \r\n ". $st);  
 echo json_encode($row);

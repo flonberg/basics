@@ -37,6 +37,9 @@ export class OutputGraphComponent implements OnInit {
     this .getData();                                                // set for 'Treatment'
   }
   modalString1 = ''; modalString2 = '';
+  showProcedure(ev){
+    console.log('41' + ev);
+  }
   showAvStdDev(ev){
     var modal = document.getElementById('myModal');
     modal.style.display = "block";
@@ -106,8 +109,8 @@ export class OutputGraphComponent implements OnInit {
       },
       tooltip: {
         formatter: function (){
-          return  Highcharts.dateFormat('%e %b ', this .x) + " Duration:" + this .y + " minutes. "  ;
-        }
+          return  Highcharts.dateFormat('%e %b ', this .x) + " duration:" + this .y + " minutes. "  ;
+        }.bind(this)
       },
       series: [{}]                                // data is loaded in the binData() function
     }
@@ -184,7 +187,6 @@ export class OutputGraphComponent implements OnInit {
     this .route.queryParams.subscribe(params => {
       this .param1 = params['param'];
       });
-  
   }
   setProcedureCode(n){
     this .procedureCode = n;
@@ -206,12 +208,10 @@ export class OutputGraphComponent implements OnInit {
   getData(dateRange?){
     this .genSvce.setPlatform();                                            // switch Dev = BB or Prod = 242
     var selStr = "SELECT top(1000) StartDateTime, EndDateTime, ProcedureCode, PatientID, SessionID, ActivityID FROM ProtomTiming ";
-    if (this .procedureCode > 3)
-    selStr += " WHERE ProcedureCode = '" + this .procedureCode + "' AND StartDateTime > '2020-11-15' ORDER By ActivityID desc";
-    else
-    selStr += " WHERE  StartDateTime > '2020-11-15' ORDER By ActivityID desc";
-
-    console.log("190 selStr is %o", selStr)
+    if (this .procedureCode > 3)                                          // select particular ProcedureCode
+     selStr += " WHERE ProcedureCode = '" + this .procedureCode + "' AND StartDateTime > '2020-11-15' ORDER By ActivityID desc";
+    else                                                                  // take ALL ProcedureCodes
+      selStr += " WHERE  StartDateTime > '2020-11-15' ORDER By ActivityID desc";
     this .genSvce.getWithSelString(selStr, dateRange  ).subscribe (
         (res) => {
           this .setData(res);                                               // store the data
