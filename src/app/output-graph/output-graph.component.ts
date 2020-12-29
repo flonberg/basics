@@ -184,8 +184,7 @@ export class OutputGraphComponent implements OnInit {
     this .route.queryParams.subscribe(params => {
       this .param1 = params['param'];
       });
-
-    this .makeProcedureBins()                                             // make the bins for the Procedures 
+  
   }
   setProcedureCode(n){
     this .procedureCode = n;
@@ -207,7 +206,11 @@ export class OutputGraphComponent implements OnInit {
   getData(dateRange?){
     this .genSvce.setPlatform();                                            // switch Dev = BB or Prod = 242
     var selStr = "SELECT top(1000) StartDateTime, EndDateTime, ProcedureCode, PatientID, SessionID, ActivityID FROM ProtomTiming ";
+    if (this .procedureCode > 3)
     selStr += " WHERE ProcedureCode = '" + this .procedureCode + "' AND StartDateTime > '2020-11-15' ORDER By ActivityID desc";
+    else
+    selStr += " WHERE  StartDateTime > '2020-11-15' ORDER By ActivityID desc";
+
     console.log("190 selStr is %o", selStr)
     this .genSvce.getWithSelString(selStr, dateRange  ).subscribe (
         (res) => {
@@ -257,11 +260,11 @@ export class OutputGraphComponent implements OnInit {
             }
             binCount2++;
           }
-
         }
         patCount2++;
       }
     }
+    this .binByProceedureCode();
     ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
     for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
             this .options.series[i] = [];
@@ -272,7 +275,34 @@ export class OutputGraphComponent implements OnInit {
     ////////    Load data into Bottom Graph Histogram       \\\\\\\\\\\\\\\\\\\\
     this .options2.series = this .stackedBins;                                // load the data into lower graph
     this .options2.xAxis['categories'] = this .binsC['Label'];
-  }                                                                           // end of binData function
+  }
+  binByProceedureCode(){
+/*********   DICOM Procedure codes.  Will drow any Activities with that ProcedureCode in the bin,i.e. increment n   */
+this .procStr = {
+  '121704':
+  {'Description':'RT Position Acquisition single plane kV', 'code':'121704', 'n':0},
+  '121705':
+  {'Description':'RT Position Acquisition dual plane kV', 'code':'121705', 'n':0 },
+  '121707':
+  {'Description':'RT RT Position Acquisition CT kV', 'code':'121707', 'n':0 },
+  '121726':
+  {'Description':'RT Treatment with Internal Verification', 'code':'121726', 'n':0 },
+  '121787':
+  {'Description':'RT Patient Position Registration 2D on 3D Reference', 'code':'121787', 'n':0 },
+  '99I001':
+  {'Description':'Patient Position Acquisition Fluoroscopy 2DkV', 'code':'99I001`', 'n':0 },
+  '99I002':
+  {'Description':'Patient Position Acquisition Fluoroscopy CBCT ', 'code':'99I002`', 'n':0 },
+  '99I003':
+  {'Description':'RT Position Acquisition single plane CBCT', 'code':'99I003`', 'n':0 },
+  }
+  var count = 0;
+  for (let entry of this .data.Rdata){
+    if (count++ == 0)
+      console.log("297  " + entry)
+  }
+
+  }                                                                      // end of binData function
 
 ///////////  create the bins for the selected binSize.
   makeBins(){
@@ -291,17 +321,6 @@ export class OutputGraphComponent implements OnInit {
                /////////// make a bin forEach Proceedure  \\\\\\\\\\\\\\\\\\\\
   public procBins: any;
   makeProcedureBins(){
-      /*********   DICOM Procedure codes   */
-  this .procStr = [
-    {'Description':'RT Position Acquisition single plane kV', 'code':'121704', 'n':0},
-    {'Description':'RT Position Acquisition dual plane kV', 'code':'121705', 'n':0 },
-    {'Description':'RT RT Position Acquisition CT kV', 'code':'121707', 'n':0 },
-    {'Description':'RT Treatment with Internal Verification', 'code':'121726', 'n':0 },
-    {'Description':'RT Patient Position Registration 2D on 3D Reference', 'code':'121787', 'n':0 },
-    {'Description':'Patient Position Acquisition Fluoroscopy 2DkV', 'code':'99I001`', 'n':0 },
-    {'Description':'Patient Position Acquisition Fluoroscopy CBCT ', 'code':'99I002`', 'n':0 },
-    {'Description':'RT Position Acquisition single plane CBCT', 'code':'99I003`', 'n':0 },
-    ]
     var i = 0;
     this .procBins = [];
     }

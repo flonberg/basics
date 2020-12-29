@@ -32,7 +32,6 @@ echo "<br> 11 <br> ";
 	foreach ($ts as $key=>$val){                                                                            // loop thru the items returned by SOAP request. 
 		if (preg_match($pattern,$val['PatientID'],$dummy) && strcmp($val['SessionState'], 'ENDED') == 0)	// find Patient and ENDED timeSlots
 		{	
-  
 
         //  echo "<br> StartDateTimd is ". $val['StartDateTime']." PatientID is ". $val['PatientID'] ." SessionID is ". $val['SessionID'] ." timeslotID is ". $val['TimeslotID'];
 			$patId = $val['PatientID'];
