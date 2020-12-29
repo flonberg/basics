@@ -99,10 +99,6 @@ $st = print_r($row['average'], true);  fwrite($fp, "\r\n  69 \r\n ". $st);
 echo json_encode($row);
 exit();
 
-function goBackHours($date, $n){                                            // $date is a date as a String
-    
-
-}
 
 
 function makeLast30(){

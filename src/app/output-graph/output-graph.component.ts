@@ -178,23 +178,15 @@ export class OutputGraphComponent implements OnInit {
 
     }
     param1:string;
+    procStr: any
   constructor(private genSvce: GenService, private route: ActivatedRoute) {
     this .selected = "Treatment";
     this .route.queryParams.subscribe(params => {
       this .param1 = params['param'];
       });
-    }
-  /*********   DICOM Procedure codes   */  
-  procStr = [
-    {'Description':'RT Position Acquisition single plane kV', 'code':'121704', 'n':0},
-    {'Description':'RT Position Acquisition dual plane kV', 'code':'121705', 'n':0 },
-    {'Description':'RT RT Position Acquisition CT kV', 'code':'121707', 'n':0 },
-    {'Description':'RT Treatment with Internal Verification', 'code':'121726', 'n':0 },
-    {'Description':'RT Patient Position Registration 2D on 3D Reference', 'code':'121787', 'n':0 },
-    {'Description':'Patient Position Acquisition Fluoroscopy 2DkV', 'code':'99I001`', 'n':0 },
-    {'Description':'Patient Position Acquisition Fluoroscopy CBCT ', 'code':'99I002`', 'n':0 },
-    {'Description':'RT Position Acquisition single plane CBCT', 'code':'99I003`', 'n':0 },
-  ]
+
+    this .makeProcedureBins()                                             // make the bins for the Procedures 
+  }
   setProcedureCode(n){
     this .procedureCode = n;
     this .getData()
@@ -207,6 +199,7 @@ export class OutputGraphComponent implements OnInit {
   setBinSize(n){
     this .binSizeC = n;
     this .makeBins();                                                     // make the bins
+    this .makeProcedureBins()                                             // make the bins for the Procedures 
     this .binData();                                                      // bin the data
     Highcharts.chart('container2', this .options2);                       // redo the Graph with new binSize
   }
@@ -233,21 +226,24 @@ export class OutputGraphComponent implements OnInit {
     this .data = inpData;
     console.log("190 this.data is %o", this .data);
   }
-  public stackedBins: any;
-  public toSeePatID: string;
+  public stackedBins: any;                                                      // the holder for the stacked timeInterval bins
+//  public toSeePatID: string;
+
   binData(){
-    this .stackedBins = new Array();
+    this .stackedBins = new Array();                                           // the holder for the stacked timeInterval bins
     var i = 0;
-    /////////  make the bins for each patient  \\\\\\\\\\\\\\\\\\\\\
+
     var patCount2 = 0;                                                          // counter => index for patientLoop
-    if ( this .data['Patients']  ){                                             // User can select dateRange with no data
+    if ( this .data['Patients']  ){                                             // If there ARE patients
+
       for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
-        var tstObj = {'name': key, 'data': []}                                  // make an objest to hold the patient bin data
+                  /////////  create a set of timeInterval bins for each patient, .g. 0->5, 5->10 ...  \\\\\\\\\\\\\\\\\\\\\
+        var tstObj = {'name': key, 'data': []}                                  // make an object to hold the patient bin data
         this .stackedBins.push(tstObj);                                         // push the object into the main array;
         var binCount2 = 0;                                                      // counter => index for bin loop
-        for (let binEntry of this .binsC){
+        for (let binEntry of this .binsC)                                       // loop thru the Created Bins
           this .stackedBins[patCount2].data[binCount2++] = 0                    // create the bin with count = 0
-        }
+
         patCount2++;
       }
       ////////   bin the data  \\\\\\\\\\\\\\\\\\\\\\\
@@ -256,11 +252,12 @@ export class OutputGraphComponent implements OnInit {
         for (let entry of this .data['Patients'][key]) {                        // loop over each patient's durations
           var binCount2 = 0;                                                    // loop counter
           for (let binEntry of this .binsC ){
-            if (entry[1] > binEntry[0] && entry[1] <= binEntry[1]){             // if duration is withing the bin limits  
+            if (entry[1] > binEntry[0] && entry[1] <= binEntry[1]){             // if duration is withing the bin limits
               this .stackedBins[patCount2]['data'][binCount2]++                        // increment the count in that bin
             }
             binCount2++;
           }
+
         }
         patCount2++;
       }
@@ -291,6 +288,23 @@ export class OutputGraphComponent implements OnInit {
       this .numInBin[i] = 0;                                                  // zero out the count in each bin. 
     }
    }
+               /////////// make a bin forEach Proceedure  \\\\\\\\\\\\\\\\\\\\
+  public procBins: any;
+  makeProcedureBins(){
+      /*********   DICOM Procedure codes   */
+  this .procStr = [
+    {'Description':'RT Position Acquisition single plane kV', 'code':'121704', 'n':0},
+    {'Description':'RT Position Acquisition dual plane kV', 'code':'121705', 'n':0 },
+    {'Description':'RT RT Position Acquisition CT kV', 'code':'121707', 'n':0 },
+    {'Description':'RT Treatment with Internal Verification', 'code':'121726', 'n':0 },
+    {'Description':'RT Patient Position Registration 2D on 3D Reference', 'code':'121787', 'n':0 },
+    {'Description':'Patient Position Acquisition Fluoroscopy 2DkV', 'code':'99I001`', 'n':0 },
+    {'Description':'Patient Position Acquisition Fluoroscopy CBCT ', 'code':'99I002`', 'n':0 },
+    {'Description':'RT Position Acquisition single plane CBCT', 'code':'99I003`', 'n':0 },
+    ]
+    var i = 0;
+    this .procBins = [];
+    }
 
    setDurationErrorBar(){
   //   this .options.xAxis.categories = ['1', '2', '3', '4'];
