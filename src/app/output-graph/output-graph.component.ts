@@ -35,10 +35,22 @@ export class OutputGraphComponent implements OnInit {
   ngOnInit() {
     this .procedureCode = 121726;
     this .getData();                                                // set for 'Treatment'
+
+    this.detectDivChanges();
+
+
   }
   modalString1 = ''; modalString2 = '';
   showProcedure(ev){
     console.log('41' + ev);
+  }
+  detectDivChanges() {
+    const div = document.getElementById('vidx');
+    const config = { attributes: true, childList: true, subtree: true };
+    const observer = new MutationObserver((mutation) => {
+      console.log("div style changed");
+    })
+    observer.observe(div, config);
   }
   showAvStdDev(ev){
     var modal = document.getElementById('myModal');
@@ -75,7 +87,7 @@ export class OutputGraphComponent implements OnInit {
             events: {
                 legendItemClick: function (ev) {
                     this .showAvStdDev(ev); // this function is known because of the 'bind(this )'
-                    let cornerY = document.getElementById('vidx'),
+                    let cornerY = document.getElementById('vidx2'),
                     value = "test"
                     cornerY.innerHTML = "Y value: " + value
                     return false ;
@@ -84,7 +96,12 @@ export class OutputGraphComponent implements OnInit {
               point: {
                 events: {
                     click: function () {
-                        alert('Category: ' + this.category + ', value: ' + this.y);
+                    //    alert('Category: ' + this.category + ', value: ' + this.y);
+                        let cornerY = document.getElementById('vidx'),
+                        value = this.category;
+                        cornerY.innerHTML = "Y value: " + value;
+                      
+
                     }
                 }
             }

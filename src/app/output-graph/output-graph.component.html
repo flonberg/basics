@@ -49,6 +49,6 @@
     </mat-select>
 </mat-form-field>
 
-<div id="vidx"  style="display:none">  
-<input id='vidx2'  >
+<div id="vidx"  style="display:block" (touch)="showProcedure(1)">  
+<input id='vidx2' (ngModelChange)="showProcedure(2)" >
 </div>
