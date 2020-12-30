@@ -23,41 +23,38 @@ if (isset($_GET['param']) ){
 $dB = new getDBData($selStr, $handle);
 $i = 0;
 $k = 0;
+$row = array();
 $total = array();        
 $timeVproc = array();                                                           // used to compute Average for PatID Activities
 $numActivities = array();                                                           // used to compute Average for PatID Activities
 while ($assoc = $dB->getAssoc())
 { 
-  fwrite($fp, "\r\n activityiID is ". $assoc['ActivityID'] ." patientID is ". $assoc['PatientID']." starteDateTime is ".$assoc['StartDateTime']->format('Y-m-d') );
+ // fwrite($fp, "\r\n activityiID is ". $assoc['ActivityID'] ." patientID is ". $assoc['PatientID']." starteDateTime is ".$assoc['StartDateTime']->format('Y-m-d') );
     $duration = $assoc['StartDateTime']->diff($assoc['EndDateTime']);               // the DURATION
     $ssss = print_r($assoc, true);                              // DO NOT REMOVE -- the next line does NOT work without this???
     $row['Rdata'][$i][0] =strtotime($assoc['StartDateTime']->date) * 1000;            // StartDateTime --  HighCharts uses milliSec since Epoch
     $row['Rdata'][$i][1] = $duration->i;      
     $row['Rdata'][$i++][2] = $assoc['ProcedureCode'];                                // add ProcedureCode
-    $backNHours = goBackHrs($assoc['StartDateTime']->date, 15 );                // SOAP correct the time
-    $timeIndex =  strtotime($backNHours);
-    $timeVproc[$timeIndex] =  $assoc['ProcedureCode'];                               // the Diff in Minutes
+    $backNHours = goBackHrs($assoc['StartDateTime']->date, 15 );                    //  correct the time, time in Platform is11 hours later
+    $timeIndex =  strtotime($backNHours);                                           
+                             // 
+
     if(preg_match('/(^[0-9]{3}-[0-9]{2}-[0-9]{2}$)/i', trim($assoc['PatientID'])))    // match 'nnn-nn-nn' to select patients
     {
-
-     
-        if (!isset( $row['Patients'][$assoc['PatientID']]  )){                      // if datum for this patients NOT exist
-
-          $row['Patients'][$assoc['PatientID']][0] = array(strtotime($backNHours) * 1000, $duration->i, $assoc['ProcedureCode']);    // create it    
-//          $row['Patients'][$assoc['PatientID']][0] = array(strtotime($backNHours) * 1000, $duration->i);    // create it    
-          $total[$assoc['PatientID']] = $duration->i;
-          $numActivities[$assoc['PatientID']] = 1;
-        }
-        else   
-        {     
-                                                                  // if it DOES 
-           $tmp =  array(strtotime($backNHours) * 1000, $duration->i, $assoc['ProcedureCode']);    // make  the datum 
-//           $tmp =  array(strtotime($backNHours) * 1000, $duration->i);    // make  the datum 
-    //        $tmp =  array(strtotime($assoc['StartDateTime']->date) * 1000, $duration->i);    // make  the datum 
-            array_push($row['Patients'][$assoc['PatientID']], $tmp);                    // push the datum into the array. 
-            $total[$assoc['PatientID']] += $duration->i;    
-            $numActivities[$assoc['PatientID']]++;
-            }  
+      fwrite($fp, "\r\n $timeIndex --- ". $assoc['ProcedureCode'] );
+      $timeVproc[$timeIndex] =  $assoc['ProcedureCode'];  
+      if (!isset( $row['Patients'][$assoc['PatientID']]  )){                      // if datum for this patients NOT exist
+        $row['Patients'][$assoc['PatientID']][0] = array(strtotime($backNHours) * 1000, $duration->i, $assoc['ProcedureCode']);    // create it    
+        $total[$assoc['PatientID']] = $duration->i;
+        $numActivities[$assoc['PatientID']] = 1;
+      }
+      else                                                            // if it DOES 
+      {     
+          $tmp =  array(strtotime($backNHours) * 1000, $duration->i, $assoc['ProcedureCode']);    // make  the datum 
+          array_push($row['Patients'][$assoc['PatientID']], $tmp);                    // push the datum into the array. 
+          $total[$assoc['PatientID']] += $duration->i;    
+          $numActivities[$assoc['PatientID']]++;
+          }  
       $row['categoriesByKey'][$assoc['PatientID']] = $assoc['PatientID'];                                   // for use as X-axis labels                
       $k++;
     }

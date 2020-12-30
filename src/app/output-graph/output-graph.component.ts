@@ -33,10 +33,9 @@ export class OutputGraphComponent implements OnInit {
   binSizeCSelected = "5"
   dateRange = "Last_30_Days";
   ngOnInit() {
-    this .procedureCode = 121726;
+   this .procedureCode = 121733;
     this .getData();                                                // set for 'Treatment'
     this .detectDivChanges();
-
 
   }
   modalString1 = ''; modalString2 = '';
@@ -95,7 +94,6 @@ export class OutputGraphComponent implements OnInit {
                 events: {
                     click: function () {
                         let cornerY = document.getElementById('vidx'),
-                       // str = str.slice(0, -1); 
                         value = this .category;
                         cornerY.innerHTML = "Y value: " + value;
                     }
@@ -122,8 +120,9 @@ export class OutputGraphComponent implements OnInit {
       },
       tooltip: {
         formatter: function (){
+
           return  Highcharts.dateFormat('%e %b ', this .x) + " duration:" + this .y + " minutes. "  ;
-        }.bind(this)
+        }
       },
       series: [{}]                                // data is loaded in the binData() function
     }
@@ -239,6 +238,7 @@ export class OutputGraphComponent implements OnInit {
       );
     }
   setData(inpData){
+    this .data = Array();
     this .data = inpData;
     console.log("190 this.data is %o", this .data);
   }
@@ -279,6 +279,8 @@ export class OutputGraphComponent implements OnInit {
     }
     this .binByProceedureCode();
     ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
+    var i = 0;
+    this .options.series = Array();
     for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
             this .options.series[i] = [];
             this .options.series[i]['name'] = key;
@@ -309,11 +311,11 @@ this .procStr = {
   '99I003':
   {'Description':'RT Position Acquisition single plane CBCT', 'code':'99I003`', 'n':0 },
   }
-  var count = 0;
-  for (let entry of this .data.Rdata){
-    if (count++ == 0)
-      console.log("297  " + entry)
-  }
+    var count = 0;
+    for (let entry of this .data.Rdata){
+      if (count++ == 0)
+        console.log("297  " + entry)
+    }
 
   }                                                                      // end of binData function
 
