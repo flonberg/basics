@@ -35,8 +35,7 @@ export class OutputGraphComponent implements OnInit {
   ngOnInit() {
     this .procedureCode = 121726;
     this .getData();                                                // set for 'Treatment'
-
-    this.detectDivChanges();
+    this .detectDivChanges();
 
 
   }
@@ -48,7 +47,13 @@ export class OutputGraphComponent implements OnInit {
     const div = document.getElementById('vidx');
     const config = { attributes: true, childList: true, subtree: true };
     const observer = new MutationObserver((mutation) => {
-      console.log("div style changed");
+    var index = document.getElementById("vidx").textContent;
+    if (index.length > 3){
+      index = index.slice(0, -3);
+      var modal = document.getElementById('myModal');
+      modal.style.display = "block";
+    }
+      console.log("div style changed" + index + "procCode %o", this.data.PCode['1608546162'])
     })
     observer.observe(div, config);
   }
@@ -56,12 +61,8 @@ export class OutputGraphComponent implements OnInit {
     var modal = document.getElementById('myModal');
     modal.style.display = "block";
     var av = this .data.average[ev.target.userOptions.name];
-    this .modalString1 =this .data.averageByKey[ev.target.userOptions.name] + " min";
-    this .modalString2 =this .data.sigma[ev.target.userOptions.name] + " min";
-
-    ;
-    console.log("44 data %o", this .data.average.index)
-    console.log("3333 %o", ev.target.userOptions.name);
+    this .modalString1 = "Average = " + this .data.averageByKey[ev.target.userOptions.name] + " min";
+    this .modalString2 ="Standard Deviation = " + this .data.sigma[ev.target.userOptions.name] + " min";
   }
   closeModal(){
     var modal = document.getElementById('myModal');
@@ -87,21 +88,16 @@ export class OutputGraphComponent implements OnInit {
             events: {
                 legendItemClick: function (ev) {
                     this .showAvStdDev(ev); // this function is known because of the 'bind(this )'
-                    let cornerY = document.getElementById('vidx2'),
-                    value = "test"
-                    cornerY.innerHTML = "Y value: " + value
                     return false ;
                   }.bind(this )    // !!!!!!allows acces to outside functions. 
               },
               point: {
                 events: {
                     click: function () {
-                    //    alert('Category: ' + this.category + ', value: ' + this.y);
                         let cornerY = document.getElementById('vidx'),
-                        value = this.category;
+                       // str = str.slice(0, -1); 
+                        value = this .category;
                         cornerY.innerHTML = "Y value: " + value;
-                      
-
                     }
                 }
             }

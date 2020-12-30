@@ -34,12 +34,15 @@ while ($assoc = $dB->getAssoc())
     $row['Rdata'][$i][0] =strtotime($assoc['StartDateTime']->date) * 1000;            // StartDateTime --  HighCharts uses milliSec since Epoch
     $row['Rdata'][$i][1] = $duration->i;      
     $row['Rdata'][$i++][2] = $assoc['ProcedureCode'];                                // add ProcedureCode
-                                       // the Diff in Minutes
+    $backNHours = goBackHrs($assoc['StartDateTime']->date, 15 );                // SOAP correct the time
+    $timeIndex =  strtotime($backNHours);
+    $timeVproc[$timeIndex] =  $assoc['ProcedureCode'];                               // the Diff in Minutes
     if(preg_match('/(^[0-9]{3}-[0-9]{2}-[0-9]{2}$)/i', trim($assoc['PatientID'])))    // match 'nnn-nn-nn' to select patients
     {
-        $backNHours = goBackHrs($assoc['StartDateTime']->date, 15 );                // SOAP correct the time
+
+     
         if (!isset( $row['Patients'][$assoc['PatientID']]  )){                      // if datum for this patients NOT exist
-          $timeVproc[strtotime($backNHours) * 1000] =  $assoc['ProcedureCode'];
+
           $row['Patients'][$assoc['PatientID']][0] = array(strtotime($backNHours) * 1000, $duration->i, $assoc['ProcedureCode']);    // create it    
 //          $row['Patients'][$assoc['PatientID']][0] = array(strtotime($backNHours) * 1000, $duration->i);    // create it    
           $total[$assoc['PatientID']] = $duration->i;
@@ -47,7 +50,7 @@ while ($assoc = $dB->getAssoc())
         }
         else   
         {     
-          $timeVproc[strtotime($backNHours) * 1000] =  $assoc['ProcedureCode'];//                                                                    // if it DOES 
+                                                                  // if it DOES 
            $tmp =  array(strtotime($backNHours) * 1000, $duration->i, $assoc['ProcedureCode']);    // make  the datum 
 //           $tmp =  array(strtotime($backNHours) * 1000, $duration->i);    // make  the datum 
     //        $tmp =  array(strtotime($assoc['StartDateTime']->date) * 1000, $duration->i);    // make  the datum 

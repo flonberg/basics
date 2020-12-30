@@ -28,15 +28,21 @@
         </mat-form-field>
         <!-- The Modal -->
 <div id="myModal" class="modal" (click)='closeModal()'>
-
     <!-- Modal content -->
     <div class="modal-content">
       <span class="close">&times;</span>
-            <pre>Average = {{ modalString1 }}</pre> 
-            <pre>Std. Dev. = {{ modalString2 }}</pre> 
+            <pre> {{ modalString1 }}</pre> 
+            <pre> {{ modalString2 }}</pre> 
     </div>
-  
-  </div>
+</div>
+<div id="procModal" class="modal" (click)='closeModal()'>
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close">&times;</span>
+            <pre>Average = </pre> 
+            <pre>Std. Dev. =</pre> 
+    </div>
+</div>
 <div id='container2' style='height: 300px;'> </div>
 
 <mat-form-field  style='width:120px;' appearance='fill'>
@@ -49,6 +55,6 @@
     </mat-select>
 </mat-form-field>
 
-<div id="vidx"  style="display:block" (touch)="showProcedure(1)">  
-<input id='vidx2' (ngModelChange)="showProcedure(2)" >
+<div id="vidx"  style="display:block" >  
+<input id='vidx2' >
 </div>
