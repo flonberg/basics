@@ -5,6 +5,7 @@ import { throwMatDialogContentAlreadyAttachedError } from '@angular/material';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { keyframes } from '@angular/animations';
 import { ActivatedRoute } from '@angular/router';
+import * as moment from 'moment';
 
 declare var require: any;
 let Boost = require('highcharts/modules/boost');
@@ -95,7 +96,7 @@ export class OutputGraphComponent implements OnInit {
                     return false ;
                   }.bind(this )    // !!!!!!allows acces to outside functions. 
               },
-              point: {
+             /* point: {
                 events: {
                     click: function () {
                         let cornerY = document.getElementById('vidx'),
@@ -103,7 +104,7 @@ export class OutputGraphComponent implements OnInit {
                         cornerY.innerHTML = "Y value: " + value;
                     }
                 }
-            }
+              } */
         }
       },
       credits: {
@@ -125,7 +126,6 @@ export class OutputGraphComponent implements OnInit {
       },
       tooltip: {
         formatter: function (){
-
           return  Highcharts.dateFormat('%e %b ', this .x) + " duration:" + this .y + " minutes. "  ;
         }
       },
@@ -211,7 +211,15 @@ export class OutputGraphComponent implements OnInit {
   }
   setDateRange(str){
     this .dateRange = str;
-    this .getData(str);
+    let start: string = '';
+    let  today:string = moment().format('YYYY-MM-DD');
+    if (str =='last20')
+      start = moment().subtract(20, 'd').format('YYYY-MM-DD');;
+    if (str =='last30')
+      start = moment().subtract(30, 'd').format('YYYY-MM-DD');;
+    if (str =='Epoch')
+      start = '2020-01-02';
+    this .getData(start, today);
   }
    ////////////  make the bins and bin the data       \\\\\\\\\\\\\\
   setBinSize(n){
@@ -222,14 +230,19 @@ export class OutputGraphComponent implements OnInit {
     Highcharts.chart('container2', this .options2);                       // redo the Graph with new binSize
   }
   ////////   get the data from BB or 242   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-  getData(dateRange?){
+  getData(start?, end?){
+    let locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');;
+    if (start)
+      locStart = start;
+    console.log("236  locStart %o", locStart);
     this .genSvce.setPlatform();                                            // switch Dev = BB or Prod = 242
     var selStr = "SELECT top(1000) StartDateTime, EndDateTime, ProcedureCode, PatientID, SessionID, ActivityID FROM ProtomTiming ";
     if (this .procedureCode > 3)                                          // select particular ProcedureCode
-     selStr += " WHERE ProcedureCode = '" + this .procedureCode + "' AND StartDateTime > '2020-11-15' ORDER By ActivityID desc";
+     selStr += " WHERE ProcedureCode = '" + this .procedureCode + "' AND StartDateTime >= '" + locStart + "' ORDER By ActivityID desc";
     else                                                                  // take ALL ProcedureCodes
-      selStr += " WHERE  StartDateTime > '2020-11-15' ORDER By ActivityID desc";
-    this .genSvce.getWithSelString(selStr, dateRange  ).subscribe (
+      selStr += " WHERE  StartDateTime > '2020-08-01' ORDER By ActivityID desc";
+ console.log("241 slestr " + selStr);     
+    this .genSvce.getWithSelString(selStr ).subscribe (
         (res) => {
           this .setData(res);                                               // store the data
           this .makeBins();                                                 // make Histogram bins
