@@ -33,7 +33,7 @@ export class OutputGraphComponent implements OnInit {
   binSizeCSelected = "5"
   dateRange = "Last_30_Days";
   ngOnInit() {
-   this .procedureCode = 121733;
+   this .procedureCode = 121726;
     this .getData();                                                // set for 'Treatment'
     this .detectDivChanges();
 
@@ -42,17 +42,18 @@ export class OutputGraphComponent implements OnInit {
   showProcedure(ev){
     console.log('41' + ev);
   }
-  detectDivChanges() {
+  detectDivChanges() {                                                  // detects that user has clicked on a Point on the graph changed
     const div = document.getElementById('vidx');
     const config = { attributes: true, childList: true, subtree: true };
     const observer = new MutationObserver((mutation) => {
     var index = document.getElementById("vidx").textContent;
     if (index.length > 3){
       index = index.slice(0, -3);
-      var modal = document.getElementById('myModal');
+      index = index.slice(9);
+      var modal = document.getElementById('detailModal');
       modal.style.display = "block";
     }
-      console.log("div style changed" + index + "procCode %o", this.data.PCode['1608546162'])
+      console.log("div style changed" + index + "procCode %o", this .data.PCode[index])
     })
     observer.observe(div, config);
   }
@@ -65,6 +66,10 @@ export class OutputGraphComponent implements OnInit {
   }
   closeModal(){
     var modal = document.getElementById('myModal');
+    modal.style.display = "none";
+  }
+  closeDetailModal(){
+    var modal = document.getElementById('detailModal');
     modal.style.display = "none";
   }
   //////////   set parameters for upper graph  \\\\\\\\\\\\\\
@@ -280,7 +285,7 @@ export class OutputGraphComponent implements OnInit {
     this .binByProceedureCode();
     ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
     var i = 0;
-    this .options.series = Array();
+    this .options.series = Array();                                           // clear old data
     for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
             this .options.series[i] = [];
             this .options.series[i]['name'] = key;
@@ -293,29 +298,29 @@ export class OutputGraphComponent implements OnInit {
   }
   binByProceedureCode(){
 /*********   DICOM Procedure codes.  Will drow any Activities with that ProcedureCode in the bin,i.e. increment n   */
-this .procStr = {
-  '121704':
-  {'Description':'RT Position Acquisition single plane kV', 'code':'121704', 'n':0},
-  '121705':
-  {'Description':'RT Position Acquisition dual plane kV', 'code':'121705', 'n':0 },
-  '121707':
-  {'Description':'RT RT Position Acquisition CT kV', 'code':'121707', 'n':0 },
-  '121726':
-  {'Description':'RT Treatment with Internal Verification', 'code':'121726', 'n':0 },
-  '121787':
-  {'Description':'RT Patient Position Registration 2D on 3D Reference', 'code':'121787', 'n':0 },
-  '99I001':
-  {'Description':'Patient Position Acquisition Fluoroscopy 2DkV', 'code':'99I001`', 'n':0 },
-  '99I002':
-  {'Description':'Patient Position Acquisition Fluoroscopy CBCT ', 'code':'99I002`', 'n':0 },
-  '99I003':
-  {'Description':'RT Position Acquisition single plane CBCT', 'code':'99I003`', 'n':0 },
-  }
-    var count = 0;
-    for (let entry of this .data.Rdata){
-      if (count++ == 0)
-        console.log("297  " + entry)
-    }
+    this .procStr = {
+      '121704':
+      {'Description':'RT Position Acquisition single plane kV', 'code':'121704', 'n':0},
+      '121705':
+      {'Description':'RT Position Acquisition dual plane kV', 'code':'121705', 'n':0 },
+      '121707':
+      {'Description':'RT RT Position Acquisition CT kV', 'code':'121707', 'n':0 },
+      '121726':
+      {'Description':'RT Treatment with Internal Verification', 'code':'121726', 'n':0 },
+      '121787':
+      {'Description':'RT Patient Position Registration 2D on 3D Reference', 'code':'121787', 'n':0 },
+      '99I001':
+      {'Description':'Patient Position Acquisition Fluoroscopy 2DkV', 'code':'99I001`', 'n':0 },
+      '99I002':
+      {'Description':'Patient Position Acquisition Fluoroscopy CBCT ', 'code':'99I002`', 'n':0 },
+      '99I003':
+      {'Description':'RT Position Acquisition single plane CBCT', 'code':'99I003`', 'n':0 },
+      }
+        var count = 0;
+        for (let entry of this .data.Rdata){
+          if (count++ == 0)
+            console.log("297  " + entry)
+        }
 
   }                                                                      // end of binData function
 

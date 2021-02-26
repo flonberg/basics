@@ -85,6 +85,7 @@ function connectToDataBase(){
   }else{
     $offSet = 4;                                                 // set for WhiteBoard dataBase
   }
+  $offSet = 0;                // data is presently ONLY on BB
  // if ($param >= 0)                                              // Set which data
   //  $offSet = $param;
  // fwrite($fp, "\r\n offset is $offSet");

@@ -36,7 +36,7 @@ while ($assoc = $dB->getAssoc())
     $row['Rdata'][$i][1] = $duration->i;      
     $row['Rdata'][$i++][2] = $assoc['ProcedureCode'];                                // add ProcedureCode
     $backNHours = goBackHrs($assoc['StartDateTime']->date, 15 );                    //  correct the time, time in Platform is11 hours later
-    $timeIndex =  strtotime($backNHours);                                           
+    $timeIndex =  strval(strtotime($backNHours));                                           
                              // 
 
     if(preg_match('/(^[0-9]{3}-[0-9]{2}-[0-9]{2}$)/i', trim($assoc['PatientID'])))    // match 'nnn-nn-nn' to select patients

@@ -4,6 +4,7 @@
 
 require_once('./ESButils.inc');
 require_once('H:\inetpub\lib\ESB\_dev_\ESBRestProto.inc');
+require_once('H:\inetpub\lib\switchConnect.inc');                           // has routine to obtain handle for BB or 242
 //require_once('./ESBRestProto.inc');
 require_once('H:\inetpub\lib\phpDB.inc');       
 //require_once('./ESBRestSched.inc');
@@ -12,17 +13,17 @@ require_once('H:\inetpub\lib\phpDB.inc');
     $dates = makeDates();
 echo "<br> 11 <br> "; 
     $fp = fopen("gts.txt", "w+");
-	$tslt = new ESBRestTimeslot();                                                                          // instantiate class for getting multiple timeSlots. 
+    $handle = connectToDB(1);                                               // uses local connectToDB to switch between BB (1) and 242 (0)
+    var_dump($handle);
+    $tslt = new ESBRestTimeslot();                                                                          // instantiate class for getting multiple timeSlots. 
 	$getATS = new ESBRestATimeslot();                                                                       // instantiate class for getting single timeslot. 
 	$pattern = "/\d{3}-\d{2}-\d{2}/";                                                                       // pattenr for getting patientIDs
-
-
 	echo "<br> 21 <br>"; 
 	$dates = makeDates();
 
     if (isset($_GET['test'])){
-        $dates['start'] =  "2020-12-18T23:00:00.000Z";
-        $dates['end'] =  "2020-12-21T23:00:00.000Z";
+        $dates['start'] =  "2020-12-27T23:00:00.000Z";
+        $dates['end'] =  "2020-12-31T23:00:00.000Z";
 	}
 
     print_r($dates);
@@ -33,7 +34,7 @@ echo "<br> 11 <br> ";
 		if (preg_match($pattern,$val['PatientID'],$dummy) && strcmp($val['SessionState'], 'ENDED') == 0)	// find Patient and ENDED timeSlots
 		{	
 
-        //  echo "<br> StartDateTimd is ". $val['StartDateTime']." PatientID is ". $val['PatientID'] ." SessionID is ". $val['SessionID'] ." timeslotID is ". $val['TimeslotID'];
+     echo "<br> StartDateTimd is ". $val['StartDateTime']." PatientID is ". $val['PatientID'] ." SessionID is ". $val['SessionID'] ." timeslotID is ". $val['TimeslotID'];
 			$patId = $val['PatientID'];
 			/********** go thru to get the Radiations  *///////////////////////////////
                 $timeSlot = $getATS->ATimeslotRestRequest( $val['TimeslotID'],$val['SessionID']);	        // get THE timeSlot
@@ -51,14 +52,16 @@ echo "<br> 11 <br> ";
 					}
                 }
                 $ct = 0; 
-				foreach ($timeSlot['Session']['Operations'] as $key=>$val){				// 
+                echo "<br> 54 ". $timeSlot['Session']['SessionID'];
+                updateSessionState($timeSlot['Session']['State'], $timeSlot['Session']['SessionID']);
+                ////////////    Step thru the Session.Operations                    ////////////////////
+				foreach ($timeSlot['Session']['Operations'] as $key=>$val){				                // 
 				{     
 					foreach ($val['Activities'] as $kkey=>$vval){
-                        echo "<br> Description is ". $vval['Description']  ." procedureCode is ". $vval['ProcedureCode'];
+             //           echo "<br> Description is ". $vval['Description']  ." procedureCode is ". $vval['ProcedureCode'];
                         if ($ct++ == 10000){    
                             echo "<pre>"; print_r($vval['OutputObjects']); echo "</pre>";
                         }
-                        echo "<br> studyDatetime is ". $vval['OutputObjects']['StudytDateTIme'];
 				//		if (strpos($vval['Description'], 'Treatment') > 0 || strpos($vval['Description'], 'VS') > 0)
 						{
 							$tsData['Activities'][$actIDX] = $vval['ActivityID'];		                    // record list of activities pass to ProtomTimingUpdate.php
@@ -83,15 +86,31 @@ echo "<br> 11 <br> ";
                 $output = curl_exec($ch);                                                               // do the cURL
 		var_dump($output);
             //    $dataW = json_decode($output, true);                                                    // decode json string to array
-
+    exit();
+function updateSessionState($state, $SessionID){
+    global $handle, $fp;
+    $selStr = "SELECT SessionID FROM GB_Sessions WHERE SessionID ='$SessionID'";
+    echo "<br> 92 $selStr";
+    //fwrite($fp, "\r\n $selStr \r\n");
+    $isThere= sqlsrv_query("SELECT SessionID FROM GB_Sessions WHERE SessionID ='$SessionID", $handle);
+    if ($isThere == FALSE){
+        $insStr = "INSERT INTO GB_Sessions (SessionID, SessionState) values ('$SessionID', '$state')";
+        echo "<br> $insStr <br>";
+        $res = sqlsrv_query($handle, $inStr);
+        var_dump($res);
+    }
+}    
 function makeDates(){
-    $str1 =  date("Y-m-d", strtotime( '-2 days' ) ); // 2018-07-18 07:02:43
+//    $str1 =  date("Y-m-d", strtotime( '-11 days' ) ); // 2018-07-18 07:02:43
+    $str1 =  date("Y-m-d", strtotime( '-3 days' ) ); // 2018-07-18 07:02:43
     $str2 = "T23:00:00.000Z";
     $ret['start']=  "$str1"."$str2";
     $str1 =  date("Y-m-d", strtotime( '+1 days' ) ); // 2018-07-18 07:02:43
+   // $str1 =  date("Y-m-d", strtotime( '-7 days' ) ); // 2018-07-18 07:02:43
     $ret['end']=  "$str1"."$str2";
     return $ret;
 }        
+
 
 class ESBRestFL
 {
