@@ -33,11 +33,12 @@ export class OutputGraphComponent implements OnInit {
   treatSelected = "Treatment";
   binSizeCSelected = "5"
   dateRange = "Last_30_Days";
+  locStart: string;
   ngOnInit() {
    this .procedureCode = 121726;
+   this .locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');
     this .getData();                                                // set for 'Treatment'
-    this .detectDivChanges();
-
+ //   this .detectDivChanges();
   }
   modalString1 = ''; modalString2 = '';
   showProcedure(ev){
@@ -94,7 +95,7 @@ export class OutputGraphComponent implements OnInit {
                 legendItemClick: function (ev) {
                     this .showAvStdDev(ev); // this function is known because of the 'bind(this )'
                     return false ;
-                  }.bind(this )    // !!!!!!allows acces to outside functions. 
+                  }.bind(this )    // !!!!!!allows acces to outside functions.
               },
              /* point: {
                 events: {
@@ -214,18 +215,18 @@ export class OutputGraphComponent implements OnInit {
     let start: string = '';
     let  today:string = moment().format('YYYY-MM-DD');
     if (str =='last20')
-      start = moment().subtract(20, 'd').format('YYYY-MM-DD');;
+      this .locStart = moment().subtract(20, 'd').format('YYYY-MM-DD');
     if (str =='last30')
-      start = moment().subtract(30, 'd').format('YYYY-MM-DD');;
+      this .locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');
     if (str =='Epoch')
-      start = '2020-01-02';
-    this .getData(start, today);
+      this .locStart = '2020-01-02';
+    this .getData();
   }
    ////////////  make the bins and bin the data       \\\\\\\\\\\\\\
   setBinSize(n){
     this .binSizeC = n;
     this .makeBins();                                                     // make the bins
-    this .makeProcedureBins()                                             // make the bins for the Procedures 
+    this .makeProcedureBins()                                             // make the bins for the Procedures
     this .binData();                                                      // bin the data
     Highcharts.chart('container2', this .options2);                       // redo the Graph with new binSize
   }
@@ -238,17 +239,18 @@ export class OutputGraphComponent implements OnInit {
     this .genSvce.setPlatform();                                            // switch Dev = BB or Prod = 242
     var selStr = "SELECT top(1000) StartDateTime, EndDateTime, ProcedureCode, PatientID, SessionID, ActivityID FROM ProtomTiming ";
     if (this .procedureCode > 3)                                          // select particular ProcedureCode
-     selStr += " WHERE ProcedureCode = '" + this .procedureCode + "' AND StartDateTime >= '" + locStart + "' ORDER By ActivityID desc";
+     selStr += " WHERE ProcedureCode = '" + this .procedureCode + "' AND StartDateTime >= '" +
+       this .locStart + "' ORDER By ActivityID desc";
     else                                                                  // take ALL ProcedureCodes
       selStr += " WHERE  StartDateTime > '2020-08-01' ORDER By ActivityID desc";
- console.log("241 slestr " + selStr);     
+ console.log("241 slestr " + selStr);
     this .genSvce.getWithSelString(selStr ).subscribe (
         (res) => {
           this .setData(res);                                               // store the data
           this .makeBins();                                                 // make Histogram bins
           this .binData();                                                  // put the data in bins
           Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
-          Highcharts.chart('container2', this .options2);                   // Draw bottom graph Histogram 
+          Highcharts.chart('container2', this .options2);                   // Draw bottom graph Histogram
         },
         err => {
           console.log(err);
@@ -348,7 +350,7 @@ export class OutputGraphComponent implements OnInit {
       this .binsC[i] = [i * this .binSizeC, (i + 1) * this .binSizeC];        // set lower and upper bounds for each bin.
       this .binsC['Label'][i] = i * this .binSizeC + " to " +( i + 1) * this .binSizeC;   // the label for the bin in the graph
       this .binsC[i]['count'] = 0;                                            // make the bin.
-      this .numInBin[i] = 0;                                                  // zero out the count in each bin. 
+      this .numInBin[i] = 0;                                                  // zero out the count in each bin.
     }
    }
                /////////// make a bin forEach Proceedure  \\\\\\\\\\\\\\\\\\\\
@@ -361,7 +363,7 @@ export class OutputGraphComponent implements OnInit {
    setDurationErrorBar(){
   //   this .options.xAxis.categories = ['1', '2', '3', '4'];
      this .options3.xAxis.categories = this .data.categoriesForAv;
-     this .options3.xAxis.labels ={};                                          // don't format as Date. 
+     this .options3.xAxis.labels ={};                                          // don't format as Date.
      this .options3.series =[{
       name: 'Duration',
       color: '#4572A7',
@@ -385,5 +387,5 @@ export class OutputGraphComponent implements OnInit {
       }
       this .options.xAxis['categories'] = null;
       Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
- }  
+ }
 }
