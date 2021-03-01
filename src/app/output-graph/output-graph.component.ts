@@ -7,6 +7,9 @@ import { keyframes } from '@angular/animations';
 import { ActivatedRoute } from '@angular/router';
 import * as moment from 'moment';
 
+import { Inject }  from '@angular/core';
+import { DOCUMENT } from '@angular/common'; 
+
 declare var require: any;
 let Boost = require('highcharts/modules/boost');
 let noData = require('highcharts/modules/no-data-to-display');
@@ -35,7 +38,12 @@ export class OutputGraphComponent implements OnInit {
   dateRange = "Last_30_Days";
   locStart: string;
   setOptions: any;
-
+  constructor(private genSvce: GenService, private route: ActivatedRoute, @Inject(DOCUMENT) document) {
+    this .selected = "Treatment";
+    this .route.queryParams.subscribe(params => {
+      this .param1 = params['param'];
+      });
+  }
   ngOnInit() {
    this .procedureCode = 121726;
    this .setOptions = this .options;
@@ -81,10 +89,10 @@ export class OutputGraphComponent implements OnInit {
     public options: any = {
       chart: {
         type: 'scatter',
-        height: 500
+        height: 400
       },
       title: {
-        text: 'Procedure Duration'
+        text: 'Procedure-Duration'
       },
       click: function (e) {
         console.log(
@@ -100,19 +108,7 @@ export class OutputGraphComponent implements OnInit {
                     return false ;
                   }.bind(this )    // !!!!!!allows acces to outside functions.
               },
-             /* point: {
-                events: {
-                    click: function () {
-                        let cornerY = document.getElementById('vidx'),
-                        value = this .category;
-                        cornerY.innerHTML = "Y value: " + value;
-                    }
-                }
-              } */
         }
-      },
-      credits: {
-        enabled: false
       },
       xAxis: {
         type: 'column',
@@ -135,6 +131,8 @@ export class OutputGraphComponent implements OnInit {
       },
       series: [{}]                                // data is loaded in the binData() function
     }
+
+
     public options3: any =                                  // upper Graph for Average and StdDev
     {
       chart: {
@@ -202,46 +200,17 @@ export class OutputGraphComponent implements OnInit {
 
     param1:string;
     procStr: any
-  constructor(private genSvce: GenService, private route: ActivatedRoute) {
-    this .selected = "Treatment";
-    this .route.queryParams.subscribe(params => {
-      this .param1 = params['param'];
-      });
-  }
-  setDurationErrorBar(){
-    //   this .options.xAxis.categories = ['1', '2', '3', '4'];
-//    this.getData();
-this.getData();
-    this .options3.xAxis.categories = this .data.categoriesForAv;
-       this .options3.xAxis.labels ={};                                          // don't format as Date.
-       this .options3.series =[{
-        name: 'Duration',
-        color: '#4572A7',
-        type: 'column',
-        data: this .data['average']
-    }, {
-        name: 'Duration error',
-        type: 'errorbar',
-        data: this .data['error']
-    }]
-      this .setOptions = this .options3
-      this.getData();
-console.log("228 in By Patient this.data %o", this .data)
-     }
-   setDurationByDate(){
-        ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
-        this.getData();
-        var i = 0;
-        for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
-          this .options.series[i] = [];
-          this .options.series[i]['name'] = key;
-          this .options.series[i]['data'] = this .data['Patients'][key];
-          i++;
-        }
-        this .options.xAxis['categories'] = null;
-        this .setOptions = this .options
 
-   }
+  setDurationErrorBar(){
+    var tst = document.getElementById('container3').style.display = 'block';
+    var tst = document.getElementById('container').style.display = 'none';
+     }
+  setDurationByDate(){
+  var tst = document.getElementById('container3').style.display = 'none';
+  var tst = document.getElementById('container').style.display = 'block';
+    }
+
+
   setProcedureCode(n){
     this .procedureCode = n;
    console.log("212 options %o", this .setOptions)
@@ -290,7 +259,17 @@ console.log("228 in By Patient this.data %o", this .data)
           this .binData();                                                  // put the data in bins
      //    if (this .setOptions){
           Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
-          Highcharts.chart('container3', this .options3);                     // Draw top graph scatter plot
+          this .options3.series =[{
+            name: 'Duration',
+            color: '#4572A7',
+            type: 'column',
+            data: this .data['average']
+        }, {
+            name: 'Duration error',
+            type: 'errorbar',
+            data: this .data['error']
+        }]
+          Highcharts.chart('container3', this .options3);                     // Av Duration Column plot 
      //    }
      //    else 
       //    Highcharts.chart('container', this .options);                     // Draw top graph scatter plot

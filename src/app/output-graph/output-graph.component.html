@@ -1,14 +1,14 @@
 
 <div id='container'></div>
-<div id='container3'></div>
+<div id='container3' style="display:none"></div>
 <div> Procedueres Later than {{ locStart}}</div>
 <div id='control'>
+    
   <mat-form-field  style='width:200px;'  appearance='fill' >
     <mat-label>Plot Type</mat-label>
     <mat-select [(value)] = "typeSelected" id='procType'>
         <mat-option value="Duration by Date"  (click) = 'setDurationByDate()' >Duration by date</mat-option>
         <mat-option value="VSim" (click) = 'setDurationErrorBar()' >Average Duration by PatientId</mat-option>
-
     </mat-select>
 </mat-form-field>
 <mat-form-field  style='width:200px;'  appearance='fill' >
