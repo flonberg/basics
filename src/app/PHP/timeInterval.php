@@ -7,6 +7,10 @@ $fp = fopen("./log/timeInterval.txt", "w+");
 $nowDT = new DateTime();
 $now = $nowDT->format("m-d-Y H:i:s");
 fwrite($fp, "\r\n ". $now);
+$dp = fopen("./log/DBGtimeInterval.txt", "w+");
+$nowDT = new DateTime();
+$now = $nowDT->format("m-d-Y H:i:s");
+fwrite($fp, "\r\n ". $now);
 //fwrite($fp, "\r\n ". $_GET['selStr']);
 $selStr = $_GET['selStr'];
 $getStruct = print_r($_GET, true); fwrite($fp, "\r\n $getStruct"); 
@@ -59,6 +63,7 @@ while ($assoc = $dB->getAssoc())
       $k++;
     }
 }
+$dbg = print_r($row['Patients'], true); fwrite($dp, $dbg);
 /////////  calculate the Average forEach Patient \\\\\\\\\\\\\\\\\\\
 $row['averageByKey'] = array();
 $row['average'] = array();
@@ -77,7 +82,7 @@ foreach ($row['categoriesByKey'] as $key => $val)
 $i = 0; $aveKey = 0;
 $row['error'] = array();
 foreach ($row['Patients'] as $key=>$val ){
-  fwrite($fp, "\r\n key is $key ");
+  fwrite($fp, "\r\n 80  key is $key ");
  // $st = print_r($val, true); fwrite($fp, " st is ". $st);
   $tst = 0; $i = 0;
   foreach ($val as $kkey=>$vval){

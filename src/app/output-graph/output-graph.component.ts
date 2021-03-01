@@ -34,10 +34,13 @@ export class OutputGraphComponent implements OnInit {
   binSizeCSelected = "5"
   dateRange = "Last_30_Days";
   locStart: string;
+  setOptions: any;
+
   ngOnInit() {
    this .procedureCode = 121726;
+   this .setOptions = this .options;
    this .locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');
-    this .getData();                                                // set for 'Treatment'
+   this.getData()                                 // set for 'Treatment'
  //   this .detectDivChanges();
   }
   modalString1 = ''; modalString2 = '';
@@ -132,6 +135,17 @@ export class OutputGraphComponent implements OnInit {
       },
       series: [{}]                                // data is loaded in the binData() function
     }
+    public options3: any =                                  // upper Graph for Average and StdDev
+    {
+      chart: {
+        zoomType: 'xy'
+      },
+      title: {
+          text: 'Patient Duration Average and Standard Deviation'
+      },
+      xAxis: {},
+      series: []
+    }
     public options2: any =
     {
       chart: {
@@ -178,26 +192,14 @@ export class OutputGraphComponent implements OnInit {
       credits: {
         enabled: false
       },
-
       tooltip: {
         formatter: function (){
           return   this .y + " Plans. "  ;
         }
       },
-        series: []
+      series: []
     }
-    public options3: any =
-    {
-      chart: {
-        zoomType: 'xy'
-      },
-      title: {
-          text: 'Patient Duration Average and Standard Deviation'
-      },
-      xAxis: {}
 
-
-    }
     param1:string;
     procStr: any
   constructor(private genSvce: GenService, private route: ActivatedRoute) {
@@ -206,8 +208,43 @@ export class OutputGraphComponent implements OnInit {
       this .param1 = params['param'];
       });
   }
+  setDurationErrorBar(){
+    //   this .options.xAxis.categories = ['1', '2', '3', '4'];
+//    this.getData();
+this.getData();
+    this .options3.xAxis.categories = this .data.categoriesForAv;
+       this .options3.xAxis.labels ={};                                          // don't format as Date.
+       this .options3.series =[{
+        name: 'Duration',
+        color: '#4572A7',
+        type: 'column',
+        data: this .data['average']
+    }, {
+        name: 'Duration error',
+        type: 'errorbar',
+        data: this .data['error']
+    }]
+      this .setOptions = this .options3
+      this.getData();
+console.log("228 in By Patient this.data %o", this .data)
+     }
+   setDurationByDate(){
+        ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
+        this.getData();
+        var i = 0;
+        for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
+          this .options.series[i] = [];
+          this .options.series[i]['name'] = key;
+          this .options.series[i]['data'] = this .data['Patients'][key];
+          i++;
+        }
+        this .options.xAxis['categories'] = null;
+        this .setOptions = this .options
+
+   }
   setProcedureCode(n){
     this .procedureCode = n;
+   console.log("212 options %o", this .setOptions)
     this .getData()
   }
   setDateRange(str){
@@ -215,12 +252,13 @@ export class OutputGraphComponent implements OnInit {
     let start: string = '';
     let  today:string = moment().format('YYYY-MM-DD');
     if (str =='last20')
-      this .locStart = moment().subtract(20, 'd').format('YYYY-MM-DD');
+      start = moment().subtract(20, 'd').format('YYYY-MM-DD');
     if (str =='last30')
-      this .locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');
+      start = moment().subtract(30, 'd').format('YYYY-MM-DD');
     if (str =='Epoch')
-      this .locStart = '2020-01-02';
-    this .getData();
+     start = '2020-01-02';
+    this .getData(start);
+   // this .setDurationErrorBar()
   }
    ////////////  make the bins and bin the data       \\\\\\\\\\\\\\
   setBinSize(n){
@@ -240,17 +278,25 @@ export class OutputGraphComponent implements OnInit {
     var selStr = "SELECT top(1000) StartDateTime, EndDateTime, ProcedureCode, PatientID, SessionID, ActivityID FROM ProtomTiming ";
     if (this .procedureCode > 3)                                          // select particular ProcedureCode
      selStr += " WHERE ProcedureCode = '" + this .procedureCode + "' AND StartDateTime >= '" +
-       this .locStart + "' ORDER By ActivityID desc";
+       locStart + "' ORDER By ActivityID desc";
     else                                                                  // take ALL ProcedureCodes
       selStr += " WHERE  StartDateTime > '2020-08-01' ORDER By ActivityID desc";
  console.log("241 slestr " + selStr);
+ console.log("280 this.options is %o", this.setOptions);
     this .genSvce.getWithSelString(selStr ).subscribe (
         (res) => {
           this .setData(res);                                               // store the data
           this .makeBins();                                                 // make Histogram bins
           this .binData();                                                  // put the data in bins
+     //    if (this .setOptions){
           Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
-          Highcharts.chart('container2', this .options2);                   // Draw bottom graph Histogram
+          Highcharts.chart('container3', this .options3);                     // Draw top graph scatter plot
+     //    }
+     //    else 
+      //    Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
+
+        Highcharts.chart('container2', this .options2);                   // Draw bottom graph Histogram
+         
         },
         err => {
           console.log(err);
@@ -360,32 +406,5 @@ export class OutputGraphComponent implements OnInit {
     this .procBins = [];
     }
 
-   setDurationErrorBar(){
-  //   this .options.xAxis.categories = ['1', '2', '3', '4'];
-     this .options3.xAxis.categories = this .data.categoriesForAv;
-     this .options3.xAxis.labels ={};                                          // don't format as Date.
-     this .options3.series =[{
-      name: 'Duration',
-      color: '#4572A7',
-      type: 'column',
-      data: this .data['average']
-  }, {
-      name: 'Duration error',
-      type: 'errorbar',
-      data: this .data['error']
-  }]
-     Highcharts.chart('container', this .options3);                     // Draw top graph scatter plot
-   }
- setDurationByDate(){
-      ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
-      var i = 0;
-      for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
-        this .options.series[i] = [];
-        this .options.series[i]['name'] = key;
-        this .options.series[i]['data'] = this .data['Patients'][key];
-        i++;
-      }
-      this .options.xAxis['categories'] = null;
-      Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
- }
+
 }
