@@ -1,7 +1,7 @@
 
 <div id='container'></div>
 <div id='container3' style="display:none"></div>
-<div> Procedueres Later than {{ locStart}}</div>
+
 <div id='control'>
     
   <mat-form-field  style='width:200px;'  appearance='fill' >
@@ -22,10 +22,10 @@
     </mat-form-field>
     <mat-form-field  style='width:200px;'  appearance='fill' >
         <mat-label>Time Range</mat-label>
-        <mat-select id='dateRange'>
+        <mat-select [(value)]= "dateRange" id='dateRangeID' > 
             <mat-option value="Last_30_Days"  (click) = "setDateRange('last30')" >Last 30 Days </mat-option>
-            <mat-option value="Epoch" (click) ="setDateRange('last20')" >Last 20 Days</mat-option>
-            <mat-option value="Current_Month" (click) = "setDateRange('Epoch')">Epoch</mat-option>
+            <mat-option value="Last_20_Days" (click) ="setDateRange('last20')" >Last 20 Days</mat-option>
+            <mat-option value="Epoch" (click) = "setDateRange('Epoch')">Epoch</mat-option>
         </mat-select>
         </mat-form-field>
         <!-- The Modal -->

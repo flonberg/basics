@@ -48,7 +48,7 @@ export class OutputGraphComponent implements OnInit {
    this .procedureCode = 121726;
    this .setOptions = this .options;
    this .locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');
-   this.getData()                                 // set for 'Treatment'
+   this .getData()                                 // set for 'Treatment'
  //   this .detectDivChanges();
   }
   modalString1 = ''; modalString2 = '';
@@ -85,7 +85,7 @@ export class OutputGraphComponent implements OnInit {
     var modal = document.getElementById('detailModal');
     modal.style.display = "none";
   }
-  //////////   set parameters for upper graph  \\\\\\\\\\\\\\
+  //////////   set parameters for Duration by Procedure graph  \\\\\\\\\\\\\\
     public options: any = {
       chart: {
         type: 'scatter',
@@ -111,7 +111,7 @@ export class OutputGraphComponent implements OnInit {
         }
       },
       xAxis: {
-        type: 'column',
+       // type: 'column',
         labels: {
           formatter: function () {
             return Highcharts.dateFormat('%e %b %y', this .value);
@@ -133,17 +133,21 @@ export class OutputGraphComponent implements OnInit {
     }
 
 
-    public options3: any =                                  // upper Graph for Average and StdDev
-    {
+    public options3: any =     {                             // upper Graph for Average and StdDev
       chart: {
         zoomType: 'xy'
       },
       title: {
           text: 'Patient Duration Average and Standard Deviation'
       },
-      xAxis: {},
+      xAxis: {
+  
+      },
       series: []
     }
+    /*******
+     *  bottom graph histogream by duration. 
+     */
     public options2: any =
     {
       chart: {
@@ -155,7 +159,7 @@ export class OutputGraphComponent implements OnInit {
       },
       xAxis: {
         crosshair: true,
-        format: "test"
+        format: "test",
         },
       yAxis: {
         min: 0,
@@ -202,22 +206,19 @@ export class OutputGraphComponent implements OnInit {
     procStr: any
 
   setDurationErrorBar(){
-    var tst = document.getElementById('container3').style.display = 'block';
-    var tst = document.getElementById('container').style.display = 'none';
+    document.getElementById('container3').style.display = 'block';
+    document.getElementById('container').style.display = 'none';
      }
   setDurationByDate(){
-  var tst = document.getElementById('container3').style.display = 'none';
-  var tst = document.getElementById('container').style.display = 'block';
+    document.getElementById('container3').style.display = 'none';
+    document.getElementById('container').style.display = 'block';
     }
-
-
   setProcedureCode(n){
     this .procedureCode = n;
-   console.log("212 options %o", this .setOptions)
     this .getData()
   }
   setDateRange(str){
-    this .dateRange = str;
+  //  this .dateRange = str;
     let start: string = '';
     let  today:string = moment().format('YYYY-MM-DD');
     if (str =='last20')
@@ -239,17 +240,16 @@ export class OutputGraphComponent implements OnInit {
   }
   ////////   get the data from BB or 242   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
   getData(start?, end?){
-    let locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');;
+    let locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');;      // default is last 30 days
     if (start)
       locStart = start;
-    console.log("236  locStart %o", locStart);
     this .genSvce.setPlatform();                                            // switch Dev = BB or Prod = 242
     var selStr = "SELECT top(1000) StartDateTime, EndDateTime, ProcedureCode, PatientID, SessionID, ActivityID FROM ProtomTiming ";
     if (this .procedureCode > 3)                                          // select particular ProcedureCode
-     selStr += " WHERE ProcedureCode = '" + this .procedureCode + "' AND StartDateTime >= '" +
+      selStr += " WHERE ProcedureCode = '" + this .procedureCode + "' AND StartDateTime >= '" +
        locStart + "' ORDER By ActivityID desc";
     else                                                                  // take ALL ProcedureCodes
-      selStr += " WHERE  StartDateTime > '2020-08-01' ORDER By ActivityID desc";
+      selStr += " WHERE  StartDateTime > '"+locStart+"' ORDER By ActivityID desc";
  console.log("241 slestr " + selStr);
  console.log("280 this.options is %o", this.setOptions);
     this .genSvce.getWithSelString(selStr ).subscribe (
@@ -259,16 +259,24 @@ export class OutputGraphComponent implements OnInit {
           this .binData();                                                  // put the data in bins
      //    if (this .setOptions){
           Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
-          this .options3.series =[{
-            name: 'Duration',
-            color: '#4572A7',
-            type: 'column',
-            data: this .data['average']
-        }, {
-            name: 'Duration error',
-            type: 'errorbar',
-            data: this .data['error']
-        }]
+          this .options3=
+          { 
+            series : [{
+              name: 'Duration',
+              color: '#4572A7',
+              type: 'column',
+              data: this .data['average'],
+              }, {
+              name: 'Duration error',
+              type: 'errorbar',
+              data: this .data['error']
+              },
+            ],
+            xAxis :{
+              categories: this .data['categoriesForAv']
+            }
+          }
+  
           Highcharts.chart('container3', this .options3);                     // Av Duration Column plot 
      //    }
      //    else 
