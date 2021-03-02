@@ -28,6 +28,10 @@
             <mat-option value="Epoch" (click) = "setDateRange('Epoch')">Epoch</mat-option>
         </mat-select>
         </mat-form-field>
+        <button (click)="downloadCsv()">
+            Export to csv
+            </button>
+            
         <!-- The Modal -->
 <div id="myModal" class="modal" (click)='closeModal()'>
     <!-- Modal content -->

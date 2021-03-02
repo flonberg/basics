@@ -4,11 +4,16 @@ import { GenService } from '../gen.service';
 import { throwMatDialogContentAlreadyAttachedError } from '@angular/material';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { keyframes } from '@angular/animations';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLinkWithHref } from '@angular/router';
 import * as moment from 'moment';
 
 import { Inject }  from '@angular/core';
-import { DOCUMENT } from '@angular/common'; 
+import { DOCUMENT } from '@angular/common';
+import * as saveAs from 'file-saver';
+import { map, retry, catchError } from 'rxjs/operators';
+import exporting from 'highcharts/modules/exporting';
+exporting(Highcharts);
+
 
 declare var require: any;
 let Boost = require('highcharts/modules/boost');
@@ -26,6 +31,7 @@ noData(Highcharts);
   styleUrls: ['./output-graph.component.css']
 })
 export class OutputGraphComponent implements OnInit {
+  chart: any;
   data: any;
   selected:string;
   procedureCode: number;
@@ -38,7 +44,8 @@ export class OutputGraphComponent implements OnInit {
   dateRange = "Last_30_Days";
   locStart: string;
   setOptions: any;
-  constructor(private genSvce: GenService, private route: ActivatedRoute, @Inject(DOCUMENT) document) {
+  blob: Blob;
+  constructor(private genSvce: GenService, private route: ActivatedRoute, @ Inject(DOCUMENT) document) {
     this .selected = "Treatment";
     this .route.queryParams.subscribe(params => {
       this .param1 = params['param'];
@@ -129,6 +136,26 @@ export class OutputGraphComponent implements OnInit {
           return  Highcharts.dateFormat('%e %b ', this .x) + " duration:" + this .y + " minutes. "  ;
         }
       },
+      exporting: {
+
+        enabled: true,
+        chartOptions: { // specific options for the exported image
+          plotOptions: {
+            series: {
+              dataLabels: {
+                enabled: false
+              }
+            }
+          }
+        },
+      },
+      navigation: {
+        buttonOptions: {
+          align: 'center',
+          verticalAlign: 'top',
+          y: 40
+        }
+      },
       series: [{}]                                // data is loaded in the binData() function
     }
 
@@ -141,12 +168,12 @@ export class OutputGraphComponent implements OnInit {
           text: 'Patient Duration Average and Standard Deviation'
       },
       xAxis: {
-  
+
       },
       series: []
     }
     /*******
-     *  bottom graph histogream by duration. 
+     *  bottom graph histogream by duration.
      */
     public options2: any =
     {
@@ -238,6 +265,10 @@ export class OutputGraphComponent implements OnInit {
     this .binData();                                                      // bin the data
     Highcharts.chart('container2', this .options2);                       // redo the Graph with new binSize
   }
+  downloadCsv() {
+    this .chart.downloadCSV()
+  }
+
   ////////   get the data from BB or 242   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
   getData(start?, end?){
     let locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');;      // default is last 30 days
@@ -251,16 +282,16 @@ export class OutputGraphComponent implements OnInit {
     else                                                                  // take ALL ProcedureCodes
       selStr += " WHERE  StartDateTime > '"+locStart+"' ORDER By ActivityID desc";
  console.log("241 slestr " + selStr);
- console.log("280 this.options is %o", this.setOptions);
+ console.log("280 this.options is %o", this .setOptions);
     this .genSvce.getWithSelString(selStr ).subscribe (
         (res) => {
           this .setData(res);                                               // store the data
           this .makeBins();                                                 // make Histogram bins
           this .binData();                                                  // put the data in bins
-     //    if (this .setOptions){
-          Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
+ 
+         this .chart=  Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
           this .options3=
-          { 
+          {
             series : [{
               name: 'Duration',
               color: '#4572A7',
@@ -272,28 +303,43 @@ export class OutputGraphComponent implements OnInit {
               data: this .data['error']
               },
             ],
+            exporting: {
+              csv: {
+                itemDelimiter: ';'
+              }
+            },
             xAxis :{
               categories: this .data['categoriesForAv']
-            }
+            },
+
+            title: {
+              text: 'Patient Duration Average and Standard Deviation'
+            },
+
           }
-  
-          Highcharts.chart('container3', this .options3);                     // Av Duration Column plot 
+          Highcharts.chart('container3', this .options3);                     // Av Duration Column plot
      //    }
-     //    else 
+     //    else
       //    Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
 
         Highcharts.chart('container2', this .options2);                   // Draw bottom graph Histogram
-         
+
         },
         err => {
           console.log(err);
         }
       );
     }
+  exportCsv(){
+    this .chart.exportChart({
+      type: 'application/pdf',
+      filename: 'mycsv'
+    });
+  }
   setData(inpData){
-    this .data = Array();
+  //  this .data = Array();
     this .data = inpData;
-    console.log("190 this.data is %o", this .data);
+
   }
   public stackedBins: any;                                                      // the holder for the stacked timeInterval bins
 //  public toSeePatID: string;
@@ -343,6 +389,11 @@ export class OutputGraphComponent implements OnInit {
     ////////    Load data into Bottom Graph Histogram       \\\\\\\\\\\\\\\\\\\\
     this .options2.series = this .stackedBins;                                // load the data into lower graph
     this .options2.xAxis['categories'] = this .binsC['Label'];
+    this .options2.navigation = {
+      buttonOptions: {
+          enabled: true
+        }
+     }
   }
   binByProceedureCode(){
 /*********   DICOM Procedure codes.  Will drow any Activities with that ProcedureCode in the bin,i.e. increment n   */

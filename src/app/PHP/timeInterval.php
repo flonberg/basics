@@ -4,6 +4,8 @@ header("Access-Control-Allow-Origin: *");
 require_once "sql_libFL.php";                    
 require_once "libFuncs.php";                    
 $fp = fopen("./log/timeInterval.txt", "w+");
+$cp = fopen("./log/CSVtimeInterval.csv", "w");
+
 $nowDT = new DateTime();
 $now = $nowDT->format("m-d-Y H:i:s");
 fwrite($fp, "\r\n ". $now);
@@ -48,7 +50,10 @@ while ($assoc = $dB->getAssoc())
       fwrite($fp, "\r\n $timeIndex --- ". $assoc['ProcedureCode'] );
       $timeVproc[$timeIndex] =  $assoc['ProcedureCode'];  
       if (!isset( $row['Patients'][$assoc['PatientID']]  )){                      // if datum for this patients NOT exist
+        
+        fwrite($cp, "\r\n ". $assoc['PatientID']);
         $row['Patients'][$assoc['PatientID']][0] = array(strtotime($backNHours) * 1000, $duration->i, $assoc['ProcedureCode']);    // create it    
+        fwrite($cp,  $duration->i .",");
         $total[$assoc['PatientID']] = $duration->i;
         $numActivities[$assoc['PatientID']] = 1;
       }
@@ -58,11 +63,13 @@ while ($assoc = $dB->getAssoc())
           array_push($row['Patients'][$assoc['PatientID']], $tmp);                    // push the datum into the array. 
           $total[$assoc['PatientID']] += $duration->i;    
           $numActivities[$assoc['PatientID']]++;
+          fwrite($cp,  $duration->i .",");
           }  
       $row['categoriesByKey'][$assoc['PatientID']] = $assoc['PatientID'];                                   // for use as X-axis labels                
       $k++;
     }
 }
+fwrite($dp, "\r\n Time of Procedure in Epoch msec, Duratino of the Procedure in minutes, DICOm ID \r\n:w");
 $dbg = print_r($row['Patients'], true); fwrite($dp, $dbg);
 /////////  calculate the Average forEach Patient \\\\\\\\\\\\\\\\\\\
 $row['averageByKey'] = array();
