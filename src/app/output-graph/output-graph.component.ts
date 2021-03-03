@@ -13,6 +13,7 @@ import * as saveAs from 'file-saver';
 import { map, retry, catchError } from 'rxjs/operators';
 import exporting from 'highcharts/modules/exporting';
 import { HttpClient } from '@angular/common/http';
+import { Title } from '@angular/platform-browser';
 exporting(Highcharts);
 
 
@@ -47,6 +48,7 @@ export class OutputGraphComponent implements OnInit {
   locStart: string;
   setOptions: any;
   blob: Blob;
+  options3: any;
   constructor(private genSvce: GenService, private route: ActivatedRoute, @ Inject(DOCUMENT) document, private http: HttpClient) {
     this .selected = "Treatment";
     this .route.queryParams.subscribe(params => {
@@ -102,7 +104,7 @@ export class OutputGraphComponent implements OnInit {
         height: 400
       },
       title: {
-        text: 'Procedure-Duration'
+        text: 'Procedure Duration'
       },
       click: function (e) {
         console.log(
@@ -121,7 +123,6 @@ export class OutputGraphComponent implements OnInit {
         }
       },
       xAxis: {
-       // type: 'column',
         labels: {
           formatter: function () {
             return Highcharts.dateFormat('%e %b %y', this .value);
@@ -131,7 +132,7 @@ export class OutputGraphComponent implements OnInit {
       yAxis: {
         min: 0,
         title: {
-            text: 'Minutes  '
+            text: 'Duration [Minutes]'
           },
       },
       tooltip: {
@@ -139,41 +140,7 @@ export class OutputGraphComponent implements OnInit {
           return  Highcharts.dateFormat('%e %b ', this .x) + " duration:" + this .y + " minutes. "  ;
         }
       },
-      exporting: {
-
-        enabled: true,
-        chartOptions: { // specific options for the exported image
-          plotOptions: {
-            series: {
-              dataLabels: {
-                enabled: false
-              }
-            }
-          }
-        },
-      },
-      navigation: {
-        buttonOptions: {
-          align: 'center',
-          verticalAlign: 'top',
-          y: 40
-        }
-      },
       series: [{}]                                // data is loaded in the binData() function
-    }
-
-
-    public options3: any =     {                             // upper Graph for Average and StdDev
-      chart: {
-        zoomType: 'xy'
-      },
-      title: {
-          text: 'Patient Duration Average and Standard Deviation'
-      },
-      xAxis: {
-
-      },
-      series: []
     }
     /*******
      *  bottom graph histogream by duration.
@@ -196,16 +163,6 @@ export class OutputGraphComponent implements OnInit {
         title: {
             text: 'Procedures'
           },
-        stackLabels: {
-            enabled: true,
-            style: {
-                fontWeight: 'bold',
-                color: ( // theme
-                    Highcharts.defaultOptions.title.style &&
-                    Highcharts.defaultOptions.title.style.color
-                ) || 'gray'
-            }
-        }
       },
       plotOptions: {
         column: {
@@ -264,7 +221,7 @@ export class OutputGraphComponent implements OnInit {
   setBinSize(n){
     this .binSizeC = n;
     this .makeBins();                                                     // make the bins
-    this .makeProcedureBins()                                             // make the bins for the Procedures
+ //  this .makeProcedureBins()                                             // make the bins for the Procedures
     this .binData();                                                      // bin the data
     Highcharts.chart('container2', this .options2);                       // redo the Graph with new binSize
   }
@@ -284,19 +241,16 @@ export class OutputGraphComponent implements OnInit {
        locStart + "' ORDER By ActivityID desc";
     else                                                                  // take ALL ProcedureCodes
       selStr += " WHERE  StartDateTime > '"+locStart+"' ORDER By ActivityID desc";
- console.log("241 slestr " + selStr);
- console.log("280 this.options is %o", this .setOptions);
+
     this .genSvce.getWithSelString(selStr, locStart ).subscribe (
         (res) => {
           this .setData(res);                                               // store the data
           this .makeBins();                                                 // make Histogram bins
           this .binData();                                                  // put the data in bins
- 
-         this .chart=  Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
-          this .options3=
-          {
+        this .options3=
+        {
             series : [{
-              name: 'Duration',
+              name: 'Average Duration with Standard Deviation Error Bar',
               color: '#4572A7',
               type: 'column',
               data: this .data['average'],
@@ -306,47 +260,42 @@ export class OutputGraphComponent implements OnInit {
               data: this .data['error']
               },
             ],
-            exporting: {
-              csv: {
-                itemDelimiter: ';'
-              }
-            },
             xAxis :{
-              categories: this .data['categoriesForAv']
+              categories: this .data['categoriesForAv'],
             },
-
+            yAxis: {
+              title: {
+                text:'Duration [minutes]'}
+            },
             title: {
               text: 'Patient Duration Average and Standard Deviation'
             },
-
-          }
-          Highcharts.chart('container3', this .options3);                     // Av Duration Column plot
-     //    }
-     //    else
-      //    Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
-
+        }
+        Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
+        Highcharts.chart('container3', this .options3);                     // Av Duration Column plo
         Highcharts.chart('container2', this .options2);                   // Draw bottom graph Histogram
 
         },
         err => {
           console.log(err);
         }
-      );
+      );                                                                // end of subscribe
     }
 
 
   setData(inpData){
-  //  this .data = Array();
     this .data = inpData;
+    console.log("setData 288 %o", this .data)
 
   }
   public stackedBins: any;                                                      // the holder for the stacked timeInterval bins
 //  public toSeePatID: string;
-
+/**
+ * Store the data in the 'series' for the 2 Upper Graphs. Make the bins for the Duration Historam in Lower Graph
+ */
   binData(){
     this .stackedBins = new Array();                                           // the holder for the stacked timeInterval bins
     var i = 0;
-
     var patCount2 = 0;                                                          // counter => index for patientLoop
     if ( this .data['Patients']  ){                                             // If there ARE patients
 
@@ -375,7 +324,6 @@ export class OutputGraphComponent implements OnInit {
         patCount2++;
       }
     }
-    this .binByProceedureCode();
     ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
     var i = 0;
     this .options.series = Array();                                           // clear old data
@@ -385,44 +333,16 @@ export class OutputGraphComponent implements OnInit {
             this .options.series[i]['data'] = this .data['Patients'][key];
             i++;
           }
+          
     ////////    Load data into Bottom Graph Histogram       \\\\\\\\\\\\\\\\\\\\
     this .options2.series = this .stackedBins;                                // load the data into lower graph
     this .options2.xAxis['categories'] = this .binsC['Label'];
-    this .options2.navigation = {
-      buttonOptions: {
-          enabled: true
-        }
-     }
-  }
-  binByProceedureCode(){
-/*********   DICOM Procedure codes.  Will drow any Activities with that ProcedureCode in the bin,i.e. increment n   */
-    this .procStr = {
-      '121704':
-      {'Description':'RT Position Acquisition single plane kV', 'code':'121704', 'n':0},
-      '121705':
-      {'Description':'RT Position Acquisition dual plane kV', 'code':'121705', 'n':0 },
-      '121707':
-      {'Description':'RT RT Position Acquisition CT kV', 'code':'121707', 'n':0 },
-      '121726':
-      {'Description':'RT Treatment with Internal Verification', 'code':'121726', 'n':0 },
-      '121787':
-      {'Description':'RT Patient Position Registration 2D on 3D Reference', 'code':'121787', 'n':0 },
-      '99I001':
-      {'Description':'Patient Position Acquisition Fluoroscopy 2DkV', 'code':'99I001`', 'n':0 },
-      '99I002':
-      {'Description':'Patient Position Acquisition Fluoroscopy CBCT ', 'code':'99I002`', 'n':0 },
-      '99I003':
-      {'Description':'RT Position Acquisition single plane CBCT', 'code':'99I003`', 'n':0 },
-      }
-        var count = 0;
-        for (let entry of this .data.Rdata){
-          if (count++ == 0)
-            console.log("297  " + entry)
-        }
+  }                                                                           // end of bidData
+                                                                  // end of binData function
+/**
+ * Make the bins for the lower graph histogram
+ */
 
-  }                                                                      // end of binData function
-
-///////////  create the bins for the selected binSize.
   makeBins(){
     var maxDurationExpected = 60;                                             // set the maximum expected activityID duration
     this .binsC = [];                                                         // create the array of bins
@@ -437,28 +357,55 @@ export class OutputGraphComponent implements OnInit {
     }
    }
                /////////// make a bin forEach Proceedure  \\\\\\\\\\\\\\\\\\\\
-  public procBins: any;
-  makeProcedureBins(){
-    var i = 0;
-    this .procBins = [];
-    }
-    saveFile(){
-      this.getFile().subscribe((res) => {
-        this.data = res;
-        this.blob = new Blob([this.data], {type: 'application/csv'});
-        saveAs(this.blob, 'PlanData.csv')
-      });
-      console.log('fileSaved')
-    }
-    // download.service.ts
-    getFile() {
-      const httpOptions = {
-        responseType: 'blob' as 'json'
-      };
-      console.log("gen 458 urlBase is " + this .genSvce.urlBase);
-      return this .http.get(`${this .genSvce .urlBase}/log/CSVtimeInterval.csv`, httpOptions);
-    }
-  
 
+  /**
+   * Saves a .csv file of the data. 
+   */
+  saveFile(){
+    this.getFile().subscribe((res) => {
+      this .data = res;
+      this .blob = new Blob([this .data], {type: 'application/csv'});
+      saveAs(this .blob, 'PlanData.csv')
+    });
+    console.log('fileSaved')
+  }
+  // download.service.ts
+  getFile() {
+    const httpOptions = {
+      responseType: 'blob' as 'json'
+    };
+    return this .http.get(`${this .genSvce .urlBase}/log/CSVtimeInterval.csv`, httpOptions);
+  }
 
+  binByProceedureCode(){
+    /*********   DICOM Procedure codes.  Will drow any Activities with that ProcedureCode in the bin,i.e. increment n   */
+        this .procStr = {
+          '121704':
+          {'Description':'RT Position Acquisition single plane kV', 'code':'121704', 'n':0},
+          '121705':
+          {'Description':'RT Position Acquisition dual plane kV', 'code':'121705', 'n':0 },
+          '121707':
+          {'Description':'RT RT Position Acquisition CT kV', 'code':'121707', 'n':0 },
+          '121726':
+          {'Description':'RT Treatment with Internal Verification', 'code':'121726', 'n':0 },
+          '121787':
+          {'Description':'RT Patient Position Registration 2D on 3D Reference', 'code':'121787', 'n':0 },
+          '99I001':
+          {'Description':'Patient Position Acquisition Fluoroscopy 2DkV', 'code':'99I001`', 'n':0 },
+          '99I002':
+          {'Description':'Patient Position Acquisition Fluoroscopy CBCT ', 'code':'99I002`', 'n':0 },
+          '99I003':
+          {'Description':'RT Position Acquisition single plane CBCT', 'code':'99I003`', 'n':0 },
+          }
+            var count = 0;
+            for (let entry of this .data.Rdata){
+              if (count++ == 0)
+                console.log("297  " + entry)
+            }
+      } 
+      public procBins: any;
+      makeProcedureBins(){
+        var i = 0;
+        this .procBins = [];
+        }   
 }

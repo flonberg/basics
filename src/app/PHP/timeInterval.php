@@ -29,7 +29,10 @@ fwrite($fp, "\r\n $selStr");
 fwrite($cp, "\r\n". $startPhrase);
 }
 //$selStr = "SELECT StartDateTime, EndDateTime, ProcedureCode, PatientID FROM ProtomTiming";
+
 $dB = new getDBData($selStr, $handle);
+fwrite($fp, "\r\n dB is \r\n");
+ob_start(); var_dump($dB); $data = ob_get_clean(); fwrite($fp, $data);
 $i = 0;
 $k = 0;
 $row = array();
