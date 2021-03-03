@@ -12,6 +12,7 @@ import { DOCUMENT } from '@angular/common';
 import * as saveAs from 'file-saver';
 import { map, retry, catchError } from 'rxjs/operators';
 import exporting from 'highcharts/modules/exporting';
+import { HttpClient } from '@angular/common/http';
 exporting(Highcharts);
 
 
@@ -31,6 +32,7 @@ noData(Highcharts);
   styleUrls: ['./output-graph.component.css']
 })
 export class OutputGraphComponent implements OnInit {
+  urlBase: string;
   chart: any;
   data: any;
   selected:string;
@@ -45,7 +47,7 @@ export class OutputGraphComponent implements OnInit {
   locStart: string;
   setOptions: any;
   blob: Blob;
-  constructor(private genSvce: GenService, private route: ActivatedRoute, @ Inject(DOCUMENT) document) {
+  constructor(private genSvce: GenService, private route: ActivatedRoute, @ Inject(DOCUMENT) document, private http: HttpClient) {
     this .selected = "Treatment";
     this .route.queryParams.subscribe(params => {
       this .param1 = params['param'];
@@ -56,6 +58,7 @@ export class OutputGraphComponent implements OnInit {
    this .setOptions = this .options;
    this .locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');
    this .getData()                                 // set for 'Treatment'
+   this .genSvce.setPlatform();
  //   this .detectDivChanges();
   }
   modalString1 = ''; modalString2 = '';
@@ -283,7 +286,7 @@ export class OutputGraphComponent implements OnInit {
       selStr += " WHERE  StartDateTime > '"+locStart+"' ORDER By ActivityID desc";
  console.log("241 slestr " + selStr);
  console.log("280 this.options is %o", this .setOptions);
-    this .genSvce.getWithSelString(selStr ).subscribe (
+    this .genSvce.getWithSelString(selStr, locStart ).subscribe (
         (res) => {
           this .setData(res);                                               // store the data
           this .makeBins();                                                 // make Histogram bins
@@ -330,12 +333,8 @@ export class OutputGraphComponent implements OnInit {
         }
       );
     }
-  exportCsv(){
-    this .chart.exportChart({
-      type: 'application/pdf',
-      filename: 'mycsv'
-    });
-  }
+
+
   setData(inpData){
   //  this .data = Array();
     this .data = inpData;
@@ -443,6 +442,23 @@ export class OutputGraphComponent implements OnInit {
     var i = 0;
     this .procBins = [];
     }
+    saveFile(){
+      this.getFile().subscribe((res) => {
+        this.data = res;
+        this.blob = new Blob([this.data], {type: 'application/csv'});
+        saveAs(this.blob, 'PlanData.csv')
+      });
+      console.log('fileSaved')
+    }
+    // download.service.ts
+    getFile() {
+      const httpOptions = {
+        responseType: 'blob' as 'json'
+      };
+      console.log("gen 458 urlBase is " + this .genSvce.urlBase);
+      return this .http.get(`${this .genSvce .urlBase}/log/CSVtimeInterval.csv`, httpOptions);
+    }
+  
 
 
 }

@@ -16,15 +16,18 @@ fwrite($fp, "\r\n ". $now);
 //fwrite($fp, "\r\n ". $_GET['selStr']);
 $selStr = $_GET['selStr'];
 $getStruct = print_r($_GET, true); fwrite($fp, "\r\n $getStruct"); 
+$startPhrase = "Duration of treatment. Treatments From ". $_GET['param']; 
 if (isset($_GET['param']) ){
   if (strcmp($_GET['param'], 'last30') == 0   )                                     // default is to go back 30 days in getting data from ProtomTimine table
     $back30Days = date('yy-m-d', strtotime('-30 days'));
   if (strcmp($_GET['param'], 'last20') == 0   )
     $backDays = date('yy-m-d', strtotime('-20 days'));  
-  $selStr .= " AND StartDateTime > CONVERT(VARCHAR, '$backDays', 103) ";
-  fwrite($fp, "\r\n $selStr");
-}
+//$selStr .= " AND StartDateTime > CONVERT(VARCHAR, '$backDays', 103) ";
+//$startPhrase .= " AND StartDateTime > CONVERT(VARCHAR, '$backDays', 103) ";
 
+fwrite($fp, "\r\n $selStr");
+fwrite($cp, "\r\n". $startPhrase);
+}
 //$selStr = "SELECT StartDateTime, EndDateTime, ProcedureCode, PatientID FROM ProtomTiming";
 $dB = new getDBData($selStr, $handle);
 $i = 0;
@@ -47,7 +50,7 @@ while ($assoc = $dB->getAssoc())
 
     if(preg_match('/(^[0-9]{3}-[0-9]{2}-[0-9]{2}$)/i', trim($assoc['PatientID'])))    // match 'nnn-nn-nn' to select patients
     {
-      fwrite($fp, "\r\n $timeIndex --- ". $assoc['ProcedureCode'] );
+      fwrite($fp, "\r\n $timeIndex --- ". $assoc['ProcedureCode'] ." --888- ". substr($assoc['StartDateTime']->date,0,11))." --- ". $assoc['PatientID'];
       $timeVproc[$timeIndex] =  $assoc['ProcedureCode'];  
       if (!isset( $row['Patients'][$assoc['PatientID']]  )){                      // if datum for this patients NOT exist
         

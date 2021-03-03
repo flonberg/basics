@@ -29,6 +29,6 @@ export class GenService {
         console.log(" dectected whiteboard so setting urlBase to whitboard");
         this .urlBase = 'https://whiteboard.partners.org/esb/FLwbe/AngProd/';      // get data from BB  for localhost or BB
       }
-      console.log("gen 33 url is " + this .urlBase);
+      console.log("gen 33 urlBase is " + this .urlBase);
   }
 }
