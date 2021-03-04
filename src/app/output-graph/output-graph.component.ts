@@ -60,7 +60,7 @@ export class OutputGraphComponent implements OnInit {
    this .procedureCode = 121726;
    this .setOptions = this .options;
    this .locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');
-   this .getData()                                 // set for 'Treatment'
+   this .getData(null, null)                                 // set for 'Treatment'
    this .genSvce.setPlatform();
  //   this .detectDivChanges();
   }
@@ -203,7 +203,7 @@ export class OutputGraphComponent implements OnInit {
     }
   setProcedureCode(n){
     this .procedureCode = n;
-    this .getData()
+    this .getData(null, this .procedureCode)
   }
   setDateRange(str){
   //  this .dateRange = str;
@@ -215,7 +215,7 @@ export class OutputGraphComponent implements OnInit {
       start = moment().subtract(30, 'd').format('YYYY-MM-DD');
     if (str =='Epoch')
      start = '2020-01-02';
-    this .getData(start);
+    this .getData(start, null);
    // this .setDurationErrorBar()
   }
    ////////////  make the bins and bin the data       \\\\\\\\\\\\\\
@@ -229,10 +229,13 @@ export class OutputGraphComponent implements OnInit {
   downloadCsv() {
     this .chart.downloadCSV()
   }
-
-  ////////   get the data from BB or 242   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-  getData(start?, end?){
-    let locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');;      // default is last 30 days
+/**
+ * gets data from dataBase
+ * @param start 
+ * @param end 
+ */
+  getData(start, end){
+    let locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');
     if (start)
       locStart = start;
     this .genSvce.setPlatform();                                            // switch Dev = BB or Prod = 242
@@ -243,7 +246,7 @@ export class OutputGraphComponent implements OnInit {
     else                                                                  // take ALL ProcedureCodes
       selStr += " WHERE  StartDateTime > '"+locStart+"' ORDER By ActivityID desc";
 
-    this .genSvce.getWithSelString(selStr, locStart ).subscribe (
+    this .genSvce.getWithSelString(selStr, locStart, this. procedureCode ).subscribe (
         (res) => {
           this .setData(res);                                               // store the data
           this .makeBins();                                                 // make Histogram bins

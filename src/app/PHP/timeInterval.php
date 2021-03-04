@@ -5,7 +5,6 @@ require_once "sql_libFL.php";
 require_once "libFuncs.php";                    
 $fp = fopen("./log/timeInterval.txt", "w+");
 $cp = fopen("./log/CSVtimeInterval.csv", "w");
-$ccp = fopen("./log/CSVtimeInterval.txt", "w");
 
 $nowDT = new DateTime();
 $now = $nowDT->format("m-d-Y H:i:s");
@@ -18,7 +17,7 @@ fwrite($fp, "\r\n ". $now);
 //fwrite($fp, "\r\n ". $_GET['selStr']);
 $selStr = $_GET['selStr'];
 $getStruct = print_r($_GET, true); fwrite($fp, "\r\n $getStruct"); 
-$startPhrase = "Duration of treatment.i 8888 Treatments From ". $_GET['param']; 
+
 if (isset($_GET['param']) ){
   if (strcmp($_GET['param'], 'last30') == 0   )                                     // default is to go back 30 days in getting data from ProtomTimine table
     $back30Days = date('yy-m-d', strtotime('-30 days'));
@@ -28,7 +27,7 @@ if (isset($_GET['param']) ){
 //$startPhrase .= " AND StartDateTime > CONVERT(VARCHAR, '$backDays', 103) ";
 
 fwrite($fp, "\r\n $selStr");
-fwrite($cp, "\r\n". $startPhrase);
+
 }
 //$selStr = "SELECT StartDateTime, EndDateTime, ProcedureCode, PatientID FROM ProtomTiming";
 
@@ -60,9 +59,9 @@ while ($assoc = $dB->getAssoc())
       $timeVproc[$timeIndex] =  $assoc['ProcedureCode'];  
       if (!isset( $row['Patients'][$assoc['PatientID']]  )){                      // if datum for this patients NOT exist
         
-        fwrite($cp, "\r\n ". $assoc['PatientID']);
+
         $row['Patients'][$assoc['PatientID']][0] = array(strtotime($backNHours) * 1000, $duration->i, $assoc['ProcedureCode']);    // create it    
-    //    fwrite($cp,  $duration->i .",");
+
         $total[$assoc['PatientID']] = $duration->i;
         $numActivities[$assoc['PatientID']] = 1;
       }
@@ -72,7 +71,7 @@ while ($assoc = $dB->getAssoc())
           array_push($row['Patients'][$assoc['PatientID']], $tmp);                    // push the datum into the array. 
           $total[$assoc['PatientID']] += $duration->i;    
           $numActivities[$assoc['PatientID']]++;
-        //  fwrite($cp,  $duration->i .",");
+
           }  
       $row['categoriesByKey'][$assoc['PatientID']] = $assoc['PatientID'];                                   // for use as X-axis labels                
       $k++;
@@ -99,7 +98,7 @@ $i = 0; $aveKey = 0;
 $row['error'] = array();
 foreach ($row['Patients'] as $key=>$val ){
   fwrite($fp, "\r\n 80  key is $key ");
- // $st = print_r($val, true); fwrite($fp, " st is ". $st);
+
   $tst = 0; $i = 0;
   foreach ($val as $kkey=>$vval){
     $tst += pow(($vval[1] - $row['average'][$aveKey]), 2);
@@ -124,7 +123,7 @@ $row['PCode'] = $timeVproc;
 $st = print_r($row['Patients'], true);  fwrite($fp, "\r\n  69 \r\n ". $st);  
 $st = print_r($row['average'], true);  fwrite($fp, "\r\n  69 \r\n ". $st);  
 $row['total'] = $k;
-fwrite($cp, "\r\n Total, 888 ". $row['total']);
+fwrite($cp, "\r\n Total ". $row['total']);
 $row['totWritten'] = writeCSV($cp, $row['Patients']);
 
 echo json_encode($row);
@@ -133,6 +132,15 @@ exit();
  * writes out to csv file 
  */
 function writeCSV($cp, $dB){
+  $procedures = array("121726"=>"Treatment", "121724"=>"VSim", "121733"=>"QA");
+  if (strpos($_GET['procedureCode'], '726') > 0 )
+    $proc = "Treatment";
+  if (strpos($_GET['procedureCode'], '724') > 0 )
+    $proc = "VSim";
+  if (strpos($_GET['procedureCode'], '733') > 0 )
+    $proc = "QA";
+  $startPhrase = "\r\n Duration of  ".$proc ."  \r\n From ". $_GET['param']; 
+  fwrite($cp, $startPhrase);
   $totWritten = 0;
   foreach ($dB as $key=>$val){
     fwrite($cp, "\r\n $key,");               // the patientID

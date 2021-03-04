@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { GenService } from '../gen.service';
 
-@Component({
+@ Component({
   selector: 'app-plan-accordion',
   templateUrl: './plan-accordion.component.html',
   styleUrls: ['./plan-accordion.component.css']
@@ -25,7 +25,7 @@ export class PlanAccordionComponent implements OnInit {
   getData(){
     this .genSvce.setPlatform();
     //  this.genEditSvce.getPMDs('fjl3').subscribe(
-        this  .genSvce.getWithSelString("SELECT StartDateTime, EndDateTime, ProcedureCode FROM ProtomTiming WHERE PatientID ='700-57-44' AND ProcedureCode = '121726'" ).subscribe (  
+        this  .genSvce.getWithSelString("SELECT StartDateTime, EndDateTime, ProcedureCode FROM ProtomTiming WHERE PatientID ='700-57-44' AND ProcedureCode = '121726'" ).subscribe (
         (res) => {
           this .setData(res);
         },

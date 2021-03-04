@@ -10,10 +10,12 @@ export class GenService {
   constructor(private http: HttpClient) { }
 
  /*********  get using selStr from GET param  */
- getWithSelString(arg, param?){
+ getWithSelString(arg, param?, procedureCode?){
   var url = this .urlBase + "timeInterval.php?&selStr=" + arg;
   if (param)
     url += "&param=" + param;
+  if (procedureCode)
+    url += "&procedureCode= " + procedureCode;
   console.log("genservice 17 getWithSelString URL is " + url);
   return this .http.get(url)
 }
@@ -26,7 +28,6 @@ export class GenService {
       }
       if ( window.location.href.indexOf('whiteboard') !== -1 )
       {                   // PROD.
-    
         this .urlBase = 'https://whiteboard.partners.org/esb/FLwbe/AngProd/';      // get data from BB  for localhost or BB
         console.log(" dectected whiteboard so setting urlBase to " + this .urlBase);    
       }
