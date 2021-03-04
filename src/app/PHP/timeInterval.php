@@ -5,10 +5,12 @@ require_once "sql_libFL.php";
 require_once "libFuncs.php";                    
 $fp = fopen("./log/timeInterval.txt", "w+");
 $cp = fopen("./log/CSVtimeInterval.csv", "w");
+$ccp = fopen("./log/CSVtimeInterval.txt", "w");
 
 $nowDT = new DateTime();
 $now = $nowDT->format("m-d-Y H:i:s");
 fwrite($fp, "\r\n ". $now);
+fwrite($cp, "\r\n $now ,");
 $dp = fopen("./log/DBGtimeInterval.txt", "w+");
 $nowDT = new DateTime();
 $now = $nowDT->format("m-d-Y H:i:s");
@@ -16,7 +18,7 @@ fwrite($fp, "\r\n ". $now);
 //fwrite($fp, "\r\n ". $_GET['selStr']);
 $selStr = $_GET['selStr'];
 $getStruct = print_r($_GET, true); fwrite($fp, "\r\n $getStruct"); 
-$startPhrase = "Duration of treatment. Treatments From ". $_GET['param']; 
+$startPhrase = "Duration of treatment.i 8888 Treatments From ". $_GET['param']; 
 if (isset($_GET['param']) ){
   if (strcmp($_GET['param'], 'last30') == 0   )                                     // default is to go back 30 days in getting data from ProtomTimine table
     $back30Days = date('yy-m-d', strtotime('-30 days'));
@@ -35,6 +37,7 @@ fwrite($fp, "\r\n dB is \r\n");
 ob_start(); var_dump($dB); $data = ob_get_clean(); fwrite($fp, $data);
 $i = 0;
 $k = 0;
+$totalWritten = 0;
 $row = array();
 $total = array();        
 $timeVproc = array();                                                           // used to compute Average for PatID Activities
@@ -59,7 +62,7 @@ while ($assoc = $dB->getAssoc())
         
         fwrite($cp, "\r\n ". $assoc['PatientID']);
         $row['Patients'][$assoc['PatientID']][0] = array(strtotime($backNHours) * 1000, $duration->i, $assoc['ProcedureCode']);    // create it    
-        fwrite($cp,  $duration->i .",");
+    //    fwrite($cp,  $duration->i .",");
         $total[$assoc['PatientID']] = $duration->i;
         $numActivities[$assoc['PatientID']] = 1;
       }
@@ -69,7 +72,7 @@ while ($assoc = $dB->getAssoc())
           array_push($row['Patients'][$assoc['PatientID']], $tmp);                    // push the datum into the array. 
           $total[$assoc['PatientID']] += $duration->i;    
           $numActivities[$assoc['PatientID']]++;
-          fwrite($cp,  $duration->i .",");
+        //  fwrite($cp,  $duration->i .",");
           }  
       $row['categoriesByKey'][$assoc['PatientID']] = $assoc['PatientID'];                                   // for use as X-axis labels                
       $k++;
@@ -121,16 +124,39 @@ $row['PCode'] = $timeVproc;
 $st = print_r($row['Patients'], true);  fwrite($fp, "\r\n  69 \r\n ". $st);  
 $st = print_r($row['average'], true);  fwrite($fp, "\r\n  69 \r\n ". $st);  
 $row['total'] = $k;
+fwrite($cp, "\r\n Total, 888 ". $row['total']);
+$row['totWritten'] = writeCSV($cp, $row['Patients']);
+
 echo json_encode($row);
 exit();
-
+/**
+ * writes out to csv file 
+ */
+function writeCSV($cp, $dB){
+  $totWritten = 0;
+  foreach ($dB as $key=>$val){
+    fwrite($cp, "\r\n $key,");               // the patientID
+    foreach ($val as $kkey => $vval){             // the Activities
+  //    fwrite($cp, $kkey );
+      foreach ($vval as $key3 => $val3){
+     if ($key3 == '1')
+      {
+        fwrite($cp,  $val3 .",");
+        $totWritten++;}
+      }
+    }
+  }
+  return $totWritten;
+}
 
 
 function makeLast30(){
   $today = date('y-m-d');
   $d2 = date('y-m-d', strtotime('-30 days'));
 }
-
+/**
+ * create the bins
+ */
 function makeHistBins($binSize)
 {
   global $fp;
