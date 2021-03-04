@@ -49,6 +49,7 @@ export class OutputGraphComponent implements OnInit {
   setOptions: any;
   blob: Blob;
   options3: any;
+  totalActivities: number;
   constructor(private genSvce: GenService, private route: ActivatedRoute, @ Inject(DOCUMENT) document, private http: HttpClient) {
     this .selected = "Treatment";
     this .route.queryParams.subscribe(params => {
@@ -285,6 +286,7 @@ export class OutputGraphComponent implements OnInit {
 
   setData(inpData){
     this .data = inpData;
+    this .totalActivities = inpData.total;
     console.log("setData 288 %o", this .data)
 
   }

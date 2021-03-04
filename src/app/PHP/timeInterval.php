@@ -120,6 +120,7 @@ if ($debug2 == 1){
 $row['PCode'] = $timeVproc;  
 $st = print_r($row['Patients'], true);  fwrite($fp, "\r\n  69 \r\n ". $st);  
 $st = print_r($row['average'], true);  fwrite($fp, "\r\n  69 \r\n ". $st);  
+$row['total'] = $k;
 echo json_encode($row);
 exit();
 
