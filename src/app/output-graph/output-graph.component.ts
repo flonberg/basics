@@ -1,3 +1,4 @@
+import { FormControl } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
 import * as Highcharts from 'highcharts';
 import { GenService } from '../gen.service';
@@ -51,6 +52,8 @@ export class OutputGraphComponent implements OnInit {
   blob: Blob;
   options3: any;
   totalActivities: number;
+  startDate: FormControl;
+  endDate: FormControl;
   constructor(private genSvce: GenService, private route: ActivatedRoute, @ Inject(DOCUMENT) document, private http: HttpClient) {
     this .selected = "Treatment";
     this .route.queryParams.subscribe(params => {
@@ -63,6 +66,8 @@ export class OutputGraphComponent implements OnInit {
    this .locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');
    this .getData(null, null)                                 // set for 'Treatment'
    this .genSvce.setPlatform();
+   this .startDate = new FormControl();
+   this .endDate = new FormControl();
  //   this .detectDivChanges();
   }
   modalString1 = ''; modalString2 = '';
