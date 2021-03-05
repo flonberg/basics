@@ -35,7 +35,7 @@ noData(Highcharts);
   styleUrls: ['./output-graph.component.css']
 })
 export class OutputGraphComponent implements OnInit {
-  urlBase: string;
+ // urlBase: string;
   chart: any;
   data: any;
   selected:string;
@@ -54,8 +54,9 @@ export class OutputGraphComponent implements OnInit {
   totalActivities: number;
   startDate: FormControl;
   endDate: FormControl;
+  param1:string;
   constructor(private genSvce: GenService, private route: ActivatedRoute, @ Inject(DOCUMENT) document, private http: HttpClient) {
-    this .selected = "Treatment";
+  //  this .selected = "Treatment";
     this .route.queryParams.subscribe(params => {
       this .param1 = params['param'];
       });
@@ -68,15 +69,14 @@ export class OutputGraphComponent implements OnInit {
    this .genSvce.setPlatform();
    this .startDate = new FormControl();
    this .endDate = new FormControl();
+   this .options.title.text = "Plans for Past 30 Days"
  //   this .detectDivChanges();
   }
   modalString1 = ''; modalString2 = '';
   showProcedure(ev){
     console.log('41' + ev);
   }
-  editDate(type: string, event: MatDatepickerInputEvent<Date>){
-    console.log(event)
-  }
+
   detectDivChanges() {                                                  // detects that user has clicked on a Point on the graph changed
     const div = document.getElementById('vidx');
     const config = { attributes: true, childList: true, subtree: true };
@@ -107,6 +107,7 @@ export class OutputGraphComponent implements OnInit {
     var modal = document.getElementById('detailModal');
     modal.style.display = "none";
   }
+  titlePhrase: string;
   //////////   set parameters for Duration by Procedure graph  \\\\\\\\\\\\\\
     public options: any = {
       chart: {
@@ -114,7 +115,7 @@ export class OutputGraphComponent implements OnInit {
         height: 400
       },
       title: {
-        text: 'Procedure Duration'
+        text: this .titlePhrase
       },
       click: function (e) {
         console.log(
@@ -188,9 +189,6 @@ export class OutputGraphComponent implements OnInit {
             e.yAxis[0].value
         )
       },
-      credits: {
-        enabled: false
-      },
       tooltip: {
         formatter: function (){
           return   this .y + " Plans. "  ;
@@ -199,7 +197,6 @@ export class OutputGraphComponent implements OnInit {
       series: []
     }
 
-    param1:string;
     procStr: any
 
   setDurationErrorBar(){
@@ -214,8 +211,19 @@ export class OutputGraphComponent implements OnInit {
     this .procedureCode = n;
     this .getData(null, this .procedureCode)
   }
+  startDateString: string;
+  endDateString: string;
+  editDate(type: string, event){
+    if (type == 'start')
+      this .startDateString = moment(event).format('YYYY-MM-DD');
+    if (type == 'end')
+      this .endDateString = moment(event).format('YYYY-MM-DD');
+    if (this .startDateString && this .endDateString){
+      this .options.title.text = "Plans from " + this .startDateString + " to " + this .endDateString
+      this .getData(this .startDateString, this .endDateString)
+    }
+  }
   setDateRange(str){
-  //  this .dateRange = str;
     let start: string = '';
     let  today:string = moment().format('YYYY-MM-DD');
     if (str =='last20')
@@ -233,11 +241,12 @@ export class OutputGraphComponent implements OnInit {
     this .makeBins();                                                     // make the bins
  //  this .makeProcedureBins()                                             // make the bins for the Procedures
     this .binData();                                                      // bin the data
+
     Highcharts.chart('container2', this .options2);                       // redo the Graph with new binSize
   }
-  downloadCsv() {
-    this .chart.downloadCSV()
-  }
+ // downloadCsv() {
+ //   this .chart.downloadCSV()
+ // }
 /**
  * gets data from dataBase
  * @param start 
@@ -260,10 +269,11 @@ export class OutputGraphComponent implements OnInit {
           this .setData(res);                                               // store the data
           this .makeBins();                                                 // make Histogram bins
           this .binData();                                                  // put the data in bins
+          this .makeNonStackedBins(res['Rdata'])
         this .options3=
         {
             series : [{
-              name: 'Average Duration with Standard Deviation Error Bar',
+              name: 'Average Duration [minutes] ',
               color: '#4572A7',
               type: 'column',
               data: this .data['average'],
@@ -309,10 +319,11 @@ export class OutputGraphComponent implements OnInit {
  */
   binData(){
     this .stackedBins = new Array();                                           // the holder for the stacked timeInterval bins
+    let plainBins =this .binsC;
+    console.log("323 plainBins %o ", plainBins)
     var i = 0;
     var patCount2 = 0;                                                          // counter => index for patientLoop
     if ( this .data['Patients']  ){                                             // If there ARE patients
-
       for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
                   /////////  create a set of timeInterval bins for each patient, .g. 0->5, 5->10 ...  \\\\\\\\\\\\\\\\\\\\\
         var tstObj = {'name': key, 'data': []}                                  // make an object to hold the patient bin data
@@ -320,7 +331,6 @@ export class OutputGraphComponent implements OnInit {
         var binCount2 = 0;                                                      // counter => index for bin loop
         for (let binEntry of this .binsC)                                       // loop thru the Created Bins
           this .stackedBins[patCount2].data[binCount2++] = 0                    // create the bin with count = 0
-
         patCount2++;
       }
       ////////   bin the data  \\\\\\\\\\\\\\\\\\\\\\\
@@ -331,12 +341,18 @@ export class OutputGraphComponent implements OnInit {
           for (let binEntry of this .binsC ){
             if (entry[1] > binEntry[0] && entry[1] <= binEntry[1]){             // if duration is withing the bin limits
               this .stackedBins[patCount2]['data'][binCount2]++                        // increment the count in that bin
+              plainBins[binCount2]['count']++;
             }
             binCount2++;
           }
         }
         patCount2++;
       }
+      console.log("348  staBi %o", plainBins)
+      let test = Array("stri2,","str3,")
+      let tBlob = new Blob(test)
+      console.log("349 blob %o", tBlob)
+    //  saveAs(tBlob, 'hist.csv')
     }
     ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
     var i = 0;
@@ -347,7 +363,6 @@ export class OutputGraphComponent implements OnInit {
             this .options.series[i]['data'] = this .data['Patients'][key];
             i++;
           }
-          
     ////////    Load data into Bottom Graph Histogram       \\\\\\\\\\\\\\\\\\\\
     this .options2.series = this .stackedBins;                                // load the data into lower graph
     this .options2.xAxis['categories'] = this .binsC['Label'];
@@ -356,7 +371,6 @@ export class OutputGraphComponent implements OnInit {
 /**
  * Make the bins for the lower graph histogram
  */
-
   makeBins(){
     var maxDurationExpected = 60;                                             // set the maximum expected activityID duration
     this .binsC = [];                                                         // create the array of bins
@@ -369,8 +383,25 @@ export class OutputGraphComponent implements OnInit {
       this .binsC[i]['count'] = 0;                                            // make the bin.
       this .numInBin[i] = 0;                                                  // zero out the count in each bin.
     }
+    console.log("383 binsC %o", this .binsC)
    }
-               /////////// make a bin forEach Proceedure  \\\\\\\\\\\\\\\\\\\\
+
+  makeNonStackedBins(data){
+    let simpleBins = [];
+    var maxDurationExpected = 60;
+ 
+    let k: keyof typeof data;
+    for (k in data){
+      let binNum = +(data[k][1] / this.binSizeC).toFixed()
+      if (!simpleBins[binNum])
+        simpleBins[binNum] = 1;
+      else
+        simpleBins[binNum] += 1;
+    //  console.log(data[k][1], binNum )
+    }
+    console.log("401 simpleVins %o", simpleBins)
+
+  }
 
   /**
    * Saves a .csv file of the data. 
