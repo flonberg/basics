@@ -349,10 +349,9 @@ export class OutputGraphComponent implements OnInit {
         patCount2++;
       }
       console.log("348  staBi %o", plainBins)
-      let test = Array("stri2,","str3,")
-      let tBlob = new Blob(test)
-      console.log("349 blob %o", tBlob)
-    //  saveAs(tBlob, 'hist.csv')
+      this .saveHistogram(plainBins)
+ 
+  
     }
     ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
     var i = 0;
@@ -368,6 +367,20 @@ export class OutputGraphComponent implements OnInit {
     this .options2.xAxis['categories'] = this .binsC['Label'];
   }                                                                           // end of bidData
                                                                   // end of binData function
+  saveHistogram(data ){
+    let test = Array()
+    for (let key of Object.keys(data)){
+      console.log("osss %o", data[key]['count'])
+      if (data[key]['count'])
+        test.push(data[key]['count'].toString() + ",")
+      else 
+        test.push("0,"); 
+    }
+    console.log("376 test is %o", test)
+    let tBlob = new Blob(test)
+    console.log("349 blob %o", tBlob)
+    saveAs(tBlob, 'hist.csv')
+  }
 /**
  * Make the bins for the lower graph histogram
  */
