@@ -4,13 +4,14 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatSelectModule} from '@angular/material/select';
+import {MatDatepickerModule} from '@angular/material/datepicker';
 import {MatRadioModule} from '@angular/material/radio';
 import {MatInputModule, MatInput} from '@angular/material/input';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import { RouterModule } from '@angular/router';
 import {MatExpansionModule} from '@angular/material/expansion';
 
-import { MatGridListModule } from '@angular/material';
+import { MatGridListModule, MatDatepicker, MatNativeDateModule } from '@angular/material';
 
 
 
@@ -30,11 +31,8 @@ import { OutputGraphComponent } from './output-graph/output-graph.component';
     OutputGraphComponent,
     ExpandRowsComponent,
     PlanAccordionComponent,
-
-
   ],
   imports: [
-
     BrowserModule,
     BrowserAnimationsModule,
     MatCheckboxModule,
@@ -43,6 +41,8 @@ import { OutputGraphComponent } from './output-graph/output-graph.component';
     MatGridListModule,
     MatRadioModule,
     MatInputModule,
+    MatNativeDateModule,
+    MatDatepickerModule,
     HttpClientModule,
     ReactiveFormsModule,
     FormsModule,
@@ -53,7 +53,9 @@ import { OutputGraphComponent } from './output-graph/output-graph.component';
     ])
 
   ],
-  providers: [],
+  providers: [
+    MatDatepickerModule, 
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
