@@ -5,6 +5,7 @@ import { NgModule } from '@angular/core';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatSelectModule} from '@angular/material/select';
 import {MatDatepickerModule} from '@angular/material/datepicker';
+
 import {MatRadioModule} from '@angular/material/radio';
 import {MatInputModule, MatInput} from '@angular/material/input';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
@@ -42,6 +43,7 @@ import { OutputGraphComponent } from './output-graph/output-graph.component';
     MatRadioModule,
     MatInputModule,
     MatNativeDateModule,
+
     MatDatepickerModule,
     HttpClientModule,
     ReactiveFormsModule,
@@ -54,7 +56,7 @@ import { OutputGraphComponent } from './output-graph/output-graph.component';
 
   ],
   providers: [
-    MatDatepickerModule, 
+
   ],
   bootstrap: [AppComponent]
 })

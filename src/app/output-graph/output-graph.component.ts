@@ -14,6 +14,7 @@ import { map, retry, catchError } from 'rxjs/operators';
 import exporting from 'highcharts/modules/exporting';
 import { HttpClient } from '@angular/common/http';
 import { Title } from '@angular/platform-browser';
+import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 exporting(Highcharts);
 
 
@@ -67,6 +68,9 @@ export class OutputGraphComponent implements OnInit {
   modalString1 = ''; modalString2 = '';
   showProcedure(ev){
     console.log('41' + ev);
+  }
+  editDate(type: string, event: MatDatepickerInputEvent<Date>){
+    console.log(event)
   }
   detectDivChanges() {                                                  // detects that user has clicked on a Point on the graph changed
     const div = document.getElementById('vidx');
