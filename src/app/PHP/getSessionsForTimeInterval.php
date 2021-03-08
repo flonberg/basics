@@ -8,9 +8,12 @@ require_once('./restLib.php');
 $dates = makeDates();
 print_r($dates);
 $tslt = new ESBRestTimeslot();    
-var_dump($tslt);
+//var_dump($tslt);
 $ts  = $tslt->timeslotRestRequest("","", $dates['start'], $dates['end']);		// get the timeSlots
-print_r($ts);
+foreach ( $ts as $key => $val){
+    echo $val['SessionType'] ." --- ". $val['SessionState'] ." <br>";
+}
+
 
 exit();
 
