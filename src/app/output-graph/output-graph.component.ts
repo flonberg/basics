@@ -227,12 +227,12 @@ export class OutputGraphComponent implements OnInit {
     let start: string = '';
     let  today:string = moment().format('YYYY-MM-DD');
     if (str =='last20')
-      start = moment().subtract(20, 'd').format('YYYY-MM-DD');
+      this .startDateString = moment().subtract(20, 'd').format('YYYY-MM-DD');
     if (str =='last30')
-      start = moment().subtract(30, 'd').format('YYYY-MM-DD');
+    this .startDateString  = moment().subtract(30, 'd').format('YYYY-MM-DD');
     if (str =='Epoch')
-     start = '2020-01-02';
-    this .getData(start, null);
+      this .startDateString  = '2020-01-02';
+    this .getData(this .startDateString , null);
    // this .setDurationErrorBar()
   }
    ////////////  make the bins and bin the data       \\\\\\\\\\\\\\
@@ -244,27 +244,24 @@ export class OutputGraphComponent implements OnInit {
 
     Highcharts.chart('container2', this .options2);                       // redo the Graph with new binSize
   }
- // downloadCsv() {
- //   this .chart.downloadCSV()
- // }
 /**
  * gets data from dataBase
  * @param start
  * @param end
  */
   getData(start, end){
-    let locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');
+    this .startDateString = moment().subtract(30, 'd').format('YYYY-MM-DD');
     if (start)
-      locStart = start;
+    this .startDateString = start;
     this .genSvce.setPlatform();                                            // switch Dev = BB or Prod = 242
     var selStr = "SELECT top(1000) StartDateTime, EndDateTime, ProcedureCode, PatientID, SessionID, ActivityID FROM ProtomTiming ";
     if (this .procedureCode > 3)                                          // select particular ProcedureCode
       selStr += " WHERE ProcedureCode = '" + this .procedureCode + "' AND StartDateTime >= '" +
-       locStart + "' ORDER By ActivityID desc";
+      this .startDateString+ "' ORDER By ActivityID desc";
     else                                                                  // take ALL ProcedureCodes
-      selStr += " WHERE  StartDateTime > '"+locStart+"' ORDER By ActivityID desc";
+      selStr += " WHERE  StartDateTime > '"+this .startDateString+"' ORDER By ActivityID desc";
 
-    this .genSvce.getWithSelString(selStr, locStart, this. procedureCode ).subscribe (
+    this .genSvce.getWithSelString(selStr, this .startDateString, this. procedureCode ).subscribe (
         (res) => {
           this .setData(res);                                               // store the data
           this .makeBins();                                                 // make Histogram bins
@@ -369,9 +366,15 @@ export class OutputGraphComponent implements OnInit {
    * @param totals
    */                                                                        // end of bidData
   savePatHistogram(data, totals){
-    console.log("372 data is %o", data)
+
     let dArray = Array();                                                   // array for the lines of the CSV file
     let i = 0;                                                              // line index
+    dArray[i] = Array();                                                    // create the array for the line
+    dArray[i][0] = "Plans from " + this .startDateString;
+    if (this .endDate)
+      dArray[i][0] += " to " + this .endDateString;
+    dArray[i][0] += "\r\n";
+    i++;
     for (let key of Object.keys(data)){                                     // step through the patient lines
       dArray[i] = Array();                                                  // create the array for the line
       dArray[i][0] = data[key]['name']                                      // store the PatientID in the first col
