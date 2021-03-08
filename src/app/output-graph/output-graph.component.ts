@@ -249,8 +249,8 @@ export class OutputGraphComponent implements OnInit {
  // }
 /**
  * gets data from dataBase
- * @param start 
- * @param end 
+ * @param start
+ * @param end
  */
   getData(start, end){
     let locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');
@@ -313,14 +313,14 @@ export class OutputGraphComponent implements OnInit {
 
   }
   public stackedBins: any;                                                      // the holder for the stacked timeInterval bins
-//  public toSeePatID: string;
+  public plainBins: []
 /**
  * Store the data in the 'series' for the 2 Upper Graphs. Make the bins for the Duration Historam in Lower Graph
  */
   binData(){
     this .stackedBins = new Array();                                           // the holder for the stacked timeInterval bins
-    let plainBins =this .binsC;
-    console.log("323 plainBins %o ", plainBins)
+    this .plainBins =this .binsC;
+    console.log("323 plainBins %o ", this .plainBins)
     var i = 0;
     var patCount2 = 0;                                                          // counter => index for patientLoop
     if ( this .data['Patients']  ){                                             // If there ARE patients
@@ -340,18 +340,14 @@ export class OutputGraphComponent implements OnInit {
           var binCount2 = 0;                                                    // loop counter
           for (let binEntry of this .binsC ){
             if (entry[1] > binEntry[0] && entry[1] <= binEntry[1]){             // if duration is withing the bin limits
-              this .stackedBins[patCount2]['data'][binCount2]++                        // increment the count in that bin
-              plainBins[binCount2]['count']++;
+              this .stackedBins[patCount2]['data'][binCount2]++                 // increment the count in that bin
+              this .plainBins[binCount2]['count']++;
             }
             binCount2++;
           }
         }
         patCount2++;
       }
-      console.log("348  staBi %o", plainBins)
-      this .saveHistogram(plainBins)
- 
-  
     }
     ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
     var i = 0;
@@ -365,22 +361,37 @@ export class OutputGraphComponent implements OnInit {
     ////////    Load data into Bottom Graph Histogram       \\\\\\\\\\\\\\\\\\\\
     this .options2.series = this .stackedBins;                                // load the data into lower graph
     this .options2.xAxis['categories'] = this .binsC['Label'];
-  }                                                                           // end of bidData
-                                                                  // end of binData function
-  saveHistogram(data ){
-    let test = Array()
-    for (let key of Object.keys(data)){
-      console.log("osss %o", data[key]['count'])
-      if (data[key]['count'])
-        test.push(data[key]['count'].toString() + ",")
-      else 
-        test.push("0,"); 
-    }
-    console.log("376 test is %o", test)
-    let tBlob = new Blob(test)
-    console.log("349 blob %o", tBlob)
-    saveAs(tBlob, 'hist.csv')
+ //   this .savePatHistogram(this .stackedBins, plainBins)
   }
+  /**
+   * Save the Histogram data to file.
+   * @param data
+   * @param totals
+   */                                                                        // end of bidData
+  savePatHistogram(data, totals){
+    console.log("372 data is %o", data)
+    let dArray = Array();                                                   // array for the lines of the CSV file
+    let i = 0;                                                              // line index
+    for (let key of Object.keys(data)){                                     // step through the patient lines
+      dArray[i] = Array();                                                  // create the array for the line
+      dArray[i][0] = data[key]['name']                                      // store the PatientID in the first col
+      let k = 1;                                                            // index of data lines
+      for ( let entry of data[key]['data']){                                // step thru each patient count
+        dArray[i][k++] = entry                                              // store the datum
+      }
+      dArray[i][k++] = "\r\n"                                               // line feed to end the line
+      i++;                                                                  // go to the next line
+    }
+    dArray[i] = Array();                                                    // make the line for the totals
+    dArray[i][0] = "Total";                                                 // put 'Total' in first col
+    let k = 1;                                                              // index for the cols
+    for (let key of Object.keys(totals)){
+      dArray[i][k++] = totals[key]['count'];                                // store the datum
+    }
+    let tBlob = new Blob(dArray)
+    saveAs(tBlob, 'hist.csv')                                               // Save the file
+  }
+
 /**
  * Make the bins for the lower graph histogram
  */
@@ -417,7 +428,7 @@ export class OutputGraphComponent implements OnInit {
   }
 
   /**
-   * Saves a .csv file of the data. 
+   * Linked to Export to Csv button. Saves a .csv file of the data.
    */
   saveFile(){
     this.getFile().subscribe((res) => {
@@ -427,7 +438,9 @@ export class OutputGraphComponent implements OnInit {
     });
     console.log('fileSaved')
   }
-  // download.service.ts
+/**
+ * Get a file from the Server
+ */
   getFile() {
     const httpOptions = {
       responseType: 'blob' as 'json'
