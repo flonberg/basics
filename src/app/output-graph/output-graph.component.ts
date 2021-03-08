@@ -220,7 +220,7 @@ export class OutputGraphComponent implements OnInit {
       this .endDateString = moment(event).format('YYYY-MM-DD');
     if (this .startDateString && this .endDateString){
       this .options.title.text = "Plans from " + this .startDateString + " to " + this .endDateString
-      this .getData(this .startDateString, this .endDateString)
+    this .getData(this .startDateString, this .endDateString)
     }
   }
   setDateRange(str){
@@ -232,6 +232,8 @@ export class OutputGraphComponent implements OnInit {
     this .startDateString  = moment().subtract(30, 'd').format('YYYY-MM-DD');
     if (str =='Epoch')
       this .startDateString  = '2020-01-02';
+    this .endDateString = " to Present"  
+    this .options.title.text = "Plans from " + this .startDateString + " to " + this .endDateString
     this .getData(this .startDateString , null);
    // this .setDurationErrorBar()
   }
@@ -366,17 +368,18 @@ export class OutputGraphComponent implements OnInit {
    * @param totals
    */                                                                        // end of bidData
   savePatHistogram(data, totals){
-
     let dArray = Array();                                                   // array for the lines of the CSV file
     let i = 0;                                                              // line index
     dArray[i] = Array();                                                    // create the array for the line
     dArray[i][0] = "Plans from " + this .startDateString;
-    if (this .endDate)
+    if (this .endDateString)
       dArray[i][0] += " to " + this .endDateString;
+    dArray[i][0] += " Bin Size = " + this .binSizeC + " minutes"
     dArray[i][0] += "\r\n";
     i++;
     for (let key of Object.keys(data)){                                     // step through the patient lines
       dArray[i] = Array();                                                  // create the array for the line
+    //  dArray[i][0] = '';                                                    // empty first col for spacing
       dArray[i][0] = data[key]['name']                                      // store the PatientID in the first col
       let k = 1;                                                            // index of data lines
       for ( let entry of data[key]['data']){                                // step thru each patient count
