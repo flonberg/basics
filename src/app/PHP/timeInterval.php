@@ -123,14 +123,13 @@ $row['PCode'] = $timeVproc;
 $st = print_r($row['Patients'], true);  fwrite($fp, "\r\n  69 \r\n ". $st);  
 $st = print_r($row['average'], true);  fwrite($fp, "\r\n  69 \r\n ". $st);  
 $row['total'] = $k;
-fwrite($cp, "\r\n Total ". $row['total']);
-$row['totWritten'] = writeCSV($cp, $row['Patients']);
+//fwrite($cp, "\r\n Total ". $row['total']);
+//$row['totWritten'] = writeCSV($cp, $row['Patients']);
 
 echo json_encode($row);
 exit();
-/**
- * writes out to csv file 
- */
+/*
+ 
 function writeCSV($cp, $dB){
   $procedures = array("121726"=>"Treatment", "121724"=>"VSim", "121733"=>"QA");
   if (strpos($_GET['procedureCode'], '726') > 0 )
@@ -156,7 +155,7 @@ function writeCSV($cp, $dB){
   }
   return $totWritten;
 }
-
+*/
 
 function makeLast30(){
   $today = date('y-m-d');
