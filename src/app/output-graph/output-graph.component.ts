@@ -70,6 +70,7 @@ export class OutputGraphComponent implements OnInit {
    this .startDate = new FormControl();
    this .endDate = new FormControl();
    this .options.title.text = "Plans for Past 30 Days"
+   this .endDateString = "to Present"
  //   this .detectDivChanges();
   }
   modalString1 = ''; modalString2 = '';
@@ -304,11 +305,12 @@ export class OutputGraphComponent implements OnInit {
       );                                                                // end of subscribe
     }
 
-
+    byPatData: any
   setData(inpData){
     this .data = inpData;
     this .totalActivities = inpData.total;
-    console.log("setData 288 %o", this .data)
+    this .byPatData = inpData.Patients
+    console.log("setData 288 %o", this .byPatData)
 
   }
   public stackedBins: any;                                                      // the holder for the stacked timeInterval bins
@@ -362,6 +364,30 @@ export class OutputGraphComponent implements OnInit {
     this .options2.xAxis['categories'] = this .binsC['Label'];
  //   this .savePatHistogram(this .stackedBins, plainBins)
   }
+  saveDurationCSV(data){
+    let dArray = Array();                                                   // array for the lines of the CSV file
+    let i = 0;                                                              // line index
+    dArray[i] = Array();                                                    // create the array for the line
+    dArray[i][0] = "Duration [min] \r\n"
+    dArray[++i] = Array();
+    dArray[i][0] = "Plans from " + this .startDateString;
+    if (this .endDateString)
+      dArray[i][0] += " to " + this .endDateString + "\r\n";
+    i++;
+    for (let key of Object.keys(data)){                                     // step through the patient lines
+        dArray[i] = Array();                                                  // create the array for the line
+        dArray[i][0] = key                                      // store the PatientID in the first col
+        let k = 1;                                                            // index of data lines
+        for (let entry of data[key]){
+          dArray[i][k++] = entry[1]
+        }
+        dArray[i][k++] = "\r\n"                                               // line feed to end the line
+        i++;                                                                  // go to the next line
+      }
+      console.log("384 patDate %o", dArray)
+      let tBlob = new Blob(dArray)
+      saveAs(tBlob, 'duration.csv')                                               // Save the file
+  }
   /**
    * Save the Histogram data to file.
    * @param data
@@ -379,7 +405,7 @@ export class OutputGraphComponent implements OnInit {
     i++;
     for (let key of Object.keys(data)){                                     // step through the patient lines
       dArray[i] = Array();                                                  // create the array for the line
-    //  dArray[i][0] = '';                                                    // empty first col for spacing
+
       dArray[i][0] = data[key]['name']                                      // store the PatientID in the first col
       let k = 1;                                                            // index of data lines
       for ( let entry of data[key]['data']){                                // step thru each patient count
