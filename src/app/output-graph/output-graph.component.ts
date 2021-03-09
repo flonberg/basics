@@ -1,7 +1,8 @@
+import { GenService } from './../gen.service';
 import { FormControl } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
 import * as Highcharts from 'highcharts';
-import { GenService } from '../gen.service';
+
 import { throwMatDialogContentAlreadyAttachedError } from '@angular/material';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { keyframes } from '@angular/animations';
@@ -16,6 +17,7 @@ import exporting from 'highcharts/modules/exporting';
 import { HttpClient } from '@angular/common/http';
 import { Title } from '@angular/platform-browser';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
+import { interval } from 'rxjs';
 exporting(Highcharts);
 
 
@@ -55,11 +57,14 @@ export class OutputGraphComponent implements OnInit {
   startDate: FormControl;
   endDate: FormControl;
   param1:string;
+  currentSessions: {}
+  numContinued: number;
   constructor(private genSvce: GenService, private route: ActivatedRoute, @ Inject(DOCUMENT) document, private http: HttpClient) {
   //  this .selected = "Treatment";
     this .route.queryParams.subscribe(params => {
       this .param1 = params['param'];
       });
+  
   }
   ngOnInit() {
    this .procedureCode = 121726;
@@ -70,12 +75,38 @@ export class OutputGraphComponent implements OnInit {
    this .startDate = new FormControl();
    this .endDate = new FormControl();
    this .options.title.text = "Plans for Past 30 Days"
-   this .endDateString = "to Present"
+   this .endDateString = "to Present";
+   // Create an Observable that will publish a value on an interval
+   const secondsCounter = interval(50000);
+   this .getSessions()
+// Subscribe to begin publishing values
+
+   secondsCounter.subscribe(n => {
+    console.log(`It's been ${n} seconds since subscribing!`); 
+    this .getSessions()
+    });
+
+
  //   this .detectDivChanges();
   }
   modalString1 = ''; modalString2 = '';
   showProcedure(ev){
     console.log('41' + ev);
+  }
+  getSessions(){
+
+    this .genSvce .getSessions(). subscribe(
+      (res=> {
+        this .setSessions(res);
+
+      })
+    )
+  }
+
+  setSessions(sess){
+
+    this .numContinued = sess['CONTINUED'];
+    console.log("88 currentSessions %o", sess.CONTINUED)
   }
 
   detectDivChanges() {                                                  // detects that user has clicked on a Point on the graph changed

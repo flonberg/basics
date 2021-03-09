@@ -19,6 +19,11 @@ export class GenService {
   console.log("genservice 17 getWithSelString URL is " + url);
   return this .http.get(url)
 }
+getSessions(){
+  this .urlBase = 'https://whiteboard.partners.org/esb/FLwbe/REST/JW/';  
+  var url = this .urlBase + "getSessionsForTimeInterval.php";
+  return this .http.get(url)
+}
 
   setPlatform(){             // set the dB host for the localhost version
       const wlr = window.location.href;

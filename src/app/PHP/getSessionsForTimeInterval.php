@@ -1,4 +1,6 @@
 <?php
+/*********  save to    'http://blackboard-dev.partners.org/dev/FJL/AngProd/';  */
+
 require_once('./ESButils.inc');
 require_once('H:\inetpub\lib\ESB\_dev_\ESBRestProto.inc');
 require_once('H:\inetpub\lib\switchConnect.inc');                           // has routine to obtain handle for BB or 242
@@ -6,13 +8,18 @@ require_once('H:\inetpub\lib\phpDB.inc');
 require_once('./restLib.php');  
 
 $dates = makeDates();
-print_r($dates);
+
 $tslt = new ESBRestTimeslot();    
-//var_dump($tslt);
+
 $ts  = $tslt->timeslotRestRequest("","", $dates['start'], $dates['end']);		// get the timeSlots
 foreach ( $ts as $key => $val){
-    echo $val['SessionType'] ." --- ". $val['SessionState'] ." <br>";
-}
+    if (!isset($dist[$val['SessionState']]))
+        $dist[$val['SessionState']] = 1;
+    else
+        $dist[$val['SessionState']]++;    
+    }
+ 
+    echo json_encode($dist);
 
 
 exit();
