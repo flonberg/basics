@@ -20,7 +20,7 @@ export class GenService {
   return this .http.get(url)
 }
 getSessions(){
-  this .urlBase = 'https://whiteboard.partners.org/esb/FLwbe/REST/JW/';  
+  this .urlBase = 'https://whiteboard.partners.org/esb/FLwbe/REST/JW/';
   var url = this .urlBase + "getSessionsForTimeInterval.php";
   return this .http.get(url)
 }

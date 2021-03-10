@@ -3,20 +3,17 @@ import { FormControl } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
 import * as Highcharts from 'highcharts';
 
-import { throwMatDialogContentAlreadyAttachedError } from '@angular/material';
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
-import { keyframes } from '@angular/animations';
+
 import { ActivatedRoute, RouterLinkWithHref } from '@angular/router';
 import * as moment from 'moment';
 
 import { Inject }  from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import * as saveAs from 'file-saver';
-import { map, retry, catchError } from 'rxjs/operators';
+
 import exporting from 'highcharts/modules/exporting';
 import { HttpClient } from '@angular/common/http';
-import { Title } from '@angular/platform-browser';
-import { MatDatepickerInputEvent } from '@angular/material/datepicker';
+
 import { interval } from 'rxjs';
 exporting(Highcharts);
 
@@ -74,7 +71,7 @@ export class OutputGraphComponent implements OnInit {
    this .genSvce.setPlatform();
    this .startDate = new FormControl();
    this .endDate = new FormControl();
-   this .options.title.text = "Plans for Past 30 Days"
+
    this .endDateString = "to Present";
    // Create an Observable that will publish a value on an interval
    const secondsCounter = interval(50000);
@@ -94,19 +91,16 @@ export class OutputGraphComponent implements OnInit {
     console.log('41' + ev);
   }
   getSessions(){
-
     this .genSvce .getSessions(). subscribe(
       (res=> {
         this .setSessions(res);
-
       })
     )
   }
 
   setSessions(sess){
-
-    this .numContinued = sess['CONTINUED'];
-    console.log("88 currentSessions %o", sess.CONTINUED)
+    this .currentSessions = sess;
+    console.log("88 currentSessions %o", sess)
   }
 
   detectDivChanges() {                                                  // detects that user has clicked on a Point on the graph changed
@@ -255,6 +249,9 @@ export class OutputGraphComponent implements OnInit {
     this .getData(this .startDateString, this .endDateString)
     }
   }
+  setSessionRange(arg){
+
+  }
   setDateRange(str){
     let start: string = '';
     let  today:string = moment().format('YYYY-MM-DD');
@@ -336,12 +333,13 @@ export class OutputGraphComponent implements OnInit {
       );                                                                // end of subscribe
     }
 
-    byPatData: any
+  
   setData(inpData){
     this .data = inpData;
     this .totalActivities = inpData.total;
-    this .byPatData = inpData.Patients
-    console.log("setData 288 %o", this .byPatData)
+  //  this .byPatData = inpData.Patients
+  //  console.log("setData 288 %o", this .byPatData)
+    this .options.title.text = inpData.total + " Activities in Past 30 Days"
 
   }
   public stackedBins: any;                                                      // the holder for the stacked timeInterval bins

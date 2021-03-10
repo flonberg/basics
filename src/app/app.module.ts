@@ -25,6 +25,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { ExpandRowsComponent } from './expand-rows/expand-rows.component';
 import { PlanAccordionComponent } from './plan-accordion/plan-accordion.component';
 import { OutputGraphComponent } from './output-graph/output-graph.component';
+import { SessionsComponent } from './sessions/sessions.component';
 
 @ NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { OutputGraphComponent } from './output-graph/output-graph.component';
     OutputGraphComponent,
     ExpandRowsComponent,
     PlanAccordionComponent,
+    SessionsComponent
   ],
   imports: [
     BrowserModule,

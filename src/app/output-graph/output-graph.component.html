@@ -3,7 +3,6 @@
 <div id='container3' style="display:none"></div>
 
 <div id='control'>
-
   <mat-form-field  style='width:200px;'  appearance='fill' >
     <mat-label>Plot Type</mat-label>
     <mat-select [(value)] = "typeSelected" id='procType'>
@@ -28,10 +27,7 @@
             <mat-option value="Epoch" (click) = "setDateRange('Epoch')">Epoch</mat-option>
         </mat-select>
     </mat-form-field>
-    <mat-form-field  style='width:200px;'  appearance='fill' >
-        <mat-label>Total Activities</mat-label>
-        <input matInput readonly='true' [value]="totalActivities" >
-    </mat-form-field>
+
     
     <mat-form-field appearance="fill">
         <mat-label>Interval Start</mat-label>
@@ -45,13 +41,43 @@
         <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
         <mat-datepicker #picker2></mat-datepicker>
     </mat-form-field>
-
+    <button mat-button (click)="saveDurationCSV(byPatData)">
+            Export to csv
+        </button> 
+</div>
+<div>
+            <mat-form-field *ngIf = "currentSessions"  style='width:200px;'  appearance='fill' >
+                <mat-label>Idle</mat-label>
+                <input *ngIf = "currentSessions" matInput readonly='true' [value]="currentSessions.IDLE" >
+            </mat-form-field>
+            <mat-form-field *ngIf = "currentSessions"  style='width:200px;'  appearance='fill' >
+                    <mat-label>Canceled</mat-label>
+                    <input *ngIf = "currentSessions" matInput readonly='true' [value]="currentSessions.CANCELED" >
+             </mat-form-field>
+             <mat-form-field *ngIf = "currentSessions  && currentSessions.CONTINUED"  style='width:200px;'  appearance='fill' >
+                    <mat-label>Continued</mat-label>
+                    <input *ngIf = "currentSessions" matInput readonly='true' [value]="currentSessions.CONTINUED" >
+             </mat-form-field>
+             <mat-form-field *ngIf = "currentSessions  && currentSessions.ENDED"  style='width:200px;'  appearance='fill' >
+                    <mat-label>Ended</mat-label>
+                    <input *ngIf = "currentSessions" matInput readonly='true' [value]="currentSessions.ENDED" >
+             </mat-form-field>
+             <mat-form-field *ngIf = "currentSessions && currentSessions.INPROGRESS"  style='width:200px;'  appearance='fill' >
+                    <mat-label>In Progress</mat-label>
+                    <input *ngIf = "currentSessions" matInput readonly='true' [value]="currentSessions.INPROGRESS" >
+             </mat-form-field>
+             <mat-form-field  style='width:200px;'  appearance='fill' >
+                    <mat-label>Time Range</mat-label>
+                    <mat-select [(value)]= "dateRange" id='dateRangeID' > 
+                        <mat-option value="Last_30_Days"  (click) = "setSessioRange('Today')" >Today </mat-option>
+                        <mat-option value="Last_20_Days" (click) ="setSessionRange('enc2days')" >Tomorrow</mat-option>
+         
+                    </mat-select>
+             </mat-form-field>
  
 </div>
 
-        <button mat-button (click)="saveDurationCSV(byPatData)">
-            Export to csv
-        </button> 
+    
 
         <!-- The Modal -->
 <div id="myModal" class="modal" (click)='closeModal()'>
