@@ -45,18 +45,14 @@
             Export to csv
         </button> 
 </div>
-<div>
-            <mat-form-field *ngIf = "currentSessions"  style='width:200px;'  appearance='fill' >
+<div *ngIf = "currentSessions" >
+            <mat-form-field  style='width:200px;'  appearance='fill' >
                 <mat-label>Idle</mat-label>
-                <input *ngIf = "currentSessions" matInput readonly='true' [value]="currentSessions.IDLE" >
+                <input matInput readonly='true' [value]="currSess.IDLE" >
             </mat-form-field>
-            <mat-form-field *ngIf = "currentSessions"  style='width:200px;'  appearance='fill' >
-                    <mat-label>Canceled</mat-label>
-                    <input *ngIf = "currentSessions" matInput readonly='true' [value]="currentSessions.CANCELED" >
-             </mat-form-field>
              <mat-form-field *ngIf = "currentSessions  && currentSessions.CONTINUED"  style='width:200px;'  appearance='fill' >
                     <mat-label>Continued</mat-label>
-                    <input *ngIf = "currentSessions" matInput readonly='true' [value]="currentSessions.CONTINUED" >
+                    <input *ngIf = "currentSessions" matInput readonly='true' [value]="currSess.CONTINUED" >
              </mat-form-field>
              <mat-form-field *ngIf = "currentSessions  && currentSessions.ENDED"  style='width:200px;'  appearance='fill' >
                     <mat-label>Ended</mat-label>
@@ -66,15 +62,20 @@
                     <mat-label>In Progress</mat-label>
                     <input *ngIf = "currentSessions" matInput readonly='true' [value]="currentSessions.INPROGRESS" >
              </mat-form-field>
+             <mat-form-field *ngIf = "currSess.CANCELED > 0 "  style='width:200px;'  appearance='fill' >
+                    <mat-label>Canceled</mat-label>
+                    <input matInput readonly='true' [value]="currSess.CANCELED" >
+             </mat-form-field>
              <mat-form-field  style='width:200px;'  appearance='fill' >
                     <mat-label>Time Range</mat-label>
                     <mat-select [(value)]= "dateRange" id='dateRangeID' > 
-                        <mat-option value="Last_30_Days"  (click) = "setSessioRange('Today')" >Today </mat-option>
-                        <mat-option value="Last_20_Days" (click) ="setSessionRange('enc2days')" >Tomorrow</mat-option>
-         
+                        <mat-option value="Last_30_Days"  (click) = "setSessionRange(0)" >Today </mat-option>
+                        <mat-option value="Last_20_Days" (click) ="setSessionRange(1)" >Tomorrow</mat-option>
                     </mat-select>
              </mat-form-field>
- 
+</div>
+<div *ngIf = !currentSessions >
+    <p> Loading Sessions </p>
 </div>
 
     

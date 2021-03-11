@@ -28,6 +28,14 @@ noData(Highcharts);
 More(Highcharts);
 noData(Highcharts);
 
+export interface sessiontInt {
+  IDLE: number,
+  CONTINUED: number,
+  ENDED: number,
+  INPROGRESS: number,
+  CANCELED: number
+}
+
 @ Component({
   selector: 'app-output-graph',
   templateUrl: './output-graph.component.html',
@@ -35,9 +43,9 @@ noData(Highcharts);
 })
 export class OutputGraphComponent implements OnInit {
  // urlBase: string;
-  chart: any;
+ // chart: any;
   data: any;
-  selected:string;
+  //selected:string;
   procedureCode: number;
   binSizeC: number = 5;                                                 // default number of minutes per bin
   binsC: any
@@ -54,16 +62,21 @@ export class OutputGraphComponent implements OnInit {
   startDate: FormControl;
   endDate: FormControl;
   param1:string;
-  currentSessions: {}
+  currentSessions: any;
   numContinued: number;
-  constructor(private genSvce: GenService, private route: ActivatedRoute, @ Inject(DOCUMENT) document, private http: HttpClient) {
+  currSess: sessiontInt;
+  byPatData: any;
+  sessStateInterval: string = 'Today';
+
+  constructor(private genSvce: GenService, private route: ActivatedRoute, @ Inject(DOCUMENT) document,
+   private http: HttpClient) {
   //  this .selected = "Treatment";
     this .route.queryParams.subscribe(params => {
       this .param1 = params['param'];
       });
-  
   }
   ngOnInit() {
+   this .currSess =  { 'CONTINUED' : 0, 'IDLE' :0, 'ENDED' :0, 'INPROGRESS':0 , 'CANCELED': 0}
    this .procedureCode = 121726;
    this .setOptions = this .options;
    this .locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');
@@ -71,35 +84,37 @@ export class OutputGraphComponent implements OnInit {
    this .genSvce.setPlatform();
    this .startDate = new FormControl();
    this .endDate = new FormControl();
-
    this .endDateString = "to Present";
    // Create an Observable that will publish a value on an interval
-   const secondsCounter = interval(50000);
-   this .getSessions()
+   const secondsCounter = interval(1000000);
+   this .getSessions(this .sessStateInterval)
 // Subscribe to begin publishing values
 
    secondsCounter.subscribe(n => {
-    console.log(`It's been ${n} seconds since subscribing!`); 
-    this .getSessions()
+    this .getSessions(this .sessStateInterval)
     });
-
-
  //   this .detectDivChanges();
   }
   modalString1 = ''; modalString2 = '';
-  showProcedure(ev){
-    console.log('41' + ev);
-  }
-  getSessions(){
-    this .genSvce .getSessions(). subscribe(
+  getSessions(arg){
+    this .genSvce .getSessions(arg). subscribe(
       (res=> {
         this .setSessions(res);
       })
     )
   }
+  setSessionRange(arg){
+    this .sessStateInterval = arg;
+    this .getSessions(this .sessStateInterval)
 
+  }
   setSessions(sess){
     this .currentSessions = sess;
+    this .currSess.CONTINUED = sess.CONTINUED;
+    this .currSess.IDLE = sess.IDLE;
+    this .currSess.ENDED = sess.ENDED;
+    this .currSess.INPROGRESS = sess.INPROGRESS;
+    this .currSess.CANCELED = sess.CANCELED;
     console.log("88 currentSessions %o", sess)
   }
 
@@ -164,7 +179,7 @@ export class OutputGraphComponent implements OnInit {
           formatter: function () {
             return Highcharts.dateFormat('%e %b %y', this .value);
           }
-        }
+        },
       },
       yAxis: {
         min: 0,
@@ -191,15 +206,16 @@ export class OutputGraphComponent implements OnInit {
       title: {
         text: ''
       },
-      xAxis: {
-        crosshair: true,
-        format: "test",
-        },
       yAxis: {
         min: 0,
         title: {
             text: 'Procedures'
           },
+      },
+      xAxis: {
+        title:{
+          text: 'Bin Size [minutes]'
+        }
       },
       plotOptions: {
         column: {
@@ -249,9 +265,7 @@ export class OutputGraphComponent implements OnInit {
     this .getData(this .startDateString, this .endDateString)
     }
   }
-  setSessionRange(arg){
 
-  }
   setDateRange(str){
     let start: string = '';
     let  today:string = moment().format('YYYY-MM-DD');
@@ -337,7 +351,7 @@ export class OutputGraphComponent implements OnInit {
   setData(inpData){
     this .data = inpData;
     this .totalActivities = inpData.total;
-  //  this .byPatData = inpData.Patients
+     this .byPatData = inpData.Patients
   //  console.log("setData 288 %o", this .byPatData)
     this .options.title.text = inpData.total + " Activities in Past 30 Days"
 

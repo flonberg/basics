@@ -19,9 +19,9 @@ export class GenService {
   console.log("genservice 17 getWithSelString URL is " + url);
   return this .http.get(url)
 }
-getSessions(){
+getSessions(arg){
   this .urlBase = 'https://whiteboard.partners.org/esb/FLwbe/REST/JW/';
-  var url = this .urlBase + "getSessionsForTimeInterval.php";
+  var url = this .urlBase + "getSessionsForTimeInterval.php?arg=" + arg;
   return this .http.get(url)
 }
 
@@ -34,7 +34,7 @@ getSessions(){
       if ( window.location.href.indexOf('whiteboard') !== -1 )
       {                   // PROD.
         this .urlBase = 'https://whiteboard.partners.org/esb/FLwbe/AngProd/';      // get data from BB  for localhost or BB
-        console.log(" dectected whiteboard so setting urlBase to " + this .urlBase);    
+        console.log(" dectected whiteboard so setting urlBase to " + this .urlBase);
       }
       console.log("gen 33  in setPlatForm urlBase is " + this .urlBase);
   }
