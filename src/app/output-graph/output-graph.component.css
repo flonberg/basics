@@ -36,3 +36,9 @@
     text-decoration: none;
     cursor: pointer;
 }
+input {
+    width:100px;
+}
+.oneHun {
+    width:120px;
+}

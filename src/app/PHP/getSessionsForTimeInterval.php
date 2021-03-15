@@ -1,5 +1,5 @@
 <?php
-/*********  save to    'http://blackboard-dev.partners.org/dev/FJL/AngProd/';  */
+/*********  save to    ''https://whiteboard.partners.org/esb/FLwbe/REST/JW/'';  */
 
 require_once('./ESButils.inc');
 require_once('H:\inetpub\lib\ESB\_dev_\ESBRestProto.inc');
@@ -9,8 +9,9 @@ require_once('./restLib.php');
 
     $fp = setLog();
     $gp = fopen('./log/wSessions.txt', 'w+');
- 
-    $dates = makeDates($fp, 0);
+    
+   // $dates = makeDates(2, 'week');
+    $dates = makeDates($_GET['num'], $_GET['arg']);
  /*   week/month/3 months/6 months/year/all/  */
 $tslt = new ESBRestTimeslot();    
 $ts  = $tslt->timeslotRestRequest("","", $dates['start'], $dates['end']);		// get the timeSlots
@@ -21,10 +22,26 @@ foreach ( $ts as $key => $val){
     else
         $dist[$val['SessionState']]++;    
     }
+    $dist['fromDate'] = $dates['startString'];
     echo json_encode($dist);
 exit();
 
-    function makeDates($fp, $arg){
+
+function makeDates($n, $arg){
+    $today = new DateTime();
+    $str1 =  $today->format("Y-m-d" );             
+    $str2 = "T00:00:00.000Z";
+    $str3 = "T23:00:00.000Z";
+    $ret['end']=  "$str1"."$str3";
+        $today->modify( '-' . $n .' '. $arg); 
+    $str1 = $today->format('Y-m-d');
+    $ret['start']=  "$str1"."$str2";
+    $ret['startString'] = $str1;
+    return ($ret);
+}
+
+
+    function makeDatesOLD($fp, $arg){
         $today = new DateTime();
         if ($_GET['arg'] == '1')                        // caller asked to tomorrow
             $today->modify('+ 1 day');                  // go to tomorrow

@@ -33,7 +33,8 @@ export interface sessiontInt {
   CONTINUED: number,
   ENDED: number,
   INPROGRESS: number,
-  CANCELED: number
+  CANCELED: number,
+  fromDate: string
 }
 
 @ Component({
@@ -76,7 +77,7 @@ export class OutputGraphComponent implements OnInit {
       });
   }
   ngOnInit() {
-   this .currSess =  { 'CONTINUED' : 0, 'IDLE' :0, 'ENDED' :0, 'INPROGRESS':0 , 'CANCELED': 0}
+   this .currSess =  { 'CONTINUED' : 0, 'IDLE' :0, 'ENDED' :0, 'INPROGRESS':0 , 'CANCELED': 0, 'fromDate':''}
    this .procedureCode = 121726;
    this .setOptions = this .options;
    this .locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');
@@ -87,26 +88,26 @@ export class OutputGraphComponent implements OnInit {
    this .endDateString = "to Present";
    // Create an Observable that will publish a value on an interval
    const secondsCounter = interval(1000000);
-   this .getSessions(this .sessStateInterval)
+   this .getSessions(0, null)
 // Subscribe to begin publishing values
 
    secondsCounter.subscribe(n => {
-    this .getSessions(this .sessStateInterval)
+    this .getSessions(0, null)
     });
  //   this .detectDivChanges();
   }
   modalString1 = ''; modalString2 = '';
-  getSessions(arg){
-    this .genSvce .getSessions(arg). subscribe(
+  getSessions(num, arg){
+    this .currentSessions = null;
+    this .genSvce .getSessions(num, arg). subscribe(
       (res=> {
         this .setSessions(res);
       })
     )
   }
-  setSessionRange(arg){
+  setSessionRange(num, arg){
     this .sessStateInterval = arg;
-    this .getSessions(this .sessStateInterval)
-
+    this .getSessions(num, arg)
   }
   setSessions(sess){
     this .currentSessions = sess;
@@ -115,6 +116,7 @@ export class OutputGraphComponent implements OnInit {
     this .currSess.ENDED = sess.ENDED;
     this .currSess.INPROGRESS = sess.INPROGRESS;
     this .currSess.CANCELED = sess.CANCELED;
+    this .currSess.fromDate = sess.fromDate;
     console.log("88 currentSessions %o", sess)
   }
 

@@ -19,9 +19,9 @@ export class GenService {
   console.log("genservice 17 getWithSelString URL is " + url);
   return this .http.get(url)
 }
-getSessions(arg){
+getSessions(num, arg){
   this .urlBase = 'https://whiteboard.partners.org/esb/FLwbe/REST/JW/';
-  var url = this .urlBase + "getSessionsForTimeInterval.php?arg=" + arg;
+  var url = this .urlBase + "getSessionsForTimeInterval.php?num=" + num + "&arg=" + arg;
   return this .http.get(url)
 }
 

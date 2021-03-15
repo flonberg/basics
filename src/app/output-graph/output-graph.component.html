@@ -46,31 +46,36 @@
         </button> 
 </div>
 <div *ngIf = "currentSessions" >
-            <mat-form-field  style='width:200px;'  appearance='fill' >
+            <mat-form-field  class='oneHun' appearance='fill' >
                 <mat-label>Idle</mat-label>
                 <input matInput readonly='true' [value]="currSess.IDLE" >
             </mat-form-field>
-             <mat-form-field *ngIf = "currentSessions  && currentSessions.CONTINUED"  style='width:200px;'  appearance='fill' >
+             <mat-form-field *ngIf = "currentSessions  && currentSessions.CONTINUED"  class='oneHun'  appearance='fill' >
                     <mat-label>Continued</mat-label>
                     <input *ngIf = "currentSessions" matInput readonly='true' [value]="currSess.CONTINUED" >
              </mat-form-field>
-             <mat-form-field *ngIf = "currentSessions  && currentSessions.ENDED"  style='width:200px;'  appearance='fill' >
+             <mat-form-field *ngIf = "currentSessions  && currentSessions.ENDED"  class='oneHun'  appearance='fill' >
                     <mat-label>Ended</mat-label>
                     <input *ngIf = "currentSessions" matInput readonly='true' [value]="currentSessions.ENDED" >
              </mat-form-field>
-             <mat-form-field *ngIf = "currentSessions && currentSessions.INPROGRESS"  style='width:200px;'  appearance='fill' >
+             <mat-form-field *ngIf = "currentSessions && currentSessions.INPROGRESS"  class='oneHun'  appearance='fill' >
                     <mat-label>In Progress</mat-label>
                     <input *ngIf = "currentSessions" matInput readonly='true' [value]="currentSessions.INPROGRESS" >
              </mat-form-field>
-             <mat-form-field *ngIf = "currSess.CANCELED > 0 "  style='width:200px;'  appearance='fill' >
+             <mat-form-field *ngIf = "currSess.CANCELED > 0 " class='oneHun'  appearance='fill' >
                     <mat-label>Canceled</mat-label>
                     <input matInput readonly='true' [value]="currSess.CANCELED" >
              </mat-form-field>
-             <mat-form-field  style='width:200px;'  appearance='fill' >
+             <mat-form-field *ngIf = "currSess.CANCELED > 0 " class='oneHun'  appearance='fill' >
+                    <mat-label>From Date</mat-label>
+                    <input matInput readonly='true' [value]="currSess.fromDate" >
+             </mat-form-field>
+             <mat-form-field  appearance='fill' >
                     <mat-label>Time Range</mat-label>
                     <mat-select [(value)]= "dateRange" id='dateRangeID' > 
-                        <mat-option value="Last_30_Days"  (click) = "setSessionRange(0)" >Today </mat-option>
-                        <mat-option value="Last_20_Days" (click) ="setSessionRange(1)" >Last 5 days</mat-option>
+                        <mat-option value="Last_30_Days"  (click) = "setSessionRange(0, null)" >Today </mat-option>
+                        <mat-option value="Last_20_Days" (click) ="setSessionRange(1, 'week')" >Last week</mat-option>
+                        
                     </mat-select>
              </mat-form-field>
 </div>

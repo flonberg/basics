@@ -1,23 +1,24 @@
 <?php
 
-$tst = makeDates(1);
+$tst = makeDates(2, 'week');
 print_r($tst);
 
-function makeDates($arg){
+function makeDates($n, $arg){
     $today = new DateTime();
     $str1 =  $today->format("Y-m-d" );             
     $str2 = "T00:00:00.000Z";
     $str3 = "T23:00:00.000Z";
     $ret['end']=  "$str1"."$str3";
-    if ($arg == 1)
-        $str1 = goBack5Days();
+        $today->modify( '-' . $n .' '. $arg); 
+    $str1 = $today->format('Y-m-d');
     $ret['start']=  "$str1"."$str2";
+    $ret['startString'] = $str1;
     return ($ret);
 }
 
-function goBack5Days(){
+function goBack5Days($n){
     $day = new DateTime();
-    for ($i = 0; $i < 5; $i++){
+    for ($i = 0; $i < $n; $i++){
         do {
             $day->modify('-1 day');
             $dow = $day->format("w");
