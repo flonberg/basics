@@ -12,7 +12,7 @@ import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import { RouterModule } from '@angular/router';
 import {MatExpansionModule} from '@angular/material/expansion';
 
-import { MatGridListModule, MatDatepicker, MatNativeDateModule } from '@angular/material';
+import { MatGridListModule, MatDatepicker, MatNativeDateModule, MatChip, MatChipsModule } from '@angular/material';
 
 
 
@@ -45,7 +45,7 @@ import { SessionsComponent } from './sessions/sessions.component';
     MatRadioModule,
     MatInputModule,
     MatNativeDateModule,
-
+    MatChipsModule,
     MatDatepickerModule,
     HttpClientModule,
     ReactiveFormsModule,

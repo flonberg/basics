@@ -1,5 +1,6 @@
 import { GenService } from './../gen.service';
 import { FormControl } from '@angular/forms';
+import {MatChipsModule} from '@angular/material/chips';
 import { Component, OnInit } from '@angular/core';
 import * as Highcharts from 'highcharts';
 
@@ -118,7 +119,7 @@ export class OutputGraphComponent implements OnInit {
     )
   }
   setSessionRange(num, arg){
-    if (arg == 'year' || arg == 'all')
+    if (arg == 'year' || arg ==  'all')
       this .expTime = "... about 15 seconds"
     if (arg == 'month' && num == '6')
       this .expTime = "... about 10 seconds"
