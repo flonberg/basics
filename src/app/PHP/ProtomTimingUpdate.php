@@ -14,6 +14,9 @@ require_once(dirname(__FILE__).'/ESBQRClass-FL.inc');
 	$lastAID = 0;
 	$fp = fopen("PTlog.txt", "a+");                                         // Open logging file. 
 	$now = date("y-m-d H:i:s");
+	fwrite($fp, "\r\n \r\n $now \r\n");
+	$sp = fopen("PTshortLog.txt", "a+");                                         // Open logging file. 
+	$now = date("y-m-d H:i:s");
     fwrite($fp, "\r\n \r\n $now \r\n");
     $arr = json_decode($_GET['toEnter']);                                   
     $get = print_r($arr, true); fwrite($fp, $get);
@@ -37,7 +40,7 @@ require_once(dirname(__FILE__).'/ESBQRClass-FL.inc');
 
 	
 function writeTimingToDataBase($handle, $res){
-		global $fp;
+		global $fp, $sp;
 	if (strlen( $res['Outcome']['EndDateTime']) < 2 )					// if there is no EndDateTime
 		return;											
 //	fwrite($fp, "\r\n endedActivity is ". $res['ActivityID']."  procedureCode is   ". $res['ProcedureCode'] ." StartDateTime is ". $res['Outcome']['StartDateTime']);
@@ -69,8 +72,10 @@ function writeTimingToDataBase($handle, $res){
 	fwrite($fp, "\r\n $insStr  \r\n");
     $res = sqlsrv_query($handle, $insStr);
 	var_dump($res);
-	if ($res)
-        fwrite($fp, "\r\n \r\n record written ".  $insStr);
+	if ($res){
+		fwrite($fp, "\r\n \r\n record written ".  $insStr);
+		fwrite($sp, "\r\n record written for ActivityID = " + $res['AcitivitID']);
+	}
     if( $res === false ) {
         if( ($errors = sqlsrv_errors() ) != null) {
             foreach( $errors as $error ) {

@@ -37,7 +37,7 @@
     </mat-form-field>
     <mat-form-field appearance="fill">
         <mat-label>Interval End</mat-label>
-        <input matInput [matDatepicker]="picker2" [formControl]="startDate"  (dateInput)="editDate('end', $event.value)">
+        <input matInput [matDatepicker]="picker2" [formControl]="endDate"  (dateInput)="editDate('end', $event.value)">
         <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
         <mat-datepicker #picker2></mat-datepicker>
     </mat-form-field>
@@ -130,8 +130,13 @@
         <mat-option value="15" (click) = 'setBinSize(15)'>15</mat-option>
         <mat-option value="20" (click) = 'setBinSize(20)'>20</mat-option>
     </mat-select>
+
 </mat-form-field>
-<button mat-button (click)="savePatHistogram(stackedBins, plainBins)">
-    Export to csv
-</button> 
+<mat-form-field  style='width:200px;'  appearance='fill' >
+        <mat-label>File Saving</mat-label>
+        <mat-select id='dateRangeID' > 
+            <mat-option value="Last_30_Days"  (click)="savePatHistogram(stackedBins, plainBins)">Save CSV</mat-option>
+        </mat-select>
+</mat-form-field>
+
 

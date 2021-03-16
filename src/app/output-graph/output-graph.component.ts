@@ -280,6 +280,7 @@ export class OutputGraphComponent implements OnInit {
       this .endDateString = moment(event).format('YYYY-MM-DD');
     if (this .startDateString && this .endDateString){
       this .options.title.text = "Plans from " + this .startDateString + " to " + this .endDateString
+    console.log("283 endDataStreing is " + this .endDateString)
     this .getData(this .startDateString, this .endDateString)
     }
   }
@@ -315,15 +316,21 @@ export class OutputGraphComponent implements OnInit {
   getData(start, end){
     this .startDateString = moment().subtract(30, 'd').format('YYYY-MM-DD');
     if (start)
-    this .startDateString = start;
+      this .startDateString = start;
+    if (end)
+      this .endDateString = end;
     this .genSvce.setPlatform();                                            // switch Dev = BB or Prod = 242
     var selStr = "SELECT top(1000) StartDateTime, EndDateTime, ProcedureCode, PatientID, SessionID, ActivityID FROM ProtomTiming ";
-    if (this .procedureCode > 3)                                          // select particular ProcedureCode
-      selStr += " WHERE ProcedureCode = '" + this .procedureCode + "' AND StartDateTime >= '" +
-      this .startDateString+ "' ORDER By ActivityID desc";
+    if (this .procedureCode > 3)     {                                     // select particular ProcedureCode
+      selStr += " WHERE ProcedureCode = '" + this .procedureCode + "' AND StartDateTime >= '" +    this .startDateString+ "'";
+      if (end)
+        selStr += " AND StartDateTime <= '"+    this .endDateString+ "'";
+    }
+   
     else                                                                  // take ALL ProcedureCodes
-      selStr += " WHERE  StartDateTime > '"+this .startDateString+"' ORDER By ActivityID desc";
+      selStr += " WHERE  StartDateTime > '"+this .startDateString + "' AND StartDateTime <= "+ this .endDateString  +" ORDER By ActivityID desc";
 
+    console.log(" 330 selStr is " + selStr)
     this .genSvce.getWithSelString(selStr, this .startDateString, this. procedureCode ).subscribe (
         (res) => {
           this .setData(res);                                               // store the data

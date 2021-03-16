@@ -20,7 +20,8 @@ echo "<br> 11 <br> ";
 	$pattern = "/\d{3}-\d{2}-\d{2}/";                                                                       // pattenr for getting patientIDs
 	echo "<br> 21 <br>"; 
 	$dates = makeDates();
-
+	print_r($dates);
+//exit();
     if (isset($_GET['test'])){
         $dates['start'] =  "2020-12-27T23:00:00.000Z";
         $dates['end'] =  "2020-12-31T23:00:00.000Z";
@@ -74,7 +75,7 @@ echo "<br> 11 <br> ";
 	}
 	$jData = json_encode($tsData['Activities']);
     echo "<br> $jData <br>"; 
-    /***********  call ProtomTimingUpdata.php to get the Activities  */
+    /***********  call ProtomTimingUpdata.php to get the Activities    Need to run as seperate script to preserve JW's functionality */
 		$ch = curl_init();
                 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -101,11 +102,13 @@ function updateSessionState($state, $SessionID){
     }
 }    
 function makeDates(){
-//    $str1 =  date("Y-m-d", strtotime( '-11 days' ) ); // 2018-07-18 07:02:43
-    $str1 =  date("Y-m-d", strtotime( '-3 days' ) ); // 2018-07-18 07:02:43
+    $str1 =  date("Y-m-d"); // 2018-07-18 07:02:43
+//    $str1 =  date("Y-m-d", strtotime( '-3 days' ) ); // 2018-07-18 07:02:43
+    $d=strtotime("December 4, 2020");								// for quering a certain date. 
+//    $str1 =  date("Y-m-d",$d ); // 2018-07-18 07:02:43
     $str2 = "T23:00:00.000Z";
-    $ret['start']=  "$str1"."$str2";
-    $str1 =  date("Y-m-d", strtotime( '+1 days' ) ); // 2018-07-18 07:02:43
+    $str3 = "T01:00:00.000Z";
+    $ret['start']=  "$str1"."$str3";
    // $str1 =  date("Y-m-d", strtotime( '-7 days' ) ); // 2018-07-18 07:02:43
     $ret['end']=  "$str1"."$str2";
     return $ret;
