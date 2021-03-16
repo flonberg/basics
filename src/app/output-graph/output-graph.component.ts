@@ -43,10 +43,9 @@ export interface sessiontInt {
   styleUrls: ['./output-graph.component.css']
 })
 export class OutputGraphComponent implements OnInit {
- // urlBase: string;
- // chart: any;
+  public dateRan = "Today";
+  public expTime = '';
   data: any;
-  //selected:string;
   procedureCode: number;
   binSizeC: number = 5;                                                 // default number of minutes per bin
   binsC: any
@@ -55,6 +54,8 @@ export class OutputGraphComponent implements OnInit {
   treatSelected = "Treatment";
   binSizeCSelected = "5"
   dateRange = "Last_30_Days";
+
+
   locStart: string;
   setOptions: any;
   blob: Blob;
@@ -67,7 +68,17 @@ export class OutputGraphComponent implements OnInit {
   numContinued: number;
   currSess: sessiontInt;
   byPatData: any;
-  sessStateInterval: string = 'Today';
+
+  public teams: any[] = [
+    { name: 'Liverpool' },
+    { name: 'Manchester City' },
+    { name: 'Manchester United' },
+    { name: 'Arsenal' },
+    { name: 'Leicester City' },
+    { name: 'Chelsea' },
+    { name: 'Tottenham Hotspur' },
+];
+
 
   constructor(private genSvce: GenService, private route: ActivatedRoute, @ Inject(DOCUMENT) document,
    private http: HttpClient) {
@@ -80,7 +91,7 @@ export class OutputGraphComponent implements OnInit {
    this .currSess =  { 'CONTINUED' : 0, 'IDLE' :0, 'ENDED' :0, 'INPROGRESS':0 , 'CANCELED': 0, 'fromDate':''}
    this .procedureCode = 121726;
    this .setOptions = this .options;
-   this .locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');
+   this .locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');  
    this .getData(null, null)                                 // set for 'Treatment'
    this .genSvce.setPlatform();
    this .startDate = new FormControl();
@@ -89,6 +100,7 @@ export class OutputGraphComponent implements OnInit {
    // Create an Observable that will publish a value on an interval
    const secondsCounter = interval(1000000);
    this .getSessions(0, null)
+
 // Subscribe to begin publishing values
 
    secondsCounter.subscribe(n => {
@@ -106,7 +118,10 @@ export class OutputGraphComponent implements OnInit {
     )
   }
   setSessionRange(num, arg){
-    this .sessStateInterval = arg;
+    if (arg == 'year' || arg == 'all')
+      this .expTime = "... about 15 seconds"
+    if (arg == 'month' && num == '6')
+      this .expTime = "... about 10 seconds"
     this .getSessions(num, arg)
   }
   setSessions(sess){

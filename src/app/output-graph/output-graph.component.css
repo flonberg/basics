@@ -42,3 +42,6 @@ input {
 .oneHun {
     width:120px;
 }
+::ng-deep .mat-select-panel{
+    max-height: none!important;
+ }

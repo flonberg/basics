@@ -72,15 +72,20 @@
              </mat-form-field>
              <mat-form-field  appearance='fill' >
                     <mat-label>Time Range</mat-label>
-                    <mat-select [(value)]= "dateRange" id='dateRangeID' > 
-                        <mat-option value="Last_30_Days"  (click) = "setSessionRange(0, null)" >Today </mat-option>
-                        <mat-option value="Last_20_Days" (click) ="setSessionRange(1, 'week')" >Last week</mat-option>
-                        
+                    <mat-select [(ngModel)]="dateRan"  > 
+                        <mat-option value="Today"  (click) = "setSessionRange(0, null)" >Today </mat-option>
+                        <mat-option value="Last_Week" (click) ="setSessionRange(1, 'week')" >Last-week</mat-option>
+                        <mat-option value="Last_Month" (click) ="setSessionRange(1, 'month')" >Last Month </mat-option>
+                        <mat-option value="Last_SixMonth" (click) ="setSessionRange(6, 'month')" >Last 6 Months </mat-option>
+                        <mat-option value="Last_Year" (click) ="setSessionRange(1, 'year')" >Last year </mat-option>            
+                        <mat-option value="All" (click) ="setSessionRange(1, 'all')" >All </mat-option>            
                     </mat-select>
              </mat-form-field>
+
+
 </div>
 <div *ngIf = !currentSessions >
-    <p> Loading Sessions </p>
+    <p> Loading Sessions {{ expTime  }} </p>
 </div>
 
     

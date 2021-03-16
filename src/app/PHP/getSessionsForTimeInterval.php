@@ -1,6 +1,6 @@
 <?php
 /*********  save to    ''https://whiteboard.partners.org/esb/FLwbe/REST/JW/'';  */
-
+ /*   week/month/3 months/6 months/year/all/  */
 require_once('./ESButils.inc');
 require_once('H:\inetpub\lib\ESB\_dev_\ESBRestProto.inc');
 require_once('H:\inetpub\lib\switchConnect.inc');                           // has routine to obtain handle for BB or 242
@@ -9,10 +9,9 @@ require_once('./restLib.php');
 
     $fp = setLog();
     $gp = fopen('./log/wSessions.txt', 'w+');
-    
-   // $dates = makeDates(2, 'week');
+
     $dates = makeDates($_GET['num'], $_GET['arg']);
- /*   week/month/3 months/6 months/year/all/  */
+    $dS = print_r($dates, true); fwrite( $gp, $dS);
 $tslt = new ESBRestTimeslot();    
 $ts  = $tslt->timeslotRestRequest("","", $dates['start'], $dates['end']);		// get the timeSlots
 //$dS = print_r($ts, true); fwrite($gp, $dS);
@@ -33,13 +32,15 @@ function makeDates($n, $arg){
     $str2 = "T00:00:00.000Z";
     $str3 = "T23:00:00.000Z";
     $ret['end']=  "$str1"."$str3";
+    if ($arg == 'all')    
+         $today = new DateTime('2019-01-01');
+    else
         $today->modify( '-' . $n .' '. $arg); 
     $str1 = $today->format('Y-m-d');
     $ret['start']=  "$str1"."$str2";
     $ret['startString'] = $str1;
     return ($ret);
 }
-
 
     function makeDatesOLD($fp, $arg){
         $today = new DateTime();
