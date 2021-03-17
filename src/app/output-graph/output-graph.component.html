@@ -22,24 +22,26 @@
     <mat-form-field  style='width:200px;'  appearance='fill' >
         <mat-label>Time Range</mat-label>
         <mat-select [(value)]= "dateRange" id='dateRangeID' > 
-            <mat-option value="Last_30_Days"  (click) = "setDateRange('last30')" >Last 30 Days </mat-option>
-            <mat-option value="Last_20_Days" (click) ="setDateRange('last20')" >Last 20 Days</mat-option>
-            <mat-option value="Epoch" (click) = "setDateRange('Epoch')">Epoch</mat-option>
+            <mat-option value="Last_20_Days" (click) ="setDateRange(1,'week')" >Last Week</mat-option>
+            <mat-option value="Last_30_Days"  (click) = "setDateRange(1,'month')" >Last Month </mat-option>
+            <mat-option value="Last_6_Months"  (click) = "setDateRange(6,'month')" >Last 6 Months </mat-option>
+            <mat-option value="Last_year"  (click) = "setDateRange(1,'year')" >Last Year </mat-option>
+   
+            <mat-option value="Epoch" (click) = "setDateRange(0, 'Epoch')">Epoch</mat-option>
         </mat-select>
     </mat-form-field>
-
-
 
     
     <mat-form-field appearance="fill">
         <mat-label>Interval Start</mat-label>
-        <input matInput [matDatepicker]="picker" [formControl]="startDate"  (dateInput)="editDate('start', $event.value)"  (click)="picker.open()" >
+        <input matInput [matDatepicker]="picker" [formControl]="startDate"  (dateInput)="editDate('start', $event.value)" 
+        title="Both Start and End dates need to be selected." (click)="picker.open()" >
         <mat-datepicker-toggle matSuffix [for]="picker"   ></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
     </mat-form-field>
     <mat-form-field appearance="fill">
         <mat-label>Interval End</mat-label>
-        <input matInput [matDatepicker]="picker2" [formControl]="endDate"  (dateInput)="editDate('end', $event.value)">
+        <input matInput [matDatepicker]="picker2" [formControl]="endDate"  (dateInput)="editDate('end', $event.value)" (click)="picker2.open()" >
         <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
         <mat-datepicker #picker2></mat-datepicker>
     </mat-form-field>

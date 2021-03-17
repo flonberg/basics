@@ -46,29 +46,3 @@ input {
 ::ng-deep .mat-select-panel{
     max-height: none!important;
  }
- button.mat-stroked-button {
-    font-size: 14px;
-    height: 142px;
-    margin: 10px;
-    color:blue;
-}
-button.align {
-    color:blue;
-    height:40px;
-
-}
-
-::ng-deep .mat-form-field.mat-focused {
-    .mat-form-field-label {
-        color: #ff884d;
-    }
-    .mat-form-field-ripple {
-        background-color: #ff884d;
-    }
-    .mat-form-field-required-marker {
-        color: #ff884d;
-    }
-    .mat-input-element {
-        color: #ff884d;
-    }
-}

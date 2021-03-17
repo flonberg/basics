@@ -124,6 +124,18 @@ export class OutputGraphComponent implements OnInit {
     if (arg == 'month' && num == '6')
       this .expTime = "... about 10 seconds"
     this .getSessions(num, arg)
+  } 
+  setDateRange(n, str){
+    let start: string = '';
+    let  today:string = moment().format('YYYY-MM-DD');
+    if (n > 0 )
+      this .startDateString = moment().subtract(n, str).format('YYYY-MM-DD');
+    if (str =='Epoch')
+      this .startDateString  = '2020-01-02';
+    this .endDateString = " to Present"  
+    this .options.title.text = "Plans from " + this .startDateString + " to " + this .endDateString
+    this .getData(this .startDateString , null);
+   // this .setDurationErrorBar()
   }
   setSessions(sess){
     this .currentSessions = sess;
@@ -278,27 +290,13 @@ export class OutputGraphComponent implements OnInit {
       this .startDateString = moment(event).format('YYYY-MM-DD');
     if (type == 'end')
       this .endDateString = moment(event).format('YYYY-MM-DD');
-    if (this .startDateString && this .endDateString){
+    if (this .startDateString.length > 2 && this .endDateString.length > 2 ){
       this .options.title.text = "Plans from " + this .startDateString + " to " + this .endDateString
-    console.log("283 endDataStreing is " + this .endDateString)
-    this .getData(this .startDateString, this .endDateString)
+      this .getData(this .startDateString, this .endDateString)
     }
   }
 
-  setDateRange(str){
-    let start: string = '';
-    let  today:string = moment().format('YYYY-MM-DD');
-    if (str =='last20')
-      this .startDateString = moment().subtract(20, 'd').format('YYYY-MM-DD');
-    if (str =='last30')
-    this .startDateString  = moment().subtract(30, 'd').format('YYYY-MM-DD');
-    if (str =='Epoch')
-      this .startDateString  = '2020-01-02';
-    this .endDateString = " to Present"  
-    this .options.title.text = "Plans from " + this .startDateString + " to " + this .endDateString
-    this .getData(this .startDateString , null);
-   // this .setDurationErrorBar()
-  }
+
    ////////////  make the bins and bin the data       \\\\\\\\\\\\\\
   setBinSize(n){
     this .binSizeC = n;
@@ -326,9 +324,9 @@ export class OutputGraphComponent implements OnInit {
       if (end)
         selStr += " AND StartDateTime <= '"+    this .endDateString+ "'";
     }
-   
     else                                                                  // take ALL ProcedureCodes
-      selStr += " WHERE  StartDateTime > '"+this .startDateString + "' AND StartDateTime <= "+ this .endDateString  +" ORDER By ActivityID desc";
+      selStr += " WHERE  StartDateTime > '"+this .startDateString + "' AND StartDateTime <= "+ this .endDateString 
+         +" ORDER By ActivityID desc";
 
     console.log(" 330 selStr is " + selStr)
     this .genSvce.getWithSelString(selStr, this .startDateString, this. procedureCode ).subscribe (
@@ -379,6 +377,9 @@ export class OutputGraphComponent implements OnInit {
      this .byPatData = inpData.Patients
   //  console.log("setData 288 %o", this .byPatData)
     this .options.title.text = inpData.total + " Activities in Past 30 Days"
+    if (this .startDateString && this .endDateString)
+      this .options.title.text = inpData.total + " Activities from " + this .startDateString + " to " + this .endDateString;
+ 
 
   }
   public stackedBins: any;                                                      // the holder for the stacked timeInterval bins
@@ -421,6 +422,7 @@ export class OutputGraphComponent implements OnInit {
     ////////     Load data into  Top Graph scatter plot       \\\\\\\\\\\\\\\\\\\
     var i = 0;
     this .options.series = Array();                                           // clear old data
+    if (this .data['Patients'])
     for (let key of Object.keys(this .data['Patients'])) {                    // loop through the Patients
             this .options.series[i] = [];
             this .options.series[i]['name'] = key;
