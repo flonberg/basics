@@ -41,6 +41,7 @@ input {
 }
 .oneHun {
     width:120px;
+
 }
 ::ng-deep .mat-select-panel{
     max-height: none!important;
@@ -55,4 +56,19 @@ button.align {
     color:blue;
     height:40px;
 
+}
+
+::ng-deep .mat-form-field.mat-focused {
+    .mat-form-field-label {
+        color: #ff884d;
+    }
+    .mat-form-field-ripple {
+        background-color: #ff884d;
+    }
+    .mat-form-field-required-marker {
+        color: #ff884d;
+    }
+    .mat-input-element {
+        color: #ff884d;
+    }
 }
