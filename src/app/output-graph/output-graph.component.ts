@@ -70,34 +70,22 @@ export class OutputGraphComponent implements OnInit {
   currSess: sessiontInt;
   byPatData: any;
 
-  public teams: any[] = [
-    { name: 'Liverpool' },
-    { name: 'Manchester City' },
-    { name: 'Manchester United' },
-    { name: 'Arsenal' },
-    { name: 'Leicester City' },
-    { name: 'Chelsea' },
-    { name: 'Tottenham Hotspur' },
-];
-
-
   constructor(private genSvce: GenService, private route: ActivatedRoute, @ Inject(DOCUMENT) document,
    private http: HttpClient) {
-  //  this .selected = "Treatment";
     this .route.queryParams.subscribe(params => {
       this .param1 = params['param'];
       });
   }
   ngOnInit() {
    this .currSess =  { 'CONTINUED' : 0, 'IDLE' :0, 'ENDED' :0, 'INPROGRESS':0 , 'CANCELED': 0, 'fromDate':''}
-   this .procedureCode = 121726;
+   this .procedureCode = 121726;                                                // default sessionType is 'Treaement' 
    this .setOptions = this .options;
-   this .locStart = moment().subtract(30, 'd').format('YYYY-MM-DD');  
+   this .locStart = moment().subtract(1, 'month').format('YYYY-MM-DD');            // default it 1 Month back
    this .getData(null, null)                                 // set for 'Treatment'
    this .genSvce.setPlatform();
    this .startDate = new FormControl();
    this .endDate = new FormControl();
-   this .endDateString = "to Present";
+   this .endDateString = moment().format('YYYY-MM-DD');
    // Create an Observable that will publish a value on an interval
    const secondsCounter = interval(1000000);
    this .getSessions(0, null)
@@ -127,15 +115,14 @@ export class OutputGraphComponent implements OnInit {
   } 
   setDateRange(n, str){
     let start: string = '';
-    let  today:string = moment().format('YYYY-MM-DD');
-    if (n > 0 )
-      this .startDateString = moment().subtract(n, str).format('YYYY-MM-DD');
-    if (str =='Epoch')
+    let  today:string = moment().format('YYYY-MM-DD');                          // set end of data collection interval
+    if (n > 0 )                                                                 // user wants to back n e.g. months
+      this .startDateString = moment().subtract(n, str).format('YYYY-MM-DD');   // go back as required
+    if (str =='Epoch')                                                          // user wants ALL data
       this .startDateString  = '2020-01-02';
-    this .endDateString = " to Present"  
-    this .options.title.text = "Plans from " + this .startDateString + " to " + this .endDateString
-    this .getData(this .startDateString , null);
-   // this .setDurationErrorBar()
+    this .endDateString =moment().format('YYYY-MM-DD')
+    this .options.title.text = "Plans from " + this .startDateString + " to " + this .endDateString   // set title for graph
+    this .getData(this .startDateString , -1);
   }
   setSessions(sess){
     this .currentSessions = sess;
@@ -207,7 +194,7 @@ export class OutputGraphComponent implements OnInit {
       xAxis: {
         labels: {
           formatter: function () {
-            return Highcharts.dateFormat('%e %b %y', this .value);
+            return Highcharts.dateFormat(' %b %e  ', this .value);
           }
         },
       },
@@ -281,7 +268,7 @@ export class OutputGraphComponent implements OnInit {
     }
   setProcedureCode(n){
     this .procedureCode = n;
-    this .getData(null, this .procedureCode)
+    this .getData(-1, this .procedureCode)
   }
   startDateString: string;
   endDateString: string;
@@ -295,7 +282,6 @@ export class OutputGraphComponent implements OnInit {
       this .getData(this .startDateString, this .endDateString)
     }
   }
-
 
    ////////////  make the bins and bin the data       \\\\\\\\\\\\\\
   setBinSize(n){
@@ -313,10 +299,12 @@ export class OutputGraphComponent implements OnInit {
  */
   getData(start, end){
     this .startDateString = moment().subtract(30, 'd').format('YYYY-MM-DD');
-    if (start)
+//    if (start && start > 0)
+    if (start && +end < 0)
       this .startDateString = start;
-    if (end)
+    if (end && +end > 0)
       this .endDateString = end;
+
     this .genSvce.setPlatform();                                            // switch Dev = BB or Prod = 242
     var selStr = "SELECT top(1000) StartDateTime, EndDateTime, ProcedureCode, PatientID, SessionID, ActivityID FROM ProtomTiming ";
     if (this .procedureCode > 3)     {                                     // select particular ProcedureCode
