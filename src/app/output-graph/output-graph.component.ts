@@ -82,7 +82,7 @@ export class OutputGraphComponent implements OnInit {
    this .procedureCode = 121726;                                                // default sessionType is 'Treaement' 
    this .setOptions = this .options;
    this .locStart = moment().subtract(1, 'month').format('YYYY-MM-DD');            // default it 1 Month back
-   this .getData(null, null)                                 // set for 'Treatment'
+   this .getData()                                 // set for 'Treatment'
    this .genSvce.setPlatform();
    this .startDate = new FormControl();
    this .endDate = new FormControl();
@@ -93,7 +93,7 @@ export class OutputGraphComponent implements OnInit {
    this .getSessions(0, null)
 
 // Subscribe to begin publishing values
-  this .getData(null,null,1);
+  this .getData();
    secondsCounter.subscribe(n => {
     this .getSessions(0, null)
     });
@@ -124,7 +124,7 @@ export class OutputGraphComponent implements OnInit {
       this .startDateString  = '2020-01-02';
     this .endDateString =moment().format('YYYY-MM-DD')
     this .options.title.text = "Plans from " + this .startDateString + " to " + this .endDateString   // set title for graph
-    this .getData(this .startDateString , -1);
+    this .getData();
   }
   setSessions(sess){
     this .currentSessions = sess;
@@ -270,7 +270,7 @@ export class OutputGraphComponent implements OnInit {
     }
   setProcedureCode(n){
     this .procedureCode = n;
-    this .getData(-1, this .procedureCode, 1)
+    this .getData()
   }
   startDateString: string;
   endDateString: string;
@@ -281,7 +281,7 @@ export class OutputGraphComponent implements OnInit {
       this .endDateString = moment(event).format('YYYY-MM-DD');
     if (this .startDateString.length > 2 && this .endDateString.length > 2 ){
       this .options.title.text = "Plans from " + this .startDateString + " to " + this .endDateString
-      this .getData(this .startDateString, this .endDateString, 1)
+      this .getData()
     }
   }
 
@@ -299,23 +299,12 @@ export class OutputGraphComponent implements OnInit {
  * @param start
  * @param end
  */
-  getData(start, end, mode?){
- //   this .startDateString = moment().subtract(30, 'd').format('YYYY-MM-DD');
-//    if (start && start > 0)
- /*   if (start && +end < 0)
-      this .startDateString = start;
-    if (end && +start > 0)
-      this .endDateString = end;  */
-  //  if (mode == 1) {                                                      // use start and end for getting Data Interval
- //     this .startDateString = start;
- //     this .endDateString = end;
- //   }
-
+  getData(){
     this .genSvce.setPlatform();                                            // switch Dev = BB or Prod = 242
     var selStr = "SELECT top(1000) StartDateTime, EndDateTime, ProcedureCode, PatientID, SessionID, ActivityID FROM ProtomTiming ";
     if (this .procedureCode > 3)     {                                     // select particular ProcedureCode
       selStr += " WHERE ProcedureCode = '" + this .procedureCode + "' AND StartDateTime >= '" +    this .startDateString+ "'";
-      if (end)
+     // if (end)
         selStr += " AND StartDateTime <= '"+    this .endDateString+ "'";
     }
     else                                                                  // take ALL ProcedureCodes
