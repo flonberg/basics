@@ -47,15 +47,15 @@ export class OutputGraphComponent implements OnInit {
   private customDates = false;                                           // only set to true if user selects
   private dateRan = "Today";
   private expTime = '';
-  data: any;
-  procedureCode: number;
-  binSizeC: number = 5;                                                 // default number of minutes per bin
-  binsC: any
-  numInBin: any;
-  typeSelected = "Duration by Date";
-  treatSelected = "Treatment";
-  binSizeCSelected = "5"
-  dateRange = "Last_30_Days";
+  private data: any;
+  private procedureCode: number;
+  private binSizeC: number = 5;                                                 // default number of minutes per bin
+  private binsC: any
+  private numInBin: any;
+  private typeSelected = "Duration by Date";
+  private treatSelected = "Treatment";
+  private binSizeCSelected = "5"
+  private dateRange = "Last_30_Days";
 
 
   locStart: string;
@@ -86,13 +86,14 @@ export class OutputGraphComponent implements OnInit {
    this .genSvce.setPlatform();
    this .startDate = new FormControl();
    this .endDate = new FormControl();
+   this .startDateString = moment().subtract(1, 'month').format('YYYY-MM-DD');            // default it 1 Month back
    this .endDateString = moment().format('YYYY-MM-DD');
    // Create an Observable that will publish a value on an interval
    const secondsCounter = interval(1000000);
    this .getSessions(0, null)
 
 // Subscribe to begin publishing values
-
+  this .getData(null,null,1);
    secondsCounter.subscribe(n => {
     this .getSessions(0, null)
     });
@@ -269,7 +270,7 @@ export class OutputGraphComponent implements OnInit {
     }
   setProcedureCode(n){
     this .procedureCode = n;
-    this .getData(-1, this .procedureCode)
+    this .getData(-1, this .procedureCode, 1)
   }
   startDateString: string;
   endDateString: string;
@@ -299,16 +300,16 @@ export class OutputGraphComponent implements OnInit {
  * @param end
  */
   getData(start, end, mode?){
-    this .startDateString = moment().subtract(30, 'd').format('YYYY-MM-DD');
+ //   this .startDateString = moment().subtract(30, 'd').format('YYYY-MM-DD');
 //    if (start && start > 0)
-    if (start && +end < 0)
+ /*   if (start && +end < 0)
       this .startDateString = start;
     if (end && +start > 0)
-      this .endDateString = end;
-    if (mode == 1) {                                                      // use start and end for getting Data Interval
-      this .startDateString = start;
-      this .endDateString = end;
-    }
+      this .endDateString = end;  */
+  //  if (mode == 1) {                                                      // use start and end for getting Data Interval
+ //     this .startDateString = start;
+ //     this .endDateString = end;
+ //   }
 
     this .genSvce.setPlatform();                                            // switch Dev = BB or Prod = 242
     var selStr = "SELECT top(1000) StartDateTime, EndDateTime, ProcedureCode, PatientID, SessionID, ActivityID FROM ProtomTiming ";
