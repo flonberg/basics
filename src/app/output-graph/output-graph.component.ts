@@ -44,8 +44,9 @@ export interface sessiontInt {
   styleUrls: ['./output-graph.component.css']
 })
 export class OutputGraphComponent implements OnInit {
-  public dateRan = "Today";
-  public expTime = '';
+  private customDates = false;                                           // only set to true if user selects
+  private dateRan = "Today";
+  private expTime = '';
   data: any;
   procedureCode: number;
   binSizeC: number = 5;                                                 // default number of minutes per bin
@@ -255,7 +256,7 @@ export class OutputGraphComponent implements OnInit {
       },
       series: []
     }
-
+ 
     procStr: any
 
   setDurationErrorBar(){
@@ -279,7 +280,7 @@ export class OutputGraphComponent implements OnInit {
       this .endDateString = moment(event).format('YYYY-MM-DD');
     if (this .startDateString.length > 2 && this .endDateString.length > 2 ){
       this .options.title.text = "Plans from " + this .startDateString + " to " + this .endDateString
-      this .getData(this .startDateString, this .endDateString)
+      this .getData(this .startDateString, this .endDateString, 1)
     }
   }
 
@@ -297,13 +298,17 @@ export class OutputGraphComponent implements OnInit {
  * @param start
  * @param end
  */
-  getData(start, end){
+  getData(start, end, mode?){
     this .startDateString = moment().subtract(30, 'd').format('YYYY-MM-DD');
 //    if (start && start > 0)
     if (start && +end < 0)
       this .startDateString = start;
-    if (end && +end > 0)
+    if (end && +start > 0)
       this .endDateString = end;
+    if (mode == 1) {                                                      // use start and end for getting Data Interval
+      this .startDateString = start;
+      this .endDateString = end;
+    }
 
     this .genSvce.setPlatform();                                            // switch Dev = BB or Prod = 242
     var selStr = "SELECT top(1000) StartDateTime, EndDateTime, ProcedureCode, PatientID, SessionID, ActivityID FROM ProtomTiming ";
@@ -323,7 +328,7 @@ export class OutputGraphComponent implements OnInit {
           this .makeBins();                                                 // make Histogram bins
           this .binData();                                                  // put the data in bins
           this .makeNonStackedBins(res['Rdata'])
-        this .options3=
+        this .options3=                                                 // set options for the Avereage/StdDev plot
         {
             series : [{
               name: 'Average Duration [minutes] ',
@@ -350,7 +355,6 @@ export class OutputGraphComponent implements OnInit {
         Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
         Highcharts.chart('container3', this .options3);                     // Av Duration Column plo
         Highcharts.chart('container2', this .options2);                   // Draw bottom graph Histogram
-
         },
         err => {
           console.log(err);
@@ -362,13 +366,10 @@ export class OutputGraphComponent implements OnInit {
   setData(inpData){
     this .data = inpData;
     this .totalActivities = inpData.total;
-     this .byPatData = inpData.Patients
-  //  console.log("setData 288 %o", this .byPatData)
+    this .byPatData = inpData.Patients
     this .options.title.text = inpData.total + " Activities in Past 30 Days"
     if (this .startDateString && this .endDateString)
       this .options.title.text = inpData.total + " Activities from " + this .startDateString + " to " + this .endDateString;
- 
-
   }
   public stackedBins: any;                                                      // the holder for the stacked timeInterval bins
   public plainBins: []

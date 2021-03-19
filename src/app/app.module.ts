@@ -36,6 +36,7 @@ import { SessionsComponent } from './sessions/sessions.component';
     SessionsComponent
   ],
   imports: [
+
     BrowserModule,
     BrowserAnimationsModule,
     MatCheckboxModule,
