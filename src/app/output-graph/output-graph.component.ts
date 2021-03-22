@@ -52,10 +52,10 @@ export class OutputGraphComponent implements OnInit {
   private binSizeC: number = 5;                                                 // default number of minutes per bin
   private binsC: any
   private numInBin: any;
-  private typeSelected = "Duration by Date";
-  private treatSelected = "Treatment";
-  private binSizeCSelected = "5"
-  private dateRange = "Last_30_Days";
+  typeSelected = "Duration by Date";
+  treatSelected = "Treatment";
+  binSizeCSelected = "5"
+  dateRange = "Last_30_Days";
 
 
   locStart: string;
@@ -223,7 +223,7 @@ export class OutputGraphComponent implements OnInit {
         height: 300
       },
       title: {
-        text: ''
+        text: 'Histogram of Activity Duration'
       },
       yAxis: {
         min: 0,
@@ -508,9 +508,7 @@ export class OutputGraphComponent implements OnInit {
 
   }
 
-  /**
-   * Linked to Export to Csv button. Saves a .csv file of the data.
-   */
+/*
   saveFile(){
     this.getFile().subscribe((res) => {
       this .data = res;
@@ -519,6 +517,7 @@ export class OutputGraphComponent implements OnInit {
     });
     console.log('fileSaved')
   }
+  */
 /**
  * Get a file from the Server
  */

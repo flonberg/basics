@@ -51,13 +51,32 @@
                 <mat-option value="Last_30_Days"  (click)="saveDurationCSV(byPatData)">Save CSV</mat-option>
             </mat-select>
     </mat-form-field>
- 
 
 </div>
+<div id='container2' style='height: 300px;'> </div>
+
+<mat-form-field  style='width:120px;' appearance='fill'>
+    <mat-label>Bins Size [min]</mat-label>
+    <mat-select [(value)] = "binSizeCSelected">
+        <mat-option value="5"  (click) = 'setBinSize(5)' >5</mat-option>
+        <mat-option value="10" (click) ='setBinSize(10)' >10</mat-option>
+        <mat-option value="15" (click) = 'setBinSize(15)'>15</mat-option>
+        <mat-option value="20" (click) = 'setBinSize(20)'>20</mat-option>
+    </mat-select>
+
+</mat-form-field>
+<mat-form-field  style='width:200px;'  appearance='fill' >
+        <mat-label>File Saving</mat-label>
+        <mat-select id='dateRangeID' > 
+            <mat-option value="Last_30_Days"  (click)="savePatHistogram(stackedBins, plainBins)">Save CSV</mat-option>
+        </mat-select>
+</mat-form-field>
+
+<h4> Sessions:</h4>
 <div *ngIf = "currentSessions" >
-            <mat-form-field  class='oneHun' appearance='fill' >
+            <mat-form-field  class='oneHun' appearance='fill' *ngIf = "currentSessions  && currentSessions.IDLE" >
                 <mat-label>Idle</mat-label>
-                <input matInput readonly='true' [value]="currSess.IDLE" >
+                <input matInput readonly='true' [value]="currentSessions.IDLE" >
             </mat-form-field>
              <mat-form-field *ngIf = "currentSessions  && currentSessions.CONTINUED"  class='oneHun'  appearance='fill' >
                     <mat-label>Continued</mat-label>
@@ -124,23 +143,6 @@
             <pre>Std. Dev. =</pre> 
     </div>
 </div>
-<div id='container2' style='height: 300px;'> </div>
 
-<mat-form-field  style='width:120px;' appearance='fill'>
-    <mat-label>Bins Size [min]</mat-label>
-    <mat-select [(value)] = "binSizeCSelected">
-        <mat-option value="5"  (click) = 'setBinSize(5)' >5</mat-option>
-        <mat-option value="10" (click) ='setBinSize(10)' >10</mat-option>
-        <mat-option value="15" (click) = 'setBinSize(15)'>15</mat-option>
-        <mat-option value="20" (click) = 'setBinSize(20)'>20</mat-option>
-    </mat-select>
-
-</mat-form-field>
-<mat-form-field  style='width:200px;'  appearance='fill' >
-        <mat-label>File Saving</mat-label>
-        <mat-select id='dateRangeID' > 
-            <mat-option value="Last_30_Days"  (click)="savePatHistogram(stackedBins, plainBins)">Save CSV</mat-option>
-        </mat-select>
-</mat-form-field>
 
 
