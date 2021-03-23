@@ -16,6 +16,7 @@ import exporting from 'highcharts/modules/exporting';
 import { HttpClient } from '@angular/common/http';
 
 import { interval } from 'rxjs';
+import { instantiateSupportedAnimationDriver } from '@angular/platform-browser/animations/src/providers';
 exporting(Highcharts);
 
 
@@ -114,13 +115,21 @@ export class OutputGraphComponent implements OnInit {
     if (arg == 'month' && num == '6')
       this .expTime = "... about 10 seconds"
     this .getSessions(num, arg)
-  } 
+  }
+  /**
+   * Sets the dates for the data collection, which are then put in the SELECT string argument 
+   * @param n 
+   * @param str 
+   */
   setDateRange(n, str){
     let start: string = '';
     let  today:string = moment().format('YYYY-MM-DD');                          // set end of data collection interval
-    if (n > 0 )                                                                 // user wants to back n e.g. months
+    if (n > 0 )      {                                                           // user wants to back n e.g. months
       this .startDateString = moment().subtract(n, str).format('YYYY-MM-DD');   // go back as required
-    if (str =='Epoch')                                                          // user wants ALL data
+      this .startDate.setValue(this .startDateString);
+      this .endDate.setValue(moment().format('YYYY-MM-DD'));
+    }
+      if (str =='Epoch')                                                          // user wants ALL data
       this .startDateString  = '2020-01-02';
     this .endDateString =moment().format('YYYY-MM-DD')
     this .options.title.text = "Plans from " + this .startDateString + " to " + this .endDateString   // set title for graph
@@ -175,8 +184,14 @@ export class OutputGraphComponent implements OnInit {
         height: 400
       },
       title: {
+        text: 'Activity Duration '
+      },
+      subtitle: {  title: {
         text: this .titlePhrase
       },
+        text: 'test'
+      },
+      
       click: function (e) {
         console.log(
             Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', e.xAxis[0].value),
@@ -275,8 +290,10 @@ export class OutputGraphComponent implements OnInit {
   startDateString: string;
   endDateString: string;
   editDate(type: string, event){
-    if (type == 'start')
+    if (type == 'start'){
       this .startDateString = moment(event).format('YYYY-MM-DD');
+      this .dateRange = "Custom"
+    }
     if (type == 'end')
       this .endDateString = moment(event).format('YYYY-MM-DD');
     if (this .startDateString.length > 2 && this .endDateString.length > 2 ){
@@ -341,6 +358,9 @@ export class OutputGraphComponent implements OnInit {
             title: {
               text: 'Patient Duration Average and Standard Deviation'
             },
+            subtitle: {
+              text: this .data['total'] + ' Plans'
+            },
         }
         Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
         Highcharts.chart('container3', this .options3);                     // Av Duration Column plo
@@ -352,14 +372,13 @@ export class OutputGraphComponent implements OnInit {
       );                                                                // end of subscribe
     }
 
-  
   setData(inpData){
     this .data = inpData;
     this .totalActivities = inpData.total;
     this .byPatData = inpData.Patients
-    this .options.title.text = inpData.total + " Activities in Past 30 Days"
+    this .options.subtitle.text = inpData.total + " Plans "
     if (this .startDateString && this .endDateString)
-      this .options.title.text = inpData.total + " Activities from " + this .startDateString + " to " + this .endDateString;
+      this .options.title.text = "Plan Duration ";
   }
   public stackedBins: any;                                                      // the holder for the stacked timeInterval bins
   public plainBins: []
