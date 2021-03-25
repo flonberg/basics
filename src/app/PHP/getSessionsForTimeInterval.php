@@ -1,17 +1,16 @@
 <?php
 /******  run on 242 .../htdocs/esb/FLwbe/REST/JW  to allow REST requests to platform   ***************:*/
 
-include 'H:\inetpub\lib\switchConnMQ.inc';
 require_once 'H:\inetpub\lib\sqlsrvLibFL_dev.php';
 require_once('./ESButils.inc');
 require_once('H:\inetpub\lib\ESB\_dev_\ESBRestProto.inc');
-require_once('H:\inetpub\lib\switchConnect.inc');                           // has routine to obtain handle for BB or 242
-require_once('H:\inetpub\lib\phpDB.inc');       
+require_once 'H:\inetpub\lib\switchConnMQ.inc';
+//require_once('H:\inetpub\lib\phpDB.inc');       
+
 //require_once('./ESBRestSched.inc');
 //$sess = new ESBRestSessions( );
 //$sess->sessionRestRequest('13102854-13C9-11EB-BFBB-B0044ED74D5C','0440F754-13C9-11EB-BBBA-B0044ED74D5C' );
     $handle = connectMSQ();
-var_dump($handle);
 $d = new DateTime();
 $firstDay =  $d->format('Y-m-d');	
 $d->modify('+1 day');
@@ -19,9 +18,8 @@ $nextDay =  $d->format('Y-m-d');
  $selStr = "SELECT TOP(100)  Sch_Id, App_DtTm, IDA, PAT_NAME, LOCATION FROM vw_Schedule 
             WHERE App_DtTm > '".$firstDay."'  AND  App_DtTm < '".$nextDay."'  AND IDA LIKE '[0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'  AND LOCATION LIKE '%GBPTC' ORDER BY App_DtTm";
 	$dB = new getDBData($selStr, $handle);
-
 while ($assoc = $dB->getAssoc()){
-    echo "<pre>"; print_r($assoc); echo "</pre>";
+	$row[$assoc['IDA']] = $assoc;
 }
 
     $dates = makeDates();
@@ -40,16 +38,21 @@ while ($assoc = $dB->getAssoc()){
 		//if (preg_match($pattern,$val['PatientID'],$dummy) && strcmp($val['SessionState'], 'ENDED') == 0)	// find Patient and ENDED timeSlots
 		if (preg_match($pattern,$val['PatientID'],$dummy))	// find Patient and ENDED timeSlots
 		{	
-
-     echo "<br><br> StartDateTimd is ". $val['StartDateTime']." PatientID is ". $val['PatientID'] ." SessionID is ". $val['SessionID'] ." timeslotID is ". $val['TimeslotID'];
+			$time = strtotime($val['StartDateTime'].' UTC');
+			$dateInLocal = date("Y-m-d H:i:s", $time);
+			$row[$val['PatientID']]['EnsStartTime'] = $dateInLocal;
+			$row[$val['PatientID']]['EnsPatID'] = $val['PatientID'];
+			//$row[$val['PatientID']]['EnsStartTime'] = $val['StartDateTime'];
+     //echo "<br><br> StartDateTimd is ". $val['StartDateTime']." PatientID is ". $val['PatientID'] ." SessionID is ". $val['SessionID'] ." timeslotID is ". $val['TimeslotID'];
 		}
 	}
+    echo "<pre>"; print_r($row); echo "</pre>";
 
     exit();
 
 function makeDates(){
     $str1 =  date("Y-m-d"); // 2018-07-18 07:02:43
-    $str1 =  date("Y-m-d", strtotime( '-1 days' ) ); // 2018-07-18 07:02:43
+ //   $str1 =  date("Y-m-d", strtotime( '-1 days' ) ); // 2018-07-18 07:02:43
 //    $d=strtotime("March 18, 2021");								// for quering a certain date. 
     //$d=strtotime("December 4, 2020");								// for quering a certain date. 
 //    $str1 =  date("Y-m-d",$d ); // 2018-07-18 07:02:43
