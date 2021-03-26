@@ -2,73 +2,68 @@
 /******  run on 242 .../htdocs/esb/FLwbe/REST/JW  to allow REST requests to platform   ***************:*/
 
 require_once 'H:\inetpub\lib\sqlsrvLibFL_dev.php';
-//require_once './ESButils.inc';
 require_once 'H:\inetpub\lib\ESB\_dev_\ESButils.inc' ;
 require_once 'H:\inetpub\lib\ESB\_dev_\ESBRestProto.inc' ;
+//require_once 'H:\inetpub\lib\ESB\_dev_\ESBRestSched.inc' ;
 require_once 'H:\inetpub\lib\switchConnMQ.inc';
 
-$handle = connectMSQ();                                                 // for connecting to Mosaiq dataBase
-$mqDates = makeMQdates(0);                                              // make the dates for MQ query
-$d = new DateTime();
-$firstDay =  $d->format('Y-m-d');	
-$d->modify('+1 day');
-$nextDay =  $d->format('Y-m-d');	
- $selStr = "SELECT TOP(100)  Sch_Id, App_DtTm, IDA, PAT_NAME, LOCATION FROM vw_Schedule 
-            WHERE App_DtTm > '".$mqDates['firstDay']."'  AND  App_DtTm < '".$mqDates['nextDay']."'  AND IDA LIKE '[0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'  AND LOCATION LIKE '%GBPTC' ORDER BY App_DtTm";
-	$dB = new getDBData($selStr, $handle);
-while ($assoc = $dB->getAssoc()){
-	$row[$assoc['IDA']] = $assoc;
-}
+    $handle = connectMSQ();                                                         // for connecting to Mosaiq dataBase
+	$mqDates = makeMQdates(0);                                                      // make the dates for MQ query
 
-    $dates = makeDates();
-//echo "<br> 11 <br> "; 
+    $selStr = "SELECT TOP(100)  Sch_Id, App_DtTm, IDA, PAT_NAME, Duration_time, LOCATION FROM vw_Schedule 
+            WHERE App_DtTm > '".$mqDates['firstDay']."'  AND  App_DtTm < '".$mqDates['nextDay']."'                  
+            AND IDA LIKE '[0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'  AND LOCATION LIKE '%GBPTC' ORDER BY App_DtTm";    // nnn-nn-nn and GBPTC
+	$dB = new getDBData($selStr, $handle);
+    while ($assoc = $dB->getAssoc()){
+		$row[$assoc['IDA']] = $assoc;
+		$row[$assoc['IDA']]['Duration'] = $assoc['Duration_time']/(60 * 100);
+    }
+
+    $dates = makeDates();                                                           // make dates for Ensemble timeslorRestRequest
     $fp = fopen("gts.txt", "w+");
-    $handle = connectToDB(1);                                               // uses local connectToDB to switch between BB (1) and 242 (0)
-//    var_dump($handle);
 	$dates = makeDates();
-    $tslt = new ESBRestTimeslot();                                                                          // instantiate class for getting multiple timeSlots. 
-	$getATS = new ESBRestATimeslot();                                                                       // instantiate class for getting single timeslot. 
+    $tslt = new ESBRestTimeslot();                                                  // instantiate class for getting multiple timeSlots. 
 	$reSched = new ESBRestReschedule(); 
-	$pattern = "/\d{3}-\d{2}-\d{2}/";                                                                       // pattenr for getting patientIDs
+	// $reSched->rescheduleRestRequest($sessionid,$timeslotid,$newdate,$roomid,$duration)
+
+	$pattern = "/\d{3}-\d{2}-\d{2}/";                                               // pattern for getting patientIDs
 	$ts  = $tslt->timeslotRestRequest("","", $dates['start'], $dates['end']);		// get the timeSlots
-	$actIDX = 0;                                                                                            // index for ActivityIDs
-	foreach ($ts as $key=>$val){                                                                            // loop thru the items returned by SOAP request. 
-		//if (preg_match($pattern,$val['PatientID'],$dummy) && strcmp($val['SessionState'], 'ENDED') == 0)	// find Patient and ENDED timeSlots
-		if (preg_match($pattern,$val['PatientID'],$dummy))	// find Patient and ENDED timeSlots
+	foreach ($ts as $key=>$val){                                                    // loop thru the items returned by SOAP request. 
+		if (preg_match($pattern,$val['PatientID'],$dummy))	                        // find Patient timeSlots
 		{	
-			$time = strtotime($val['StartDateTime'].' UTC');
-			$dateInLocal = date("Y-m-d H:i:s", $time);
-			$row[$val['PatientID']]['EnsStartTime'] = $dateInLocal;
-			$row[$val['PatientID']]['EnsPatID'] = $val['PatientID'];
-			//$row[$val['PatientID']]['EnsStartTime'] = $val['StartDateTime'];
-     //echo "<br><br> StartDateTimd is ". $val['StartDateTime']." PatientID is ". $val['PatientID'] ." SessionID is ". $val['SessionID'] ." timeslotID is ". $val['TimeslotID'];
+			$time = strtotime($val['StartDateTime'].' UTC');                        // get GMT time in local time. 
+			$dateInLocal = date("Y-m-d H:i:s", $time);                              // format the local time string
+			$row[$val['PatientID']]['EnsStartTime'] = $dateInLocal;                 // store the Ensemble Start time
+			$row[$val['PatientID']]['EnsPatID'] = $val['PatientID'];                // confirm the PatientID
+			$row[$val['PatientID']]['SessionID'] = $val['SessionID'];               
+			$row[$val['PatientID']]['TimeslotID'] = $val['TimeslotID'];              
+			$row[$val['PatientID']]['RoomID'] = $val['RoomID'];                		 
+	
+	
 		}
 	}
     echo "<pre>"; print_r($row); echo "</pre>";
-
     exit();
 
 /**
  * Make dates for a Single Day's data aquisition. Parameter $n determines how many days in future you go. 
  */
 function makeMQdates($n){
-    $d = new DateTime();                            // dreate a date
+    $d = new DateTime();                                                            // create a date
     if ($n > 0 )                                    
-        $d->modify($n .' day');                     // advance according to argument
-    $dates['firstDay'] =  $d->format('Y-m-d');	    // format the early date of interval
-    $d->modify($n + 1 .' day');                     // advance 1 day
-    $dates['nextDay'] =  $d->format('Y-m-d');	    // format the late date of the interval
+        $d->modify($n .' day');                                                     // advance according to argument
+    $dates['firstDay'] =  $d->format('Y-m-d');	                                    // format the early date of interval
+    $d->modify($n + 1 .' day');                                                     // advance 1 day
+    $dates['nextDay'] =  $d->format('Y-m-d');	                                    // format the late date of the interval
     return $dates;
 }    
 
-
+/**
+ * Make dates for the timeSlotRestRequest to get 1 day's timeSlots: from day at 1:00AM to day at 23:00
+ */
 function makeDates(){
-    $str1 =  date("Y-m-d"); // 2018-07-18 07:02:43
- //   $str1 =  date("Y-m-d", strtotime( '-1 days' ) ); // 2018-07-18 07:02:43
-//    $d=strtotime("March 18, 2021");								// for quering a certain date. 
-    //$d=strtotime("December 4, 2020");								// for quering a certain date. 
-//    $str1 =  date("Y-m-d",$d ); // 2018-07-18 07:02:43
-    $str2 = "T23:00:00.000Z";
+    $str1 =  date("Y-m-d");                                                         // make the e.g. 2021-03-18 part of the date string 
+    $str2 = "T23:00:00.000Z";                                                       // make the time for the END of the interval
     $str3 = "T01:00:00.000Z";
     $ret['start']=  "$str1"."$str3";
    // $str1 =  date("Y-m-d", strtotime( '-7 days' ) ); // 2018-07-18 07:02:43
