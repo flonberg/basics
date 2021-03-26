@@ -2,21 +2,19 @@
 /******  run on 242 .../htdocs/esb/FLwbe/REST/JW  to allow REST requests to platform   ***************:*/
 
 require_once 'H:\inetpub\lib\sqlsrvLibFL_dev.php';
-require_once('./ESButils.inc');
-require_once('H:\inetpub\lib\ESB\_dev_\ESBRestProto.inc');
+//require_once './ESButils.inc';
+require_once 'H:\inetpub\lib\ESB\_dev_\ESButils.inc' ;
+require_once 'H:\inetpub\lib\ESB\_dev_\ESBRestProto.inc' ;
 require_once 'H:\inetpub\lib\switchConnMQ.inc';
-//require_once('H:\inetpub\lib\phpDB.inc');       
 
-//require_once('./ESBRestSched.inc');
-//$sess = new ESBRestSessions( );
-//$sess->sessionRestRequest('13102854-13C9-11EB-BFBB-B0044ED74D5C','0440F754-13C9-11EB-BBBA-B0044ED74D5C' );
-    $handle = connectMSQ();
+$handle = connectMSQ();                                                 // for connecting to Mosaiq dataBase
+$mqDates = makeMQdates(0);                                              // make the dates for MQ query
 $d = new DateTime();
 $firstDay =  $d->format('Y-m-d');	
 $d->modify('+1 day');
 $nextDay =  $d->format('Y-m-d');	
  $selStr = "SELECT TOP(100)  Sch_Id, App_DtTm, IDA, PAT_NAME, LOCATION FROM vw_Schedule 
-            WHERE App_DtTm > '".$firstDay."'  AND  App_DtTm < '".$nextDay."'  AND IDA LIKE '[0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'  AND LOCATION LIKE '%GBPTC' ORDER BY App_DtTm";
+            WHERE App_DtTm > '".$mqDates['firstDay']."'  AND  App_DtTm < '".$mqDates['nextDay']."'  AND IDA LIKE '[0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'  AND LOCATION LIKE '%GBPTC' ORDER BY App_DtTm";
 	$dB = new getDBData($selStr, $handle);
 while ($assoc = $dB->getAssoc()){
 	$row[$assoc['IDA']] = $assoc;
@@ -28,7 +26,7 @@ while ($assoc = $dB->getAssoc()){
     $handle = connectToDB(1);                                               // uses local connectToDB to switch between BB (1) and 242 (0)
 //    var_dump($handle);
 	$dates = makeDates();
-    	$tslt = new ESBRestTimeslot();                                                                          // instantiate class for getting multiple timeSlots. 
+    $tslt = new ESBRestTimeslot();                                                                          // instantiate class for getting multiple timeSlots. 
 	$getATS = new ESBRestATimeslot();                                                                       // instantiate class for getting single timeslot. 
 	$reSched = new ESBRestReschedule(); 
 	$pattern = "/\d{3}-\d{2}-\d{2}/";                                                                       // pattenr for getting patientIDs
@@ -49,6 +47,20 @@ while ($assoc = $dB->getAssoc()){
     echo "<pre>"; print_r($row); echo "</pre>";
 
     exit();
+
+/**
+ * Make dates for a Single Day's data aquisition. Parameter $n determines how many days in future you go. 
+ */
+function makeMQdates($n){
+    $d = new DateTime();                            // dreate a date
+    if ($n > 0 )                                    
+        $d->modify($n .' day');                     // advance according to argument
+    $dates['firstDay'] =  $d->format('Y-m-d');	    // format the early date of interval
+    $d->modify($n + 1 .' day');                     // advance 1 day
+    $dates['nextDay'] =  $d->format('Y-m-d');	    // format the late date of the interval
+    return $dates;
+}    
+
 
 function makeDates(){
     $str1 =  date("Y-m-d"); // 2018-07-18 07:02:43
