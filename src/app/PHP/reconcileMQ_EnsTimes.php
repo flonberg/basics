@@ -16,7 +16,10 @@ require_once 'H:\inetpub\lib\switchConnMQ.inc';
 	$dB = new getDBData($selStr, $handle);
     while ($assoc = $dB->getAssoc()){
 		$row[$assoc['IDA']] = $assoc;
-		$row[$assoc['IDA']]['Duration'] = $assoc['Duration_time']/(60 * 100);
+		$row[$assoc['IDA']]['Duration'] = $assoc['Duration_time']/(60 * 100);		// this is the only conversion which yields expected results???
+		$triggerOn = '04/01/2013 03:08 PM';
+		$triggerOn = $assoc['App_DtTm']->format('Y-m-d H:i:s');
+		$row[$assoc['IDA']]['UTC_StartTime'] = gmdate('Y-m-d H:i:s',strtotime($triggerOn));
     }
 
     $dates = makeDates();                                                           // make dates for Ensemble timeslorRestRequest
@@ -32,14 +35,13 @@ require_once 'H:\inetpub\lib\switchConnMQ.inc';
 		if (preg_match($pattern,$val['PatientID'],$dummy))	                        // find Patient timeSlots
 		{	
 			$time = strtotime($val['StartDateTime'].' UTC');                        // get GMT time in local time. 
-			$dateInLocal = date("Y-m-d H:i:s", $time);                              // format the local time string
-			$row[$val['PatientID']]['EnsStartTime'] = $dateInLocal;                 // store the Ensemble Start time
+			$dateInLocal = date("Y-m-d\TH:i:s\Z", $time);                              // format the local time string in UTC
+			$row[$val['PatientID']]['EnsStartTimeLocal'] = $dateInLocal;                 // store the Ensemble Start time
+			$row[$val['PatientID']]['EnsStartTimeRaw'] = $val['StartDateTime'];                 // store the Ensemble Start time
 			$row[$val['PatientID']]['EnsPatID'] = $val['PatientID'];                // confirm the PatientID
 			$row[$val['PatientID']]['SessionID'] = $val['SessionID'];               
 			$row[$val['PatientID']]['TimeslotID'] = $val['TimeslotID'];              
 			$row[$val['PatientID']]['RoomID'] = $val['RoomID'];                		 
-	
-	
 		}
 	}
     echo "<pre>"; print_r($row); echo "</pre>";
