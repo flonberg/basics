@@ -2,16 +2,17 @@
 /******  run on 242 .../htdocs/esb/FLwbe/REST/JW  to allow REST requests to platform   ***************:*/
 
 require_once 'H:\inetpub\lib\sqlsrvLibFL_dev.php';
-require_once 'H:\inetpub\lib\ESB\_dev_\ESButils.inc' ;
-require_once 'H:\inetpub\lib\ESB\_dev_\ESBRestProto.inc' ;
 require_once 'H:\inetpub\lib\switchConnMQ.inc';
 
-	$fp = fopen("./log/ESBRescheduleLog.txt", "w+");										// create the Log file
-	$now = date('Y-m-d H:i:s'); fwrite($fp, "\r\n $now \r\n");
+require_once 'H:\inetpub\lib\ESB\_dev_\ESButils.inc' ;
+require_once 'H:\inetpub\lib\ESB\_dev_\ESBRestProto.inc' ;
 	$tslt = new ESBRestTimeslot();                                                  // instantiate class for getting multiple timeSlots. 
 	$reSched = new ESBRestReschedule(); 	
+	
 	$handle = connectMSQ();                                                         // for connecting to Mosaiq dataBase
 	
+	$fp = fopen("./log/ESBRescheduleLog.txt", "w+");										// create the Log file
+	$now = date('Y-m-d H:i:s'); fwrite($fp, "\r\n $now \r\n");
 	$mqDates = makeMQdates(0);                                                      // make the dates for MQ query
 	/* make MQ query string */
     $selStr = "SELECT TOP(100)  Sch_Id, App_DtTm, IDA, PAT_NAME, Duration_time, LOCATION FROM vw_Schedule 
@@ -26,7 +27,7 @@ require_once 'H:\inetpub\lib\switchConnMQ.inc';
 		$row[$assoc['IDA']]['UTC_MQ_StartTime'] = gmdate('Y-m-d\TH:i:s\Z',strtotime($triggerOn));	//get UTC of Mosaiq startTime. 
     }
     $dates = makeDates();                                                           // make dates for Ensemble timeslorRestRequest
-    $fp = fopen("gts.txt", "w+");
+    $gp = fopen("gts.txt", "w+");
 	$dates = makeDates();
 	$pattern = "/\d{3}-\d{2}-\d{2}/";                                               // pattern for getting patientIDs
 	$ts  = $tslt->timeslotRestRequest("","", $dates['start'], $dates['end']);		// get the timeSlots for the day
@@ -44,10 +45,17 @@ require_once 'H:\inetpub\lib\switchConnMQ.inc';
 			$row[$val['PatientID']]['RoomID'] = $val['RoomID'];     		 		// mm 
 		}
 	}
+	fwrite($fp, "\r\n data \r\n");
+	$str = print_r($row, true);  fwrite($fp, $str);
 	echo "<pre>"; print_r($row); echo "</pre>";
+
+
 	/* Loop thru the dataStruct and create ESBReschedue Rest Request    */
 	foreach ($row as $key=>$val ){	
+	   echo "<br><br> Orrig Platform Time ". $val['EnsStartTimeRaw']." MQ UTC Platform time ". $val['UTC_MQ_StartTime'];
 	   echo "<br> reSched->rescheduleRestRequest(".$val['SessionID'].",".$val['TimeslotID'].",".$val['UTC_MQ_StartTime']." ,".$val['RoomID'].",".$val['Duration'].")";
+	   fwrite($fp, "\r\n \r\n Orrig Platform Time ". $val['EnsStartTimeRaw']." MQ UTC Platform time ". $val['UTC_MQ_StartTime']);
+	   fwrite($fp, "\r\n reSched->rescheduleRestRequest(".$val['SessionID'].",".$val['TimeslotID'].",".$val['UTC_MQ_StartTime']." ,".$val['RoomID'].",".$val['Duration'].")");
 	// $reSched->rescheduleRestRequest($sessionid,$timeslotid,$newdate,$roomid,$duration)
 	}
     exit();
