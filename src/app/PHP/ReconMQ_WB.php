@@ -11,7 +11,7 @@ require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\ESBPDRClass-prod.inc");
 require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\libMOSAIQjw.inc");
 require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\mcurl.inc");
 
-	$now = date('Y-m-d H:i:s'); fwrite($fp, "\r\n $now \r\n");
+	$now = date('Y-m-d H:i:s'); fwrite($fp, "\r\n $now \r\n");		// open log file and write dateTime
 	$dayAdvance = 1;							// number of day in future, 0 = today
 	$handle = connectMSQ();                                    		// connect to MQ database                     
 	$MQdates = makeMQdates($dayAdvance);					// make StartDate and EndDate for MQ query. 
@@ -19,30 +19,24 @@ require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\mcurl.inc");
 	$row = getFromMQ($MQdates);						// get data from MQ
 	$row = getFromWB($row, $dayAdvance);					// get data from WB
     	$ds = print_r($row, true); fwrite($fp, $ds);				// write data to log file
-	makeRescheduleRequest($row);
-print "HELLO<br>\n";
+	makeRescheduleRequest($row);						// Update the WB time and duration. 
 	exit();
 
 
 function makeRescheduleRequest($row){
 	global $fp;
-	$reSched = new ESBRestReschedule(); 	
-	var_dump($reSched);
+	$reSched = new ESBRestReschedule(); 					// instaniate the class for ReScheculing
 		/* Loop thru the dataStruct and create ESBReschedue Rest Request    */
 	$i = 0;
-	foreach ($row as $key=>$val ){	
-	   if (isset($val['EnsStartTimeRaw'])){	
-	   	echo "<br><br>". $key ."  Orrig WB Time ". $val['EnsStartTimeRaw']." MQ UTC time ". $val['UTC_MQ_StartTime'];
-		   echo "<br> reSched->rescheduleRestRequest(".$val['SessionID'].",".$val['TimeslotID'].",".$val['UTC_MQ_StartTime']." ,".$val['RoomID'].",".$val['Duration'].")";
-		   fwrite($fp, "\r\n \r\n". $key ."--".$val['PAT_NAME'] ." Orrig WB Time ". $val['EnsStartTimeRaw']." MQ UTC time ". $val['UTC_MQ_StartTime']);
-		   fwrite($fp, "\r\n reSched->rescheduleRestRequest(".$val['SessionID'].",".$val['TimeslotID'].",".$val['UTC_MQ_StartTime']." ,".$val['RoomID'].",".$val['Duration'].")");
-		   /*
-		   if ($i++ == 0){
-		     $result = $reSched->rescheduleRestRequest($val['SessionID'],$val['TimeslotID'],$val['UTC_MQ_StartTime'] ,$val['RoomID'],$val['Duration']);
-		     ob_start(); var_dump($result); $d = ob_get_clean(); fwrite($fp, $d);
+	foreach ($row as $key=>$val ){						// loop thru the combined WB &  MQ data
+		if (isset($val['EnsStartTimeRaw'])){					// if data has been returned for this PatID from WB
+			fwrite($fp, "\r\n \r\n". $key ."--".$val['PAT_NAME'] ." Orrig WB Time ". $val['EnsStartTimeRaw']." MQ UTC time ". $val['UTC_MQ_StartTime']); // RECORD 'BEFORE' DATA
+			//record the ESBRestReschedule request. 
+		  	fwrite($fp, "\r\n reSched->rescheduleRestRequest(".$val['SessionID'].",".$val['TimeslotID'].",".$val['UTC_MQ_StartTime']." ,".$val['RoomID'].",".$val['Duration'].")");		   if ($i++ == 0){
+		        $result = $reSched->rescheduleRestRequest($val['SessionID'],$val['TimeslotID'],$val['UTC_MQ_StartTime'] ,$val['RoomID'],$val['Duration']);// do the reschedule
+		        ob_start(); var_dump($result); $d = ob_get_clean(); fwrite($fp, "\r\n result: \r\n "); fwrite($fp, $d);		//record the returned result
 		   }
-		    */
-	   }
+	      } 
 	}
 }
 /**
@@ -89,7 +83,9 @@ function getFromMQ($mqDates){
     	
 }
 /**
- * Get from WB
+ * Use ESBRestTimeslot->timeslotRestRequest to get all the timeslots for the given day. 
+ * Match the Timeslot data to the MQ data by MRN, assuming only one Timeslot per Patient per Day.
+ * In future, if > 1 timeslot is found matcher the earlier to the MQ earlier, mm the later one. 
  */
 function getFromWB($row, $dayAdvance){
 	global $fp;
@@ -99,19 +95,15 @@ function getFromWB($row, $dayAdvance){
 	$ts  = $tslt->timeslotRestRequest("","", $dates['start'], $dates['end']);		// get the timeSlots for the day
 	$pattern = "/\d{3}-\d{2}-\d{2}/";                                               	// pattern for getting patientIDs
 	foreach ($ts as $key=>$val){                                                    	// loop thru the items returned by SOAP request. 
-		if (preg_match($pattern,$val['PatientID'],$dummy))	                        // find Patient timeSlots
+		if (preg_match($pattern,$val['PatientID'],$dummy) )	                        // find Patient timeSlots
 		{	
 			$time = strtotime($val['StartDateTime'].' UTC');                        // get GMT time in local time. 
 			$dateInLocal = date("Y-m-d\TH:i:s\Z", $time);                           // format the local time string in UTC
-			$row[$val['PatientID']]['EnsStartTimeLocal'] = $dateInLocal;            // store the Ensemble Start time
 			$row[$val['PatientID']]['EnsStartTimeRaw'] = $val['StartDateTime'];     // store the Ensemble Start time
+			$row[$val['PatientID']]['EnsStartTimeLocal'] = $dateInLocal;            // store the Ensemble Start time
 			$row[$val['PatientID']]['EnsPatID'] = $val['PatientID'];                // confirm the PatientID
-			$row[$val['PatientID']]['SessionID'] = $val['SessionID'];            	// Add Ensemble Param.    
-			$row[$val['PatientID']]['TimeslotID'] = $val['TimeslotID'];             // mm 
-			$row[$val['PatientID']]['RoomID'] = $val['RoomID'];     		 		// mm 
 		}
 	}
-
 	return $row;
 }
 function makeWBdates($n)
