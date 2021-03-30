@@ -5,53 +5,75 @@ require_once 'H:\inetpub\lib\ESB\_dev_\ESBRestProto.inc' ;
 require_once 'H:\inetpub\lib\switchConnMQ.inc';
 require_once('../ESBLocationClass.inc');
 $mylocation = new Location();
-require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\ESBRestSchedFL.inc");
+require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\ESBRestSched.inc");
 require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\ESBPatientClass-prod.inc");
 require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\ESBPDRClass-prod.inc");
 require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\libMOSAIQjw.inc");
 require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\mcurl.inc");
 
-	$fp = fopen("../log/ReconMQ_WBlog.txt", "w+");
 	$now = date('Y-m-d H:i:s'); fwrite($fp, "\r\n $now \r\n");
 	$dayAdvance = 1;							// number of day in future, 0 = today
 	$handle = connectMSQ();                                    		// connect to MQ database                     
-	$reSched = new ESBRestReschedule(); 	
-	$row = getFromMQ($dayAdvance);						// get data from MQ
+	$MQdates = makeMQdates($dayAdvance);					// make StartDate and EndDate for MQ query. 
+	$fp = fopen("../log/ReconMQ_WBlog".$MQdates['firstDay'].".txt", "w+");	// create the log file
+	$row = getFromMQ($MQdates);						// get data from MQ
 	$row = getFromWB($row, $dayAdvance);					// get data from WB
-    	$ds = print_r($row, true); fwrite($fp, $ds);
+    	$ds = print_r($row, true); fwrite($fp, $ds);				// write data to log file
+	makeRescheduleRequest($row);
 print "HELLO<br>\n";
 	exit();
 
+
+function makeRescheduleRequest($row){
+	global $fp;
+	$reSched = new ESBRestReschedule(); 	
+	var_dump($reSched);
+		/* Loop thru the dataStruct and create ESBReschedue Rest Request    */
+	$i = 0;
+	foreach ($row as $key=>$val ){	
+	   if (isset($val['EnsStartTimeRaw'])){	
+	   	echo "<br><br>". $key ."  Orrig WB Time ". $val['EnsStartTimeRaw']." MQ UTC time ". $val['UTC_MQ_StartTime'];
+		   echo "<br> reSched->rescheduleRestRequest(".$val['SessionID'].",".$val['TimeslotID'].",".$val['UTC_MQ_StartTime']." ,".$val['RoomID'].",".$val['Duration'].")";
+		   fwrite($fp, "\r\n \r\n". $key ."--".$val['PAT_NAME'] ." Orrig WB Time ". $val['EnsStartTimeRaw']." MQ UTC time ". $val['UTC_MQ_StartTime']);
+		   fwrite($fp, "\r\n reSched->rescheduleRestRequest(".$val['SessionID'].",".$val['TimeslotID'].",".$val['UTC_MQ_StartTime']." ,".$val['RoomID'].",".$val['Duration'].")");
+		   /*
+		   if ($i++ == 0){
+		     $result = $reSched->rescheduleRestRequest($val['SessionID'],$val['TimeslotID'],$val['UTC_MQ_StartTime'] ,$val['RoomID'],$val['Duration']);
+		     ob_start(); var_dump($result); $d = ob_get_clean(); fwrite($fp, $d);
+		   }
+		    */
+	   }
+	}
+}
 /**
  * Make dates for a Single Day's data aquisition. Parameter $n determines how many days in future you go. 
  */
 function makeMQdates($n){
 	global $fp;
-    $d = new DateTime();                                                            // create a date
+    $d = new DateTime();                                                         // create a date
     if ($n > 0 )  {                                  
-	    $d->modify($n .' day');                                                 // advance according to argument
+	    $d->modify($n .' day');                                              // advance according to argument
 	    $d = goToMonday($d);
     }
-    $dates['firstDay'] =  $d->format('Y-m-d');	                                    // format the early date of interval
+    $dates['firstDay'] =  $d->format('Y-m-d');	                                 // format the early date of interval
     $d->modify(' + 1  day');                                                     // advance 1 day
     $dates['nextDay'] =  $d->format('Y-m-d');	                                    // format the late date of the interval
     $ds = print_r($dates, true); fwrite($fp, $ds);
     return $dates;
 }  
 function goToMonday($d){
-    if ($d->format('w') == '6')						    // if it is a Saturday		
-	    $d->modify('+2 days');					    // go forward to Monday	
-    if ($d->format('w') == '0')						    // if it is a Sunday		
-	    $d->modify('+1 days');					    // go forward to Monday	
+    if ($d->format('w') == '6')						    	// if it is a Saturday		
+	    $d->modify('+2 days');					    	// go forward to Monday	
+    if ($d->format('w') == '0')						    	// if it is a Sunday		
+	    $d->modify('+1 days');					    	// go forward to Monday	
     return $d;
 
 }
 /**
  * Get Data from MQ
  */
-function getFromMQ($dayAdvance){
+function getFromMQ($mqDates){
    global $fp, $handle;
-	$mqDates = makeMQdates($dayAdvance);
    	$selStr = "SELECT TOP(100)  Sch_Id, App_DtTm, IDA, PAT_NAME, Duration_time, LOCATION FROM vw_Schedule 
             WHERE App_DtTm > '".$mqDates['firstDay']."'  AND  App_DtTm < '".$mqDates['nextDay']."'                  
             AND IDA LIKE '[0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'  AND LOCATION LIKE '%GBPTC' ORDER BY App_DtTm";    // nnn-nn-nn and GBPTC
