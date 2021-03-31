@@ -11,31 +11,45 @@ require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\ESBPDRClass-prod.inc");
 require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\libMOSAIQjw.inc");
 require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\mcurl.inc");
 
-	$now = date('Y-m-d H:i:s'); fwrite($fp, "\r\n $now \r\n");		// open log file and write dateTime
-	$dayAdvance = 1;							// number of day in future, 0 = today
 	$handle = connectMSQ();                                    		// connect to MQ database                     
-	$MQdates = makeMQdates($dayAdvance);					// make StartDate and EndDate for MQ query. 
-	$fp = fopen("../log/ReconMQ_WBlog".$MQdates['firstDay'].".txt", "w+");	// create the log file
-	$row = getFromMQ($MQdates);						// get data from MQ
-	$row = getFromWB($row, $dayAdvance);					// get data from WB
-    	$ds = print_r($row, true); fwrite($fp, $ds);				// write data to log file
-	makeRescheduleRequest($row);						// Update the WB time and duration. 
+	$gp = fopen("../log/ReconMQ_WB_All.txt", "a+");	// create the log file
+//	$now = date('Y-m-d H:i:s'); fwrite($fp, "\r\n $now \r\n");		// open log file and write dateTime
+	$now = new DateTime();  $nowString =  $now->format('Y-m-d');  fwrite($fp, "\r\n $nowString \r\n");	fwrite($gp, "\r\n $nowString \r\n");		// open log file and write dateTime
+	for ($i = 0; $i < 2; $i++){
+		$dayAdvance = $i;							// number of day in future, 0 = today
+		$MQdates = makeMQdates($dayAdvance);					// make StartDate and EndDate for MQ query. 
+		fwrite($gp, "\r\n ".  $MQdates['firstDay']  ."\r\n");
+		$fp = fopen("../log/ReconMQ_WBlog".$MQdates['firstDay'].".txt", "w+");	// create the log file
+		$row = getFromMQ($MQdates);						// get data from MQ
+		$row = getFromWB($row,  $MQdates['firstDay']);					// get data from WB
+    		$ds = print_r($row, true); fwrite($fp, $ds);				// write data to log file
+		makeRescheduleRequest($row);						// Update the WB time and duration. 
+	}
+	echo $nowString;
 	exit();
 
 
 function makeRescheduleRequest($row){
-	global $fp;
+	global $fp, $gp;
 	$reSched = new ESBRestReschedule(); 					// instaniate the class for ReScheculing
 		/* Loop thru the dataStruct and create ESBReschedue Rest Request    */
 	$i = 0;
 	foreach ($row as $key=>$val ){						// loop thru the combined WB &  MQ data
-		if (isset($val['EnsStartTimeRaw'])){					// if data has been returned for this PatID from WB
-			fwrite($fp, "\r\n \r\n". $key ."--".$val['PAT_NAME'] ." Orrig WB Time ". $val['EnsStartTimeRaw']." MQ UTC time ". $val['UTC_MQ_StartTime']); // RECORD 'BEFORE' DATA
+		if (isset($val['WBStartUTCTime']) && isset($val['UTC_MQ_StartTime'])){		// if data has been returned for this PatID from WB AND MQ
+			if ($val['Duration'] == $val['WBDuration'] && $val['UTC_MQ_StartTime'] == $val['UTC_MQ_StartTime']){
+			       fwrite($fp, "\r\n ". $val['IDA'] ." WB = MQ \r\n");	
+			       fwrite($gp, "\r\n ". $val['IDA'] ." for ".  $val['WBStartTimeLocal']." WB = MQ \r\n");	
+			       continue;
+			}
+			fwrite($fp, "\r\n \r\n". $key ."--".$val['PAT_NAME'] ." Orrig WB Time ". $val['WBStartTimeRaw']." MQ UTC time ". $val['UTC_MQ_StartTime']); // RECORD 'BEFORE' DATA
+			fwrite($gp, "\r\n \r\n". $key ."--".$val['PAT_NAME'] ." Orrig WB Time ". $val['WBStartTimeRaw']." MQ UTC time ". $val['UTC_MQ_StartTime']); // RECORD 'BEFORE' DATA
 			//record the ESBRestReschedule request. 
-		  	fwrite($fp, "\r\n reSched->rescheduleRestRequest(".$val['SessionID'].",".$val['TimeslotID'].",".$val['UTC_MQ_StartTime']." ,".$val['RoomID'].",".$val['Duration'].")");		   if ($i++ == 0){
-		        $result = $reSched->rescheduleRestRequest($val['SessionID'],$val['TimeslotID'],$val['UTC_MQ_StartTime'] ,$val['RoomID'],$val['Duration']);// do the reschedule
+			fwrite($fp, "\r\n reSched->rescheduleRestRequest(".$val['SessionID'].",".$val['TimeslotID'].",".$val['UTC_MQ_StartTime']." ,".$val['RoomID'].",".$val['Duration'].")");	
+			fwrite($gp, "\r\n reSched->rescheduleRestRequest(".$val['SessionID'].",".$val['TimeslotID'].",".$val['UTC_MQ_StartTime']." ,".$val['RoomID'].",".$val['Duration'].")");	
+		        $result = $reSched->rescheduleRestRequest($val['SessionID'],$val['TimeslotID'], $val['UTC_MQ_StartTime'], $val['RoomID'], $val['Duration']);// do the reschedule
+			fwrite($fp, "\r\n ". $val['IDA'] ." WB StartTime updated");
+			fwrite($gp, "\r\n ". $val['IDA'] ." WB StartTime updated");
 		        ob_start(); var_dump($result); $d = ob_get_clean(); fwrite($fp, "\r\n result: \r\n "); fwrite($fp, $d);		//record the returned result
-		   }
 	      } 
 	}
 }
@@ -87,9 +101,9 @@ function getFromMQ($mqDates){
  * Match the Timeslot data to the MQ data by MRN, assuming only one Timeslot per Patient per Day.
  * In future, if > 1 timeslot is found matcher the earlier to the MQ earlier, mm the later one. 
  */
-function getFromWB($row, $dayAdvance){
+function getFromWB($row,  $firstDay){
 	global $fp;
-	$dates = makeWBdates($dayAdvance);
+	$dates = makeWBdates($firstDay);
         $ds = print_r($dates, true); fwrite($fp, "\r\n WB dates \r\n"); fwrite($fp, $ds);
 	$tslt = new ESBRestTimeslot();           
 	$ts  = $tslt->timeslotRestRequest("","", $dates['start'], $dates['end']);		// get the timeSlots for the day
@@ -99,20 +113,25 @@ function getFromWB($row, $dayAdvance){
 		{	
 			$time = strtotime($val['StartDateTime'].' UTC');                        // get GMT time in local time. 
 			$dateInLocal = date("Y-m-d\TH:i:s\Z", $time);                           // format the local time string in UTC
-			$row[$val['PatientID']]['EnsStartTimeRaw'] = $val['StartDateTime'];     // store the Ensemble Start time
-			$row[$val['PatientID']]['EnsStartTimeLocal'] = $dateInLocal;            // store the Ensemble Start time
-			$row[$val['PatientID']]['EnsPatID'] = $val['PatientID'];                // confirm the PatientID
+			$row[$val['PatientID']]['WBStartUTCTime'] = $val['StartDateTime'];     // store the Ensemble Start time
+			$row[$val['PatientID']]['WBDuration'] = $val['Duration'];            // store the Ensemble Start time
+			$row[$val['PatientID']]['WBStartTimeLocal'] = $dateInLocal;            // store the Ensemble Start time
+			$row[$val['PatientID']]['WBPatID'] = $val['PatientID'];                // confirm the PatientID
+			$row[$val['PatientID']]['SessionID'] = $val['SessionID'];                // confirm the PatientID
+			$row[$val['PatientID']]['TimeslotID'] = $val['TimeslotID'];                // confirm the PatientID
+			$row[$val['PatientID']]['RoomID'] = $val['RoomID'];                // confirm the PatientID
 		}
 	}
 	return $row;
 }
-function makeWBdates($n)
+function makeWBdates($firstDay)
 {
-	$today = date('Y-m-d');
-	$theDay = strtotime("+$n day", strtotime($today));
+//	$today = date('Y-m-d');
+//	$theDay = strtotime("+$n day", strtotime($today));
 	$str2 = "T23:00:00.000Z";                                                       // make the time for the END of the interval
 	$str3 = "T01:00:00.000Z";
-	$str1 = date('Y-m-d', $theDay);
+//	$str1 = date('Y-m-d', $theDay);
+	$str1 = $firstDay;
    	$ret['start']=  $str1.$str3;
     	$ret['end']=  $str1.$str2;
     return $ret;
