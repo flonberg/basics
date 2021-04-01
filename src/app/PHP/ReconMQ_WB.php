@@ -6,26 +6,38 @@ require_once 'H:\inetpub\lib\switchConnMQ.inc';
 require_once('../ESBLocationClass.inc');
 $mylocation = new Location();
 require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\ESBRestSched.inc");
-require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\ESBPatientClass-prod.inc");
-require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\ESBPDRClass-prod.inc");
-require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\libMOSAIQjw.inc");
-require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\mcurl.inc");
+require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\ESButils.inc");
+//require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\ESBPatientClass-prod.inc");
+//require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\ESBPDRClass-prod.inc");
+//require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\libMOSAIQjw.inc");
+//require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\mcurl.inc");
 
-	$handle = connectMSQ();                                    		// connect to MQ database                     
-	$gp = fopen("../log/ReconMQ_WB_All.txt", "a+");	// create the log file
+	$debug = true;
+	$handle = connectMSQ();                                    			// connect to MQ database                     
+	$gp = fopen("../log/ReconMQ_WB_All.txt", "a+");					// create the log file
+	$numDays = 6;									// number of days to go into future
 //	$now = date('Y-m-d H:i:s'); fwrite($fp, "\r\n $now \r\n");		// open log file and write dateTime
-	$now = new DateTime();  $nowString =  $now->format('Y-m-d');  fwrite($fp, "\r\n $nowString \r\n");	fwrite($gp, "\r\n $nowString \r\n");		// open log file and write dateTime
-	for ($i = 0; $i < 2; $i++){
+	$now = new DateTime();  $nowString = $now->format('Y-m-d H:i:s');  fwrite($fp, "\r\n $nowString \r\n");	fwrite($gp, "\r\n $nowString \r\n");	// open log file and write dateTime
+	$logMessage = "";
+	$tDay = new DateTime();
+	for ($i = 0; $i < $numDays; $i++){
 		$dayAdvance = $i;							// number of day in future, 0 = today
-		$MQdates = makeMQdates($dayAdvance);					// make StartDate and EndDate for MQ query. 
+		$MQdates['firstDay'] = $tDay->format('Y-m-d');				// make StartDate and EndDate for MQ query. 
+		$tDay->modify('+1 day');
+		$tDay = goToMonday($tDay);
+		$MQdates['nextDay'] = $tDay->format('Y-m-d');
+		echo "<br>"; print_r($MQdates);
 		fwrite($gp, "\r\n ".  $MQdates['firstDay']  ."\r\n");
 		$fp = fopen("../log/ReconMQ_WBlog".$MQdates['firstDay'].".txt", "w+");	// create the log file
 		$row = getFromMQ($MQdates);						// get data from MQ
 		$row = getFromWB($row,  $MQdates['firstDay']);					// get data from WB
     		$ds = print_r($row, true); fwrite($fp, $ds);				// write data to log file
-		makeRescheduleRequest($row);						// Update the WB time and duration. 
+		$logMessage = makeRescheduleRequest($row);						// Update the WB time and duration. 
+		echo "<br> ;ogMessage <br>  $logMessage <br>"; 
 	}
-	echo $nowString;
+	echo __FILE__;
+	echo date("c")." num days is ". $numDays ."<br> number of rec edited is ". $logMessage."<br> ";;
+	makeLogEntry($logMessage, $numDays);
 	exit();
 
 
@@ -34,13 +46,17 @@ function makeRescheduleRequest($row){
 	$reSched = new ESBRestReschedule(); 					// instaniate the class for ReScheculing
 		/* Loop thru the dataStruct and create ESBReschedue Rest Request    */
 	$i = 0;
+	$logMessage = ""; 
+	$numRecordsEdited = 0;								// save num rec edited to write to JW logs. 
 	foreach ($row as $key=>$val ){						// loop thru the combined WB &  MQ data
 		if (isset($val['WBStartUTCTime']) && isset($val['UTC_MQ_StartTime'])){		// if data has been returned for this PatID from WB AND MQ
-			if ($val['Duration'] == $val['WBDuration'] && $val['UTC_MQ_StartTime'] == $val['UTC_MQ_StartTime']){
-			       fwrite($fp, "\r\n ". $val['IDA'] ." WB = MQ \r\n");	
+			if ($val['Duration'] == $val['WBDuration'] && $val['UTC_MQ_StartTime'] == $val['UTC_MQ_StartTime']){ // if MQ === WB data
+			       fwrite($fp, "\r\n ". $val['IDA'] ." WB = MQ \r\n");						// record confirmation in log
 			       fwrite($gp, "\r\n ". $val['IDA'] ." for ".  $val['WBStartTimeLocal']." WB = MQ \r\n");	
 			       continue;
 			}
+			$numRecordsEdited++;
+			$logMessage .= "TimelotID ".$val['TimeslotID'] .",  SessionID = ".$val['SessionID'] ."  edited from ".$val['WBStartUTCTime'] ." to ".  $val['UTC_MQ_StartTime']." and Duration from ". $val['WBDuration']." to ". $val['Duration'] ." minutes" ;
 			fwrite($fp, "\r\n \r\n". $key ."--".$val['PAT_NAME'] ." Orrig WB Time ". $val['WBStartTimeRaw']." MQ UTC time ". $val['UTC_MQ_StartTime']); // RECORD 'BEFORE' DATA
 			fwrite($gp, "\r\n \r\n". $key ."--".$val['PAT_NAME'] ." Orrig WB Time ". $val['WBStartTimeRaw']." MQ UTC time ". $val['UTC_MQ_StartTime']); // RECORD 'BEFORE' DATA
 			//record the ESBRestReschedule request. 
@@ -50,8 +66,25 @@ function makeRescheduleRequest($row){
 			fwrite($fp, "\r\n ". $val['IDA'] ." WB StartTime updated");
 			fwrite($gp, "\r\n ". $val['IDA'] ." WB StartTime updated");
 		        ob_start(); var_dump($result); $d = ob_get_clean(); fwrite($fp, "\r\n result: \r\n "); fwrite($fp, $d);		//record the returned result
+			if ($numRecordsEdited == 1)
+				break;
 	      } 
 	}
+	if ($numRecordsEdited == 0)
+		return "0";
+	else
+		return $logMessage; 
+}
+function makeLogEntry($message)
+{
+	global $numDays;
+	$startDay = date('Y-m-d');
+	$err = new ERROR();								// class containing 'logout' function  
+	$intDates = makeMQdates($numDays);        	
+	print_r($intDates);
+	if  (strcmp($message, "0") == 0)
+		$message = "All records syncronized from ". $startDay ." to  ". $intDates['nextDay'];
+	$err->logout('poll', 'info' ,__FILE__, $message);     
 }
 /**
  * Make dates for a Single Day's data aquisition. Parameter $n determines how many days in future you go. 
@@ -65,6 +98,7 @@ function makeMQdates($n){
     }
     $dates['firstDay'] =  $d->format('Y-m-d');	                                 // format the early date of interval
     $d->modify(' + 1  day');                                                     // advance 1 day
+	    $d = goToMonday($d);
     $dates['nextDay'] =  $d->format('Y-m-d');	                                    // format the late date of the interval
     $ds = print_r($dates, true); fwrite($fp, $ds);
     return $dates;
