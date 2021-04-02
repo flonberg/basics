@@ -15,32 +15,46 @@ require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\ESButils.inc");
 	$debug = true;
 	$handle = connectMSQ();                                    			// connect to MQ database                     
 	$gp = fopen("../log/ReconMQ_WB_All.txt", "a+");					// create the log file
-	$numDays = 6;									// number of days to go into future
-//	$now = date('Y-m-d H:i:s'); fwrite($fp, "\r\n $now \r\n");		// open log file and write dateTime
-	$now = new DateTime();  $nowString = $now->format('Y-m-d H:i:s');  fwrite($fp, "\r\n $nowString \r\n");	fwrite($gp, "\r\n $nowString \r\n");	// open log file and write dateTime
+	$numDays = 2;									// number of days to go into future
 	$logMessage = "";
-	$tDay = new DateTime();
-	for ($i = 0; $i < $numDays; $i++){
-		$dayAdvance = $i;							// number of day in future, 0 = today
-		$MQdates['firstDay'] = $tDay->format('Y-m-d');				// make StartDate and EndDate for MQ query. 
-		$tDay->modify('+1 day');
-		$tDay = goToMonday($tDay);
-		$MQdates['nextDay'] = $tDay->format('Y-m-d');
-		echo "<br>"; print_r($MQdates);
+	$tDay = new DateTime();								// make DateTime Object for today
+	for ($i = 0; $i < $numDays; $i++){						// go forward by 1 day, repeat number specified times
+		$MQdates = makeMosaiqDates($tDay);
 		fwrite($gp, "\r\n ".  $MQdates['firstDay']  ."\r\n");
 		$fp = fopen("../log/ReconMQ_WBlog".$MQdates['firstDay'].".txt", "w+");	// create the log file
 		$row = getFromMQ($MQdates);						// get data from MQ
-		$row = getFromWB($row,  $MQdates['firstDay']);					// get data from WB
+		$row = getFromWB($row,  $MQdates['firstDay']);				// get data from WB
     		$ds = print_r($row, true); fwrite($fp, $ds);				// write data to log file
-		$logMessage = makeRescheduleRequest($row);						// Update the WB time and duration. 
-		echo "<br> ;ogMessage <br>  $logMessage <br>"; 
+		$logMessage = makeRescheduleRequest($row);				// Update the WB time and duration. 
+		echo "<br> logMessage <br>  $logMessage <br>"; 
 	}
 	echo __FILE__;
 	echo date("c")." num days is ". $numDays ."<br> number of rec edited is ". $logMessage."<br> ";;
-	makeLogEntry($logMessage, $numDays);
+	makeLogEntry($logMessage, $numDays);						// make entry in system log. 
 	exit();
+/**
+ * Make startDate and endDate, formatted for Mosaiq, skippin thru weekends. Since $dt is an Object it is passed by reference. 
+ */
+function makeMosaiqDates($dt){
+	$mQ['firstDay'] = $dt->format('Y-m-d');
+	$dt = advanceToNextWeekday($dt);
+	$mQ['nextDay'] = $dt->format('Y-m-d');
+	echo "<br>"; print_r($mQ);
+	return $mQ; 
+}
 
-
+function advanceToNextWeekday($d){
+    	$d->modify('+1 days');
+	$d = goToMonday($d);
+   	return $d;
+}
+function goToMonday($d){
+    if ($d->format('w') == '6')						    	// if it is a Saturday		
+	    $d->modify('+2 days');					    	// go forward to Monday	
+    if ($d->format('w') == '0')						    	// if it is a Sunday		
+	    $d->modify('+1 days');					    	// go forward to Monday	
+    return $d;
+}
 function makeRescheduleRequest($row){
 	global $fp, $gp;
 	$reSched = new ESBRestReschedule(); 					// instaniate the class for ReScheculing
@@ -103,14 +117,7 @@ function makeMQdates($n){
     $ds = print_r($dates, true); fwrite($fp, $ds);
     return $dates;
 }  
-function goToMonday($d){
-    if ($d->format('w') == '6')						    	// if it is a Saturday		
-	    $d->modify('+2 days');					    	// go forward to Monday	
-    if ($d->format('w') == '0')						    	// if it is a Sunday		
-	    $d->modify('+1 days');					    	// go forward to Monday	
-    return $d;
 
-}
 /**
  * Get Data from MQ
  */
