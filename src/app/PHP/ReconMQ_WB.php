@@ -15,21 +15,26 @@ require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\ESButils.inc");
 	$debug = true;
 	$handle = connectMSQ();                                    			// connect to MQ database                     
 	$gp = fopen("../log/ReconMQ_WB_All.txt", "a+");					// create the log file
-	$numDays = 2;									// number of days to go into future
+	$numDays = 4;									// number of days to go into future
 	$logMessage = "";
 	$tDay = new DateTime();								// make DateTime Object for today
+	$todayString = $tDay->format('Y-m-d');
+	$hp = fopen("../log/test".$todayString.".txt", "a+");					// create the log file
+	$dBugArray = array();							
 	for ($i = 0; $i < $numDays; $i++){						// go forward by 1 day, repeat number specified times
 		$MQdates = makeMosaiqDates($tDay);
 		fwrite($gp, "\r\n ".  $MQdates['firstDay']  ."\r\n");
 		$fp = fopen("../log/ReconMQ_WBlog".$MQdates['firstDay'].".txt", "w+");	// create the log file
-		$row = getFromMQ($MQdates);						// get data from MQ
-		$row = getFromWB($row,  $MQdates['firstDay']);				// get data from WB
+		$row = getFromMQ($MQdates,  &$dBugArray);						// get data from MQ
+		$row = getFromWB($row,  $MQdates['firstDay'],  &$dBugArray, 0);				// get data from WB
     		$ds = print_r($row, true); fwrite($fp, $ds);				// write data to log file
 		$logMessage = makeRescheduleRequest($row);				// Update the WB time and duration. 
+		$row = getFromWB($row,  $MQdates['firstDay'],  &$dBugArray, 1);		// confirm edit for WB
 		echo "<br> logMessage <br>  $logMessage <br>"; 
 	}
-	echo __FILE__;
 	echo date("c")." num days is ". $numDays ."<br> number of rec edited is ". $logMessage."<br> ";;
+	echo " in main <pre>"; print_r($dBugArray); echo "</pre>"; 
+	$str = print_r($dBugArray, true); fwrite($hp, $str);
 	makeLogEntry($logMessage, $numDays);						// make entry in system log. 
 	exit();
 /**
@@ -121,7 +126,7 @@ function makeMQdates($n){
 /**
  * Get Data from MQ
  */
-function getFromMQ($mqDates){
+function getFromMQ($mqDates,  $dBugArray){
    global $fp, $handle;
    	$selStr = "SELECT TOP(100)  Sch_Id, App_DtTm, IDA, PAT_NAME, Duration_time, LOCATION FROM vw_Schedule 
             WHERE App_DtTm > '".$mqDates['firstDay']."'  AND  App_DtTm < '".$mqDates['nextDay']."'                  
@@ -131,8 +136,10 @@ function getFromMQ($mqDates){
     while ($assoc = $dB->getAssoc()){
 	$row[$assoc['IDA']] = $assoc;
 	$row[$assoc['IDA']]['Duration'] = $assoc['Duration_time']/(60 * 100);				// confirmed with Anne
-	$triggerOn = $assoc['App_DtTm']->format('Y-m-d H:i:s');						// create arg for strtotime
-	$row[$assoc['IDA']]['UTC_MQ_StartTime'] = gmdate('Y-m-d\TH:i:s\Z',strtotime($triggerOn));	//get UTC of Mosaiq startTime. 
+	$App_DtTmString = $assoc['App_DtTm']->format('Y-m-d H:i:s');						// create arg for strtotime
+	$row[$assoc['IDA']]['UTC_MQ_StartTime'] = gmdate('Y-m-d\TH:i:s\Z',strtotime($App_DtTmString));	//get UTC of Mosaiq startTime. 
+//	fwrite($fp, "\r\n For ". $assoc['IDA'] ."  MQ has  App_DtTm is ". $App_DtTmString ." Duration is ". $row[$assoc['IDA']]['Duration']); 
+	$dBugArray[$mqDates['firstDay']][$assoc['IDA']]['MQstart'] = $App_DtTmString; 	$dBugArray [$mqDates['firstDay']][$assoc['IDA']]['MQduration'] = $row[$assoc['IDA']]['Duration']; 
    	}
     return $row;	
     	
@@ -142,7 +149,7 @@ function getFromMQ($mqDates){
  * Match the Timeslot data to the MQ data by MRN, assuming only one Timeslot per Patient per Day.
  * In future, if > 1 timeslot is found matcher the earlier to the MQ earlier, mm the later one. 
  */
-function getFromWB($row,  $firstDay){
+function getFromWB($row,  $firstDay,  $dBugArray, $mode){
 	global $fp;
 	$dates = makeWBdates($firstDay);
         $ds = print_r($dates, true); fwrite($fp, "\r\n WB dates \r\n"); fwrite($fp, $ds);
@@ -161,6 +168,8 @@ function getFromWB($row,  $firstDay){
 			$row[$val['PatientID']]['SessionID'] = $val['SessionID'];                // confirm the PatientID
 			$row[$val['PatientID']]['TimeslotID'] = $val['TimeslotID'];                // confirm the PatientID
 			$row[$val['PatientID']]['RoomID'] = $val['RoomID'];                // confirm the PatientID
+			$dBugArray[$firstDay] [$val['PatientID']][$mode]['WBstartTime'] = $dateInLocal; 
+			$dBugArray[$firstDay][$val['PatientID']][$mode]['WBduration'] = $val['Duration']; 
 		}
 	}
 	return $row;
