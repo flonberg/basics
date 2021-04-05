@@ -15,7 +15,7 @@ require_once("H:\inetpub\lib\ESB\\".$mylocation->path."\\ESButils.inc");
 	$debug = true;
 	$handle = connectMSQ();                                    			// connect to MQ database                     
 	$gp = fopen("../log/ReconMQ_WB_All.txt", "a+");					// create the log file
-	$numDays = 4;									// number of days to go into future
+	$numDays = 7;									// number of days to go into future
 	$logMessage = "";
 	$tDay = new DateTime();								// make DateTime Object for today
 	$todayString = $tDay->format('Y-m-d');
@@ -63,6 +63,7 @@ function goToMonday($d){
 function makeRescheduleRequest($row){
 	global $fp, $gp;
 	$reSched = new ESBRestReschedule(); 					// instaniate the class for ReScheculing
+	$err = new ERROR();								// class containing 'logout' function  
 		/* Loop thru the dataStruct and create ESBReschedue Rest Request    */
 	$i = 0;
 	$logMessage = ""; 
@@ -75,18 +76,17 @@ function makeRescheduleRequest($row){
 			       continue;
 			}
 			$numRecordsEdited++;
-			$logMessage .= "TimelotID ".$val['TimeslotID'] .",  SessionID = ".$val['SessionID'] ."  edited from ".$val['WBStartUTCTime'] ." to ".  $val['UTC_MQ_StartTime']." and Duration from ". $val['WBDuration']." to ". $val['Duration'] ." minutes" ;
 			fwrite($fp, "\r\n \r\n". $key ."--".$val['PAT_NAME'] ." Orrig WB Time ". $val['WBStartTimeRaw']." MQ UTC time ". $val['UTC_MQ_StartTime']); // RECORD 'BEFORE' DATA
 			fwrite($gp, "\r\n \r\n". $key ."--".$val['PAT_NAME'] ." Orrig WB Time ". $val['WBStartTimeRaw']." MQ UTC time ". $val['UTC_MQ_StartTime']); // RECORD 'BEFORE' DATA
 			//record the ESBRestReschedule request. 
 			fwrite($fp, "\r\n reSched->rescheduleRestRequest(".$val['SessionID'].",".$val['TimeslotID'].",".$val['UTC_MQ_StartTime']." ,".$val['RoomID'].",".$val['Duration'].")");	
 			fwrite($gp, "\r\n reSched->rescheduleRestRequest(".$val['SessionID'].",".$val['TimeslotID'].",".$val['UTC_MQ_StartTime']." ,".$val['RoomID'].",".$val['Duration'].")");	
 		        $result = $reSched->rescheduleRestRequest($val['SessionID'],$val['TimeslotID'], $val['UTC_MQ_StartTime'], $val['RoomID'], $val['Duration']);// do the reschedule
+			$logMessage = "for PatID = ". $val['IDA'] ." TimelotID ".$val['TimeslotID'] .",  SessionID = ".$val['SessionID'] ."  edited from ".$val['WBStartUTCTime'] ." to ".  $val['UTC_MQ_StartTime']." and Duration from ". $val['WBDuration']." to ". $val['Duration'] ." minutes" ;
+			$err->logout('poll', 'info' ,__FILE__, $logMessage);     
 			fwrite($fp, "\r\n ". $val['IDA'] ." WB StartTime updated");
 			fwrite($gp, "\r\n ". $val['IDA'] ." WB StartTime updated");
 		        ob_start(); var_dump($result); $d = ob_get_clean(); fwrite($fp, "\r\n result: \r\n "); fwrite($fp, $d);		//record the returned result
-			if ($numRecordsEdited == 1)
-				break;
 	      } 
 	}
 	if ($numRecordsEdited == 0)
@@ -101,9 +101,10 @@ function makeLogEntry($message)
 	$err = new ERROR();								// class containing 'logout' function  
 	$intDates = makeMQdates($numDays);        	
 	print_r($intDates);
-	if  (strcmp($message, "0") == 0)
+	if  (strcmp($message, "0") == 0){
 		$message = "All records syncronized from ". $startDay ." to  ". $intDates['nextDay'];
 	$err->logout('poll', 'info' ,__FILE__, $message);     
+	}
 }
 /**
  * Make dates for a Single Day's data aquisition. Parameter $n determines how many days in future you go. 
