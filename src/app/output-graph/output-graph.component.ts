@@ -324,9 +324,10 @@ export class OutputGraphComponent implements OnInit {
      // if (end)
         selStr += " AND StartDateTime <= '"+    this .endDateString+ "'";
     }
-    else                                                                  // take ALL ProcedureCodes
-      selStr += " WHERE  StartDateTime > '"+this .startDateString + "' AND StartDateTime <= "+ this .endDateString 
-         +" ORDER By ActivityID desc";
+    else       {                                                         // take ALL ProcedureCodes
+    selStr += " WHERE (ProcedureCode = '121726' OR ProcedureCode= '121733' OR ProcedureCode = '121724') AND StartDateTime >= '" +    this .startDateString+ "'";
+       selStr += " AND StartDateTime <= '"+    this .endDateString+ "'";
+  }
 
     console.log(" 330 selStr is " + selStr)
     this .genSvce.getWithSelString(selStr, this .startDateString, this. procedureCode ).subscribe (
@@ -374,6 +375,7 @@ export class OutputGraphComponent implements OnInit {
 
   setData(inpData){
     this .data = inpData;
+    console.log("in setData %o", this .data)
     this .totalActivities = inpData.total;
     this .byPatData = inpData.Patients
     this .options.subtitle.text = inpData.total + " Plans "

@@ -29,7 +29,7 @@ getSessions(num, arg){
       const wlr = window.location.href;
       console.log("window.location.herf is " + window.location.href);
       if (window.location.href.indexOf('localhost') !== -1 || window.location.href.indexOf('blackboard') !== -1 ){
-        this .urlBase = 'http://blackboard-dev.partners.org/dev/FJL/AngProd/';      // get data from BB  for localhost or BB
+        this .urlBase = 'https://whiteboard.partners.org/esb/FLwbe/AngProd/';      // get data from BB  for localhost or BB
       }
       if ( window.location.href.indexOf('whiteboard') !== -1 )
       {                   // PROD.
