@@ -53,6 +53,7 @@ export class OutputGraphComponent implements OnInit {
   private binSizeC: number = 5;                                                 // default number of minutes per bin
   private binsC: any
   private numInBin: any;
+  private maxDurationExpected: number = 60;
   typeSelected = "Duration by Date";
   treatSelected = "Treatment";
   binSizeCSelected = "5"
@@ -375,7 +376,7 @@ export class OutputGraphComponent implements OnInit {
 
   setData(inpData){
     this .data = inpData;
-    console.log("in setData %o", this .data)
+    console.log("378 in setData %o", this .data)
     this .totalActivities = inpData.total;
     this .byPatData = inpData.Patients
     this .options.subtitle.text = inpData.total + " Plans "
@@ -402,17 +403,18 @@ export class OutputGraphComponent implements OnInit {
         for (let binEntry of this .binsC)                                       // loop thru the Created Bins
           this .stackedBins[patCount2].data[binCount2++] = 0                    // create the bin with count = 0
         patCount2++;
-      }
+        }
       ////////   bin the data  \\\\\\\\\\\\\\\\\\\\\\\
       var patCount2 = 0;                                                        // patient loop counter
       for (let key of Object.keys(this .data['Patients'])) {                    // loop over patients
         for (let entry of this .data['Patients'][key]) {                        // loop over each patient's durations
           var binCount2 = 0;                                                    // loop counter
-          for (let binEntry of this .binsC ){
+          for (let binEntry of this .binsC ){                                   // loop over the bins
             if (entry[1] > binEntry[0] && entry[1] <= binEntry[1]){             // if duration is withing the bin limits
               this .stackedBins[patCount2]['data'][binCount2]++                 // increment the count in that bin
               this .plainBins[binCount2]['count']++;
             }
+          
             binCount2++;
           }
         }
@@ -498,23 +500,26 @@ export class OutputGraphComponent implements OnInit {
  * Make the bins for the lower graph histogram
  */
   makeBins(){
-    var maxDurationExpected = 60;                                             // set the maximum expected activityID duration
+ //   var maxDurationExpected = 60;                                             // set the maximum expected activityID duration
     this .binsC = [];                                                         // create the array of bins
     this .numInBin = [];
     this .binsC['Label'] = [];
-    var numBins = maxDurationExpected / this .binSizeC;                      // create max number of bins = longestExpectedTime / numBins
+    var numBins = this .maxDurationExpected / this .binSizeC;              // create max number of bins = longestExpectedTime / numBins
     for (let i = 0; i < numBins; i++) {
       this .binsC[i] = [i * this .binSizeC, (i + 1) * this .binSizeC];        // set lower and upper bounds for each bin.
       this .binsC['Label'][i] = i * this .binSizeC + " to " +( i + 1) * this .binSizeC;   // the label for the bin in the graph
       this .binsC[i]['count'] = 0;                                            // make the bin.
       this .numInBin[i] = 0;                                                  // zero out the count in each bin.
     }
-    console.log("383 binsC %o", this .binsC)
+    this .binsC['Label'][numBins] = ' > ' + this .maxDurationExpected;        // make the label for the 'greaterThan' bin
+    this .binsC[numBins] = [ numBins * this .binSizeC, 3 * numBins * this .binSizeC];   // make  a bin to hold all durations > max.
+    this .binsC[numBins]['count'] = 0;                                        // set the count in MAX bin to 0
+        console.log("383 binsC %o", this .binsC)
    }
 
   makeNonStackedBins(data){
     let simpleBins = [];
-    var maxDurationExpected = 60;
+
  
     let k: keyof typeof data;
     for (k in data){
