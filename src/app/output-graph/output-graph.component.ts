@@ -125,7 +125,6 @@ export class OutputGraphComponent implements OnInit {
    */
   setDateRange(n, str){
     this .dateRange = str;                                                      // used by xAxis label formatter
-
     let start: string = '';
     let  today:string = moment().format('YYYY-MM-DD');                          // set end of data collection interval
     if (n > 0 )      {                                                           // user wants to back n e.g. months

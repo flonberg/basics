@@ -31,7 +31,6 @@
         </mat-select>
     </mat-form-field>
 
-    
     <mat-form-field appearance="fill">
         <mat-label>Interval Start</mat-label>
         <input matInput [matDatepicker]="picker" [formControl]="startDate"  (dateInput)="editDate('start', $event.value)" 
