@@ -92,7 +92,8 @@ export class OutputGraphComponent implements OnInit {
    this .endDateString = moment().format('YYYY-MM-DD');
    // Create an Observable that will publish a value on an interval
    const secondsCounter = interval(1000000);
-   this .getSessions(0, null)
+   this .getSessions(0, null);
+   this .dateRange = "Last 30 Days"
 
 // Subscribe to begin publishing values
   this .getData();
@@ -123,6 +124,8 @@ export class OutputGraphComponent implements OnInit {
    * @param str 
    */
   setDateRange(n, str){
+    this .dateRange = str;                                                      // used by xAxis label formatter
+
     let start: string = '';
     let  today:string = moment().format('YYYY-MM-DD');                          // set end of data collection interval
     if (n > 0 )      {                                                           // user wants to back n e.g. months
@@ -212,7 +215,12 @@ export class OutputGraphComponent implements OnInit {
       xAxis: {
         labels: {
           formatter: function () {
-            return Highcharts.dateFormat(' %b %e  ', this .value);
+ 
+         //   return this .value;
+
+              return Highcharts.dateFormat(' %b %e %H : %M   ', this .value);
+   
+
           }
         },
       },
