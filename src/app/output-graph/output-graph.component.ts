@@ -89,6 +89,7 @@ export class OutputGraphComponent implements OnInit {
    this .startDate = new FormControl();
    this .endDate = new FormControl();
    this .startDateString = moment().subtract(1, 'month').format('YYYY-MM-DD');            // default it 1 Month back
+ //  this .endDateString= moment().add(1, 'day').format('YYYY-mm-dd')
    this .endDateString = moment().format('YYYY-MM-DD');
    // Create an Observable that will publish a value on an interval
    const secondsCounter = interval(1000000);
