@@ -89,8 +89,10 @@ export class OutputGraphComponent implements OnInit {
    this .startDate = new FormControl();
    this .endDate = new FormControl();
    this .startDateString = moment().subtract(1, 'month').format('YYYY-MM-DD');            // default it 1 Month back
- //  this .endDateString= moment().add(1, 'day').format('YYYY-mm-dd')
+
    this .endDateString = moment().format('YYYY-MM-DD');
+   this. endDateString= moment().add(1, 'day').format('YYYY-MM-DD')
+
    // Create an Observable that will publish a value on an interval
    const secondsCounter = interval(1000000);
    this .getSessions(0, null);
@@ -384,7 +386,7 @@ export class OutputGraphComponent implements OnInit {
 
   setData(inpData){
     this .data = inpData;
-    console.log("378 in setData %o", this .data)
+  //  console.log("378 in setData %o", this .data)
     this .totalActivities = inpData.total;
     this .byPatData = inpData.Patients
     this .options.subtitle.text = inpData.total + " Plans "
@@ -399,7 +401,7 @@ export class OutputGraphComponent implements OnInit {
   binData(){
     this .stackedBins = new Array();                                           // the holder for the stacked timeInterval bins
     this .plainBins =this .binsC;
-    console.log("323 plainBins %o ", this .plainBins)
+  //  console.log("323 plainBins %o ", this .plainBins)
     var i = 0;
     var patCount2 = 0;                                                          // counter => index for patientLoop
     if ( this .data['Patients']  ){                                             // If there ARE patients
@@ -522,7 +524,7 @@ export class OutputGraphComponent implements OnInit {
     this .binsC['Label'][numBins] = ' > ' + this .maxDurationExpected;        // make the label for the 'greaterThan' bin
     this .binsC[numBins] = [ numBins * this .binSizeC, 3 * numBins * this .binSizeC];   // make  a bin to hold all durations > max.
     this .binsC[numBins]['count'] = 0;                                        // set the count in MAX bin to 0
-        console.log("383 binsC %o", this .binsC)
+    //    console.log("383 binsC %o", this .binsC)
    }
 
   makeNonStackedBins(data){
