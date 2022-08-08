@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { GenService } from '../gen.service';
 
+
 @ Component({
   selector: 'app-plan-accordion',
   templateUrl: './plan-accordion.component.html',
@@ -14,7 +15,7 @@ export class PlanAccordionComponent implements OnInit {
   headText2Bool = false;
   headText2 = 'QA Check';
   data: any;
-
+  WFData: any; 
   constructor(private genSvce: GenService) {
     this .genSvce = genSvce;
    }
@@ -36,6 +37,7 @@ export class PlanAccordionComponent implements OnInit {
       );
     }
 
+     
   setData(res){
     this .data = res;
     console.log("43  pasritnet is  %o", this .data);

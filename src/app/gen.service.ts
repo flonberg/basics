@@ -1,12 +1,15 @@
 import { Injectable , Inject} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { WINDOW } from './window.provider';
+import {Observable}  from 'rxjs'
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { WFData } from './WfData'
 @ Injectable({
   providedIn: 'root'
 })
 export class GenService {
   urlBase: String;
+  WFargs:{}
   constructor(private http: HttpClient) { }
 
  /*********  get using selStr from GET param  */
@@ -38,4 +41,11 @@ getSessions(num, arg){
       }
       console.log("gen 33  in setPlatForm urlBase is " + this .urlBase);
   }
+  getWFdata(): Observable<WFData>{
+    //   this .WFargs = {'startDate':'2022-07-01','endDate':'2022-07-02','sortBy':'Modality','maxDays':'8','center':'AllCox',
+    //   'startWF':'ScanDate', 'endWF':'Contours and Prescription'};
+    console.log("46 genSvce %o", this.WFargs)  
+    let url = "https://whiteboard.partners.org/esb/FLwbe/QAdashBd/getData.php";			// proxy for ION
+         return this .http.post<WFData>(url, JSON.stringify(this .WFargs))
+       }  
 }
