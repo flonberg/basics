@@ -4,6 +4,17 @@ import { WINDOW } from './window.provider';
 import {Observable}  from 'rxjs'
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { WFData } from './WfData'
+
+interface WFargInt {
+  startDate: string;
+  endDate: string;
+  sortBy: string;
+  maxDays: number;
+  center?: string;
+  startWF: string;
+  endWF: string;
+}
+
 @ Injectable({
   providedIn: 'root'
 })
@@ -15,6 +26,7 @@ export class GenService {
  /*********  get using selStr from GET param  */
  getWithSelString(arg, param?, procedureCode?){
   var url = this .urlBase + "timeInterval.php?&selStr=" + arg;
+  let test = 1;
   if (param)
     url += "&param=" + param;
   if (procedureCode)
@@ -48,4 +60,9 @@ getSessions(num, arg){
     let url = "https://whiteboard.partners.org/esb/FLwbe/QAdashBd/getData.php";			// proxy for ION
          return this .http.post<WFData>(url, JSON.stringify(this .WFargs))
        }  
+   getParams(userid): Observable<WFargInt> {
+        let url = "https://blackboard-dev.partners.org/dev/FJL/QAdashBd/getQAparams.php?userid=" + userid;			// proxy for ION
+        return this .http.get<WFargInt>(url)
+    
+      }     
 }

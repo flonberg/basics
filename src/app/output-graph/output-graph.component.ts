@@ -346,7 +346,8 @@ export class OutputGraphComponent implements OnInit {
           this .makeNonStackedBins(res['Rdata'])
         this .options3=                                                 // set options for the Avereage/StdDev plot
         {
-            series : [{
+            series : [
+              {
               name: 'Average Duration [minutes] ',
               color: '#4572A7',
               type: 'column',
@@ -371,7 +372,7 @@ export class OutputGraphComponent implements OnInit {
               text: this .data['total'] + ' Plans'
             },
         }
-        Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
+   //     Highcharts.chart('container', this .options);                     // Draw top graph scatter plot
         Highcharts.chart('container3', this .options3);                     // Av Duration Column plo
         Highcharts.chart('container2', this .options2);                   // Draw bottom graph Histogram
         },
