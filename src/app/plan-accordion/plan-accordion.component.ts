@@ -5,7 +5,10 @@ import * as Highcharts from 'highcharts';
 import { FormControl } from '@angular/forms';
 import * as moment from 'moment';
 
-
+interface DD {
+  value: string;
+  viewValue: string;
+}
 @ Component({
   selector: 'app-plan-accordion',
   templateUrl: './plan-accordion.component.html',
@@ -24,12 +27,48 @@ export class PlanAccordionComponent implements OnInit {
   public options
   startDate: FormControl;
   endDate: FormControl;
+  sortingbyTerm: FormControl;
+  serviceList: string[]
+  dateRangeList: string[]
+  startStageList: string[]
+  endStageList: string[]
+  sortBys: DD[] = [
+    {value: 'Modality', viewValue: 'Modality'},
+    {value: 'SiteDesc', viewValue: 'Service'},
+    {value: 'Physician', viewValue: 'Physician'},
+  ];
+  startStage: DD[] = [
+    {value: 'ScanDate', viewValue: 'ScanDate'},
+    {value: 'Contours and Prescription', viewValue: 'Contours and Prescription'},
+    {value: 'Assign Dosimetrist', viewValue: 'Assign Dosimetrist'},
+    {value: 'Treatment Planning', viewValue: 'Treatment Planning'},
+    {value: 'Ready for MD', viewValue: 'Ready for MD'},
+    {value: 'MD Approved', viewValue: 'MD Approved'},
+    {value: 'Plan Write-up', viewValue: 'Plan Write-up'},
+    {value: 'Pre-Treatment QA', viewValue: 'Pre-Treatment QA'},
+  ];
+  endStage: DD[] = [
+  //  {value: 'VSim/StartDate', viewValue: 'VSim/StartDate'},
+    {value: 'Contours and Prescription', viewValue: 'Contours and Prescription'},
+  //  {value: 'Assign Dosimetrist', viewValue: 'Assign Dosimetrist'},
+  //  {value: 'Ready for MD', viewValue: 'Ready for MD'},
+  //  {value: 'MD Approved', viewValue: 'MD Approved'},
+  //  {value: 'Plan Write-up', viewValue: 'Plan Write-up'},
+  //  {value: 'Pre-Treatment QA', viewValue: 'Pre-Treatment QA'},
+  //  {value: 'Physics Plan Check', viewValue: 'Physics Plan Check'},
+  ];
+  selectedMod = 'Modality'
+  selectedStartStage = 'ScanDate'
+  selectedEndStage = 'Contours and Prescription'
+
 
   userid: string;
   constructor(private genSvce: GenService, private route: ActivatedRoute) {
     this .genSvce = genSvce;
    }
   ngOnInit() {
+
+    this .serviceList = ['Modality', 'Service', 'Physician']
     this .gotData = false
     this .startDate = new FormControl();
     this .endDate = new FormControl();
@@ -92,14 +131,6 @@ export class PlanAccordionComponent implements OnInit {
       
               Highcharts.chart('container', this.options);
                   //    this .showControls = true
-
-
-
-
-
-
-
-
             }
           )
         }
@@ -108,7 +139,53 @@ export class PlanAccordionComponent implements OnInit {
     })
   }
     
-  
+  changeStartStage(e){
+    console.log("142  changeStartStage %o ", e)
+    if (e == 'ScanDate'){
+      this .endStage = [{value: 'Contours and Prescription', viewValue: 'Contours and Prescription'},]
+      this. selectedEndStage = 'Contours and Prescription'
+    }
+    if (e == 'Assign Dosimetrist'){
+      this .endStage = [ {value: 'VSIM/StartDate', viewValue: 'CVSIM/StartDate'},]
+      this. selectedEndStage = 'VSIM/StartDate'
+    }    
+    if (e == 'Treatment Planning'){
+      this .endStage = [
+        {value: 'Assign Dosimetrist', viewValue: 'Assign Dosimetrist'},
+        {value: 'VSIM/Start Date', viewValue: 'VSIM/Start Date (updated'},
+      ];
+    }
+    if (e == 'Contours and Prescription'){
+        this .endStage = [
+          {value: 'Ready for MD', viewValue: 'Ready for MD'},
+          {value: 'MD Approved', viewValue: 'MD Approved'},
+          {value: 'VSIM/Start Date', viewValue: 'VSIM/Start Date (updated'},
+        ];
+      }
+    if (e == 'Ready for MD'){
+      this .endStage = [
+        {value: 'MD Approved', viewValue: 'MD Approved'},
+        {value: 'VSIM/Start Date', viewValue: 'VSIM/Start Date'},
+      ];
+      }  
+    if (e == 'MD Approved'){
+      this .endStage = [
+        {value: 'Plan Write-up', viewValue: 'Plan Write-up'},
+        {value: 'VSIM/Start Date', viewValue: 'VSIM/Start Date'},
+      ];
+      }    
+    if (e == 'Plan Write-up'){
+      this .endStage = [
+        {value: 'Physics Plan Check', viewValue: 'Physics Plan Check'},
+        {value: 'Pre-Treatment QA', viewValue: 'Pre-Treatment QA'},
+        {value: 'VSIM/Start Date', viewValue: 'VSIM/Start Date'},
+      ];
+      }   
+    if (e == 'Pre-Treatment QA'){
+      this .endStage = [ {value: 'Physics Plan Check', viewValue: 'Physics Plan Check'},]
+      this. selectedEndStage = 'Physics Plan Check'
+    }       
+  }
   getData(){
     this .genSvce.setPlatform();
     //  this.genEditSvce.getPMDs('fjl3').subscribe(
