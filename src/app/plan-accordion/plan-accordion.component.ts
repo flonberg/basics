@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { GenService } from '../gen.service';
 import * as Highcharts from 'highcharts';
+import { FormControl } from '@angular/forms';
+import * as moment from 'moment';
 
 
 @ Component({
@@ -18,13 +20,19 @@ export class PlanAccordionComponent implements OnInit {
   headText2 = 'QA Check';
   data: any;
   WFdata: any;
+  gotData: boolean
   public options
+  startDate: FormControl;
+  endDate: FormControl;
 
   userid: string;
   constructor(private genSvce: GenService, private route: ActivatedRoute) {
     this .genSvce = genSvce;
    }
   ngOnInit() {
+    this .gotData = false
+    this .startDate = new FormControl();
+    this .endDate = new FormControl();
     this.route.queryParams.subscribe(params => {
       this.userid = params.userid
       this .genSvce.getParams(params.userid).subscribe(
@@ -34,6 +42,7 @@ export class PlanAccordionComponent implements OnInit {
           this .genSvce.getWFdata().subscribe(
             (wres) => {
               this .WFdata = wres
+              this .gotData = true
               console.log("36 eeee %o", this .WFdata)
               this .options = {
                 plotOptions: {
@@ -122,6 +131,20 @@ export class PlanAccordionComponent implements OnInit {
   addRow(){
     this .bars.push(1);
   }
+  startDateString: string;
+  endDateString: string;
+  editDate(type: string, event){
+    if (type == 'start'){
+      this .startDateString = moment(event).format('YYYY-MM-DD');
+     // this .dateRange = "Custom"
+    }
+    if (type == 'end')
+      this .endDateString = moment(event).format('YYYY-MM-DD');
+    if (this .startDateString.length > 2 && this .endDateString.length > 2 ){
+      this .options.title.text = "Plans from " + this .startDateString + " to " + this .endDateString
+      this .getData()
+    }
+  }
   setType(s){
     console.log('set', s.target.innerText);
     if (s.target.innerText == 'Mobius'){
@@ -134,5 +157,6 @@ export class PlanAccordionComponent implements OnInit {
       this .headText2Bool = false;
       this .headText = "Measurement";
     }
+    
   }
 }
