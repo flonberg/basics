@@ -24,7 +24,9 @@ export class PlanAccordionComponent implements OnInit {
   data: any;
   WFdata: any;
   gotData: boolean
+  showCustomDates: boolean
   public options
+  selectedSortBy: string
   startDate: FormControl;
   endDate: FormControl;
   sortingbyTerm: FormControl;
@@ -35,7 +37,7 @@ export class PlanAccordionComponent implements OnInit {
   sortBys: DD[] = [
     {value: 'Modality', viewValue: 'Modality'},
     {value: 'SiteDesc', viewValue: 'Service'},
-    {value: 'Physician', viewValue: 'Physician'},
+    {value: 'MDKey', viewValue: 'Physician'},
   ];
   startStage: DD[] = [
     {value: 'ScanDate', viewValue: 'ScanDate'},
@@ -48,18 +50,18 @@ export class PlanAccordionComponent implements OnInit {
     {value: 'Pre-Treatment QA', viewValue: 'Pre-Treatment QA'},
   ];
   endStage: DD[] = [
-  //  {value: 'VSim/StartDate', viewValue: 'VSim/StartDate'},
     {value: 'Contours and Prescription', viewValue: 'Contours and Prescription'},
-  //  {value: 'Assign Dosimetrist', viewValue: 'Assign Dosimetrist'},
-  //  {value: 'Ready for MD', viewValue: 'Ready for MD'},
-  //  {value: 'MD Approved', viewValue: 'MD Approved'},
-  //  {value: 'Plan Write-up', viewValue: 'Plan Write-up'},
-  //  {value: 'Pre-Treatment QA', viewValue: 'Pre-Treatment QA'},
-  //  {value: 'Physics Plan Check', viewValue: 'Physics Plan Check'},
   ];
-  selectedMod = 'Modality'
+  relTimeRange: DD[] = [
+    {value: 'Last Month', viewValue: 'Last Month'},
+    {value: 'Last Two Months', viewValue: 'Last Two Months'},
+    {value: 'Year to Date', viewValue: 'Year to Date'},
+    {value: 'Custom Dates', viewValue: 'Custom Dates'},
+  ];
+  
   selectedStartStage = 'ScanDate'
   selectedEndStage = 'Contours and Prescription'
+  selectedTimeRange = 'Last Month'
 
 
   userid: string;
@@ -70,13 +72,16 @@ export class PlanAccordionComponent implements OnInit {
 
     this .serviceList = ['Modality', 'Service', 'Physician']
     this .gotData = false
+    this .showCustomDates = false
     this .startDate = new FormControl();
     this .endDate = new FormControl();
     this.route.queryParams.subscribe(params => {
       this.userid = params.userid
+      console.log("79 usrid is %o", this.userid)
       this .genSvce.getParams(params.userid).subscribe(
         (res) => {
           this .genSvce.WFargs = res;
+          this .selectedSortBy = 'Modality'
           console.log("32 gggg WFargs %o", this .genSvce.WFargs)
           this .genSvce.getWFdata().subscribe(
             (wres) => {
@@ -123,12 +128,9 @@ export class PlanAccordionComponent implements OnInit {
                   categories: ['Apples', 'Oranges', 'Pears', 'Grapes', ]
                 },
               }
-             // this .gotData = true
-        
               console.log("182 res is %o", res)
               this .options.series = this .WFdata['data']
               this .options.xAxis['categories'] = ['0','1','2','3','4','5','6','7'];
-      
               Highcharts.chart('container', this.options);
                   //    this .showControls = true
             }
@@ -138,18 +140,43 @@ export class PlanAccordionComponent implements OnInit {
       console.log("28 usrid fffff is %o", this .userid)
     })
   }
+  getWFdata(){
+    this .genSvce.getWFdata().subscribe(
+      (wres) => {
+        this .WFdata = wres
+        this .options.series = this .WFdata['data'] 
+        Highcharts.chart('container', this.options);
+      })
+  }
+  submitFunc(){
+    console.log("98 WFargs %o", this.genSvce.WFargs);
+    this .getWFdata();
+ //   this .getWFData() 
+  /*  this .genSvce. saveWFparams().subscribe(
+      (res)=>{
+        let savedParams = res
+        console.log("111 saveParams %o", savedParams)
+      }
+    );
+    */
+
+  }
     
   changeStartStage(e){
     console.log("142  changeStartStage %o ", e)
     if (e == 'ScanDate'){
       this .endStage = [{value: 'Contours and Prescription', viewValue: 'Contours and Prescription'},]
       this. selectedEndStage = 'Contours and Prescription'
+      this .genSvce.WFargs['endWF'] = 'Contours and Prescription'
+      this .genSvce.WFargs['startWF'] = 'ScanDate'
     }
-    if (e == 'Assign Dosimetrist'){
+    if (e == 'Assign Dosimetrist' ){
       this .endStage = [ {value: 'VSIM/StartDate', viewValue: 'CVSIM/StartDate'},]
       this. selectedEndStage = 'VSIM/StartDate'
+      this .genSvce.WFargs['endWF'] = 'StartDate'
     }    
     if (e == 'Treatment Planning'){
+      this .genSvce.WFargs['endWF'] = 'Start Date'
       this .endStage = [
         {value: 'Assign Dosimetrist', viewValue: 'Assign Dosimetrist'},
         {value: 'VSIM/Start Date', viewValue: 'VSIM/Start Date (updated'},
@@ -184,7 +211,21 @@ export class PlanAccordionComponent implements OnInit {
     if (e == 'Pre-Treatment QA'){
       this .endStage = [ {value: 'Physics Plan Check', viewValue: 'Physics Plan Check'},]
       this. selectedEndStage = 'Physics Plan Check'
+      this .genSvce.WFargs['endWF'] = 'Physics Plan Check'
+      console.log("213 WF has %o", )
     }       
+  }
+  setSortBy(e){
+    console.log("193 setSortBy %o", e)
+    this .genSvce.WFargs['sortBy'] = e
+    console.log("193 setSortBy %o", this .genSvce.WFargs)
+  }
+  setRelTimeRange(e){
+    console.log("142  changeStartStage %o ", e)
+    if (e == "Custom Dates")
+      this .showCustomDates = true
+    else  
+      this .showCustomDates = false
   }
   getData(){
     this .genSvce.setPlatform();
@@ -204,6 +245,7 @@ export class PlanAccordionComponent implements OnInit {
   setData(res){
     this .data = res;
     console.log("43  pasritnet is  %o", this .data);
+
   }
   addRow(){
     this .bars.push(1);

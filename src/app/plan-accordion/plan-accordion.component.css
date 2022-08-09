@@ -1,3 +1,43 @@
 
 
 .accordion-body.in { overflow:visible; }
+
+button {
+    background:none;
+
+    color:#00C;
+    font-size:24px
+}   
+button:hover {
+    text-decoration:underline;
+    cursor:pointer
+}
+.Button{
+    color: #333;
+   border: 1px solid orange;
+   border-bottom: 5px solid rgb(57, 72, 145);
+   background-color: #fff;
+   font-size: 24px;
+   margin: 5px;
+   padding: 1px 7px 1px 7px;
+   display: inline-block;
+   -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+   position: relative;
+   top: 0px;
+   }
+   
+   .Button:hover{
+   cursor: hand; 
+   cursor: pointer;
+   }
+   
+   .Button:active{
+   border-bottom: 3px solid #999;
+   top: 3px;
+   }
+   
