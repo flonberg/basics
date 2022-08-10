@@ -4,6 +4,7 @@ import { WINDOW } from './window.provider';
 import {Observable}  from 'rxjs'
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { WFData } from './WfData'
+import * as saveAs from 'file-saver';
 
 interface WFargInt {
   startDate: string;
@@ -61,8 +62,45 @@ getSessions(num, arg){
          return this .http.post<WFData>(url, JSON.stringify(this .WFargs))
        }  
    getParams(userid): Observable<WFargInt> {
-        let url = "https://blackboard-dev.partners.org/dev/FJL/QAdashBd/getQAparams.php?userid=" + userid;			// proxy for ION
+        let url = "http://blackboard-dev.partners.org/dev/FJL/QAdashBd/getQAparams.php?userid=" + userid;			// proxy for ION
         return this .http.get<WFargInt>(url)
     
       }     
+  saveWFparams(args?): Observable<WFData>{
+    console.log("46 genSvce %o", this.WFargs)  
+    let url = "http://blackboard-dev.partners.org/dev/FJL/QAdashBd/saveQAparams.php";	
+          return this .http.post<WFData>(url, JSON.stringify(this .WFargs))
+        }      
+  dArray: any  = Array     
+  saveCSV(data){
+    console.log("75 data is %o", data)
+    let dArray = Array();                                                   // array for the lines of the CSV file
+    let i = 0;                                                              // line index
+    dArray[i] = Array();                                                    // create the array for the line
+    dArray[i][0] = "Duration [min] \r\n"
+    dArray[++i] = Array();
+ //   dArray[i][0] = "Plans from " + this .startDateString;
+//    if (this .endDateString)
+    //  dArray[i][0] += " to " + this .endDateString + "\r\n";
+    i++;
+    for (let key of Object.keys(data)){                                     // step through the patient lines
+        dArray[i] = Array();                                                  // create the array for the line
+        dArray[i][0] = key                                      // store the PatientID in the first col
+        let k = 1;                                                            // index of data lines
+        for (let entry of data[key]){
+          if (entry['data']){
+          console.log("91 %o", entry)
+          dArray[i][k] = entry['data']
+          dArray[i][k][8] = "\r\n"
+          k++
+          }
+         // dArray[i][k] = "\r\n"       
+        }
+   //     dArray[i][k++] = "\r\n"                                               // line feed to end the line
+        i++;                                                                  // go to the next line
+      }
+      console.log("384 patDate %o", dArray[2])
+      let tBlob = new Blob(dArray)
+      saveAs(tBlob, 'duration.csv')    
+  }      
 }

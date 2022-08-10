@@ -23,7 +23,7 @@
 
     <mat-form-field appearance="fill">
       <mat-label>End Workflow Stage</mat-label>
-      <mat-select [(value)]="selectedEndStage" >
+      <mat-select [(value)]="selectedEndStage" (selectionChange)='changeEndStage($event.value)' >
         <mat-option *ngFor="let sby of endStage" [value]="sby.value">
           {{sby.viewValue}}
         </mat-option>
@@ -39,6 +39,7 @@
     </mat-form-field> 
    
     <button mat-raised-button class="Button" (click)="submitFunc()">Submit</button>
+    <button mat-raised-button class="Button" (click)="saveCSV()">Save Data</button>
 
  <div *ngIf = 'showCustomDates'> 
     <mat-form-field appearance="fill">

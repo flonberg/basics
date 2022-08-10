@@ -26,6 +26,7 @@ export class PlanAccordionComponent implements OnInit {
   gotData: boolean
   showCustomDates: boolean
   public options
+  subTitle = ''
   selectedSortBy: string
   startDate: FormControl;
   endDate: FormControl;
@@ -69,7 +70,6 @@ export class PlanAccordionComponent implements OnInit {
     this .genSvce = genSvce;
    }
   ngOnInit() {
-
     this .serviceList = ['Modality', 'Service', 'Physician']
     this .gotData = false
     this .showCustomDates = false
@@ -81,6 +81,10 @@ export class PlanAccordionComponent implements OnInit {
       this .genSvce.getParams(params.userid).subscribe(
         (res) => {
           this .genSvce.WFargs = res;
+          if (this .genSvce.WFargs['sortBy'] == 'Modality')
+            this .subTitle = 'Groups are MGH, NWH,CDH,ACC, Emerson'
+          else 
+            this .subTitle = ''  
           this .selectedSortBy = 'Modality'
           console.log("32 gggg WFargs %o", this .genSvce.WFargs)
           this .genSvce.getWFdata().subscribe(
@@ -102,7 +106,7 @@ export class PlanAccordionComponent implements OnInit {
                     text: this. WFdata['count'] + " plans canvased, from " + this .WFdata['startDate'] + " to " + this .WFdata['endDate']
                 },
                 subtitle: {
-                //  text: this. theSubTitle
+                  text: this. subTitle
                 },
                 credits: {
                   enabled: false
@@ -144,7 +148,11 @@ export class PlanAccordionComponent implements OnInit {
     this .genSvce.getWFdata().subscribe(
       (wres) => {
         this .WFdata = wres
-        this .options.series = this .WFdata['data'] 
+        this .options.series = this .WFdata['data']           
+        if (this .genSvce.WFargs['sortBy'] == 'Modality')
+          this .options.subtitle = 'Groups are MGH, NWH,CDH,ACC, Emerson'
+        else 
+          this .options.subtitle= ''  
         Highcharts.chart('container', this.options);
       })
   }
@@ -152,16 +160,19 @@ export class PlanAccordionComponent implements OnInit {
     console.log("98 WFargs %o", this.genSvce.WFargs);
     this .getWFdata();
  //   this .getWFData() 
-  /*  this .genSvce. saveWFparams().subscribe(
+    this .genSvce. saveWFparams().subscribe(
       (res)=>{
         let savedParams = res
         console.log("111 saveParams %o", savedParams)
       }
     );
-    */
-
   }
-    
+  saveCSV(){
+    this .genSvce.saveCSV(this.WFdata)
+  }
+  changeEndStage(e){
+    this .genSvce.WFargs['endWF'] = e
+  }
   changeStartStage(e){
     console.log("142  changeStartStage %o ", e)
     if (e == 'ScanDate'){
@@ -174,6 +185,7 @@ export class PlanAccordionComponent implements OnInit {
       this .endStage = [ {value: 'VSIM/StartDate', viewValue: 'CVSIM/StartDate'},]
       this. selectedEndStage = 'VSIM/StartDate'
       this .genSvce.WFargs['endWF'] = 'StartDate'
+      this .subTitle = 'Groups are MGH, NWH,CDH,ACC, Emerson'
     }    
     if (e == 'Treatment Planning'){
       this .genSvce.WFargs['endWF'] = 'Start Date'
