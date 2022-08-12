@@ -90,7 +90,6 @@ getSessions(num, arg){
         for (let entry of data[key]){
           if (entry['data']){
           console.log("91 %o", entry)
-
           dArray[i][k] = Array();
           dArray[i][k][0] = entry['name']
           dArray[i][k].push(entry['data'])

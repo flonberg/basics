@@ -5,7 +5,7 @@
     <form >
     <mat-form-field appearance="fill">
       <mat-label>Sort Data By</mat-label>
-      <mat-select [(value)]="selectedSortBy"  (selectionChange)='setSortBy($event.value)' >
+      <mat-select [(value)]="genSvce.WFargs['sortBy']" (selectionChange)='setSortBy($event.value)' >
         <mat-option *ngFor="let sby of sortBys" [value]="sby.value">
           {{sby.viewValue}}
         </mat-option>
@@ -37,6 +37,11 @@
         </mat-option>
       </mat-select>
     </mat-form-field> 
+    <mat-form-field class="example-full-width" appearance="fill">
+      <mat-label>Max days (limit < 16) </mat-label>
+      <input matInput placeholder="Max Days Bin" [value]="genSvce.WFargs['maxDays']" (change)=" setMaxDays($event)">
+    </mat-form-field>
+
    
     <button mat-raised-button class="Button" (click)="submitFunc()">Submit</button>
     <button mat-raised-button class="Button" (click)="saveCSV()">Save Data</button>
@@ -56,7 +61,13 @@
         <mat-datepicker #picker2></mat-datepicker>
     </mat-form-field>
   </div>  
-
+  <div class="raised" *ngIf = 'byMD'>
+      <mat-selection-list #shoes class="list-horizontal">
+        <mat-list-option *ngFor="let shoe of typesOfShoes">
+          {{shoe}}
+        </mat-list-option>
+      </mat-selection-list>
+  </div>    
   </form>  
     <!--
     <mat-form-field  style='width:200px;'  appearance='fill' >

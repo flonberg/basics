@@ -40,4 +40,18 @@ button:hover {
    border-bottom: 3px solid #999;
    top: 3px;
    }
+   .mat-list-item {
+    float: right;
+  }
+  mat-selection-list.list-horizontal {
+    display: flex;
+    flex-direction: row;
+    width:300px;
+   }
+  .raised {
+    border-bottom:solid;
+    border-color: grey;
+    width:450px;
+    background-color: rgba(250, 250, 250, 0.964);
+  } 
    

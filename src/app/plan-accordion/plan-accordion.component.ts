@@ -15,8 +15,9 @@ interface DD {
   styleUrls: ['./plan-accordion.component.css']
 })
 export class PlanAccordionComponent implements OnInit {
-  heroes = [{'name':'Agiligy'}];
-  bars = new Array(1);
+  maxDays: number = 8                               // default larges bin days
+  byMD: boolean = false                             // show limiy MDs shown, e.g MGH only
+ // bars = new Array(1);
   heading = false;
   headText = 'Measurement';
   headText2Bool = false;
@@ -35,6 +36,11 @@ export class PlanAccordionComponent implements OnInit {
   dateRangeList: string[]
   startStageList: string[]
   endStageList: string[]
+  limitMDs: DD[] = [
+    {value:'MGH', viewValue: "MGH"},
+    {value:'NWH', viewValue: "NWH"},
+    {value:'Emerson', viewValue: "Emerson"},
+  ]
   sortBys: DD[] = [
     {value: 'Modality', viewValue: 'Modality'},
     {value: 'SiteDesc', viewValue: 'Service'},
@@ -64,7 +70,7 @@ export class PlanAccordionComponent implements OnInit {
   selectedEndStage = 'Contours and Prescription'
   selectedTimeRange = 'Last Month'
 
-
+  typesOfShoes: string[] = ['MGH', 'NWH', 'Emerson', 'CDH'];
   userid: string;
   constructor(private genSvce: GenService, private route: ActivatedRoute) {
     this .genSvce = genSvce;
@@ -115,9 +121,19 @@ export class PlanAccordionComponent implements OnInit {
                   title: {
                     text: 'Number of Plans',
                   },
-                //  stackLabels: {
-                  //  enabled: true,
-                  //},
+                 stackLabels: {
+                    enabled: true,
+                  },
+                },
+                dataLabels: {
+                  enabled: true,
+                  verticalAlign: 'bottom',
+                  overflow: 'none',
+                  crop: false,
+                  //y: 20,
+                  formatter() {
+                    return this.series.name;
+                  }
                 },
                 xAxis: {
                   title: {
@@ -132,6 +148,7 @@ export class PlanAccordionComponent implements OnInit {
                   categories: ['Apples', 'Oranges', 'Pears', 'Grapes', ]
                 },
               }
+
               console.log("182 res is %o", res)
               this .options.series = this .WFdata['data']
               this .options.xAxis['categories'] = ['0','1','2','3','4','5','6','7'];
@@ -143,6 +160,10 @@ export class PlanAccordionComponent implements OnInit {
       )
       console.log("28 usrid fffff is %o", this .userid)
     })
+  }
+  setMaxDays(ev){
+    console.log("148 maxdays %o", ev.target.value)
+    this.genSvce.WFargs['maxDays'] = ev.target.value
   }
   getWFdata(){
     this .genSvce.getWFdata().subscribe(
@@ -175,6 +196,7 @@ export class PlanAccordionComponent implements OnInit {
   }
   changeStartStage(e){
     console.log("142  changeStartStage %o ", e)
+    this .genSvce.WFargs['startWF'] = e
     if (e == 'ScanDate'){
       this .endStage = [{value: 'Contours and Prescription', viewValue: 'Contours and Prescription'},]
       this. selectedEndStage = 'Contours and Prescription'
@@ -230,6 +252,9 @@ export class PlanAccordionComponent implements OnInit {
   setSortBy(e){
     console.log("193 setSortBy %o", e)
     this .genSvce.WFargs['sortBy'] = e
+    if (e == 'MDKey'){
+      this .byMD = true
+    }
     console.log("193 setSortBy %o", this .genSvce.WFargs)
   }
   setRelTimeRange(e){
@@ -259,9 +284,10 @@ export class PlanAccordionComponent implements OnInit {
     console.log("43  pasritnet is  %o", this .data);
 
   }
-  addRow(){
-    this .bars.push(1);
-  }
+
+  //addRow(){
+    //this .bars.push(1);
+ // }
   startDateString: string;
   endDateString: string;
   editDate(type: string, event){
