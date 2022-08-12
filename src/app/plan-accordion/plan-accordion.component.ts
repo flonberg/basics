@@ -175,10 +175,8 @@ export class PlanAccordionComponent implements OnInit {
     this.genSvce.WFargs['maxDays'] = ev.target.value
   }
   setInst(ev){
-   
     this .genSvce.WFargs['instSpec'] = this.institutions
     console.log("148 maxdays %o", this .genSvce.WFargs)
-
   }
   getWFdata(){
     this .genSvce.getWFdata().subscribe(
