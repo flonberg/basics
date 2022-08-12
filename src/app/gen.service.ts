@@ -14,8 +14,8 @@ interface WFargInt {
   center?: string;
   startWF: string;
   endWF: string;
+  instSpec: string[]                                  // MDs limited to those institutions
 }
-
 @ Injectable({
   providedIn: 'root'
 })

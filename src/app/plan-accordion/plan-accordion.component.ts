@@ -36,6 +36,7 @@ export class PlanAccordionComponent implements OnInit {
   dateRangeList: string[]
   startStageList: string[]
   endStageList: string[]
+  institutions: string[]; // this array will contain the selected pizzas
   limitMDs: DD[] = [
     {value:'MGH', viewValue: "MGH"},
     {value:'NWH', viewValue: "NWH"},
@@ -65,12 +66,18 @@ export class PlanAccordionComponent implements OnInit {
     {value: 'Year to Date', viewValue: 'Year to Date'},
     {value: 'Custom Dates', viewValue: 'Custom Dates'},
   ];
+  institution: DD[] = [
+    {value: 'MGH', viewValue: 'MGH'},
+    {value: 'NWH', viewValue: 'NWH'},
+    {value: 'CDH', viewValue: 'CDH'},
+    {value: 'Emerson', viewValue: 'Emerson'},
+  ];
   
   selectedStartStage = 'ScanDate'
   selectedEndStage = 'Contours and Prescription'
   selectedTimeRange = 'Last Month'
 
-  typesOfShoes: string[] = ['MGH', 'NWH', 'Emerson', 'CDH'];
+  institutionNames: string[] = ['MGH', 'NWH', 'EH','ACC', 'CDH'];
   userid: string;
   constructor(private genSvce: GenService, private route: ActivatedRoute) {
     this .genSvce = genSvce;
@@ -91,6 +98,8 @@ export class PlanAccordionComponent implements OnInit {
             this .subTitle = 'Groups are MGH, NWH,CDH,ACC, Emerson'
           else 
             this .subTitle = ''  
+          if (this .genSvce.WFargs['sortBy'] == 'MDKey')  
+            this .byMD = true
           this .selectedSortBy = 'Modality'
           console.log("32 gggg WFargs %o", this .genSvce.WFargs)
           this .genSvce.getWFdata().subscribe(
@@ -164,6 +173,12 @@ export class PlanAccordionComponent implements OnInit {
   setMaxDays(ev){
     console.log("148 maxdays %o", ev.target.value)
     this.genSvce.WFargs['maxDays'] = ev.target.value
+  }
+  setInst(ev){
+   
+    this .genSvce.WFargs['instSpec'] = this.institutions
+    console.log("148 maxdays %o", this .genSvce.WFargs)
+
   }
   getWFdata(){
     this .genSvce.getWFdata().subscribe(
@@ -252,9 +267,11 @@ export class PlanAccordionComponent implements OnInit {
   setSortBy(e){
     console.log("193 setSortBy %o", e)
     this .genSvce.WFargs['sortBy'] = e
-    if (e == 'MDKey'){
+    if (e == 'MDKey')
       this .byMD = true
-    }
+    else
+      this .byMD = false  
+    
     console.log("193 setSortBy %o", this .genSvce.WFargs)
   }
   setRelTimeRange(e){
