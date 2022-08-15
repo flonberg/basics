@@ -18,13 +18,15 @@ $dB = new getDBData($selStr, $handle);
 $assoc = $dB->getAssoc();
 $assoc['instSpec'] = Array();
 $i = 0;
+
 foreach ($limMDs as $key=>$val){
     {
-      //  echo "<br> key is $key val is $val";
-        $assoc['instSpec'][$i]['name']= $val;
-        $assoc['instSpec'][$i++]['value']= $assoc[$val];
-     //   echo "<pre>"; print_r($assoc['instSpec']); echo "</pre>";
+        if ($assoc[$val] == '1')
+            array_push($assoc['instSpec'], $val);
+
     }
+    
 }
+
 echo json_encode($assoc);
 
