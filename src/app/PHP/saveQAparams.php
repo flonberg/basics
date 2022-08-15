@@ -14,7 +14,6 @@ $IAU = new InsertAndUpdates();
 $fp = fopen('./saveDatalog.txt', "w");
 $nowStr = date("Y-m-d H:i:s"); fwrite($fp, "\r\n $nowStr \r\n");
 $body = @file_get_contents('php://input');            // Get parameters from calling cURL POST;
-
                                    	// Write out the data to the log
 $data = json_decode($body, true);
 $s = print_r($data, true);     fwrite($fp, $s ."\r\n");                      	// Create pretty form of data
@@ -26,10 +25,10 @@ $instNames = Array('MGH','NWH','CDH','EH');
 $insStr1 = "INSERT INTO QADashdbParams (userid, startDate, endDate, maxDays, startWF, endWF, sortBy, EnteredWhen";
 $insStr2 = " values ('".$data['userid']."','".$data['startDate']."','".$data['endDate']."','".$data['maxDays']."',
 '".$data['startWF']."','".$data['endWF']."','".$data['sortBy']."',  GETDATE()";
-if (isset($data['instSpec'])){
-        foreach($data['instSpec'] as $key=>$val){
+if (isset($data['changeInst'])){
+        foreach($data['changeInst'] as $key=>$val){
                 $insStr1 .= ", $val";
-                $insStr2 .= ",'1'";
+                $insStr2 .= ", '1'";        
                 }
         }
 $insStr0 = $insStr1 .") " . $insStr2 .")";
@@ -38,7 +37,7 @@ fwrite($fp, "\r\n insStr0 is \r\n $insStr0 \r\n ");
 $insStr = "INSERT INTO QADashdbParams (userid, startDate, endDate, maxDays, startWF, endWF, sortBy, EnteredWhen )
         values ('".$data['userid']."','".$data['startDate']."','".$data['endDate']."','".$data['maxDays']."',
         '".$data['startWF']."','".$data['endWF']."','".$data['sortBy']."',  GETDATE())";
-fwrite($fp, "\r\n $insStr \r\n ");        
+fwrite($fp, "\r\n $insStr0 \r\n ");        
 $res = $IAU->safeSQL($insStr0, $handle);
 $resA = array("result"=>"Success");
 //echo json_encode($resA);

@@ -1,8 +1,6 @@
 
 <div id='container'></div>
 <div *ngIf = 'gotData'>
-
- 
     <mat-form-field appearance="fill">
       <mat-label>Sort Data By</mat-label>
       <mat-select [(value)]="genSvce.WFargs['sortBy']" (selectionChange)='setSortBy($event.value)' >
@@ -62,7 +60,7 @@
   </div>  
   <div class="raised" *ngIf = 'byMD'>
       <mat-selection-list #shoes class="list-horizontal" [(ngModel)]="institutions" (ngModelChange)="setInst($event)">
-        <mat-list-option *ngFor="let inst of institutionNames"  [value]="inst">
+        <mat-list-option *ngFor="let inst of institutionNames"  [selected]="retInst(inst)" [value] = inst>
           {{inst}}
         </mat-list-option>
       </mat-selection-list>

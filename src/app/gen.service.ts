@@ -6,6 +6,11 @@ import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { WFData } from './WfData'
 import * as saveAs from 'file-saver';
 
+interface DDD {
+  name: string;
+  value: string;
+}
+
 interface WFargInt {
   startDate: string;
   endDate: string;
@@ -14,14 +19,15 @@ interface WFargInt {
   center?: string;
   startWF: string;
   endWF: string;
-  instSpec: string[]                                  // MDs limited to those institutions
+  instSpec: DDD[]                                  // MDs limited to those institutions
+  changeInst?:any
 }
 @ Injectable({
   providedIn: 'root'
 })
 export class GenService {
   urlBase: String;
-  WFargs:{}
+  WFargs:WFargInt
   constructor(private http: HttpClient) { }
 
  /*********  get using selStr from GET param  */
@@ -66,8 +72,11 @@ getSessions(num, arg){
         return this .http.get<WFargInt>(url)
     
       }     
-  saveWFparams(args?): Observable<WFData>{
-    console.log("46 genSvce %o", this.WFargs)  
+  saveWFPparams(args?): Observable<WFData>{
+    this .WFargs.changeInst = args
+    console.log("70 genSvce %o", this.WFargs) 
+    let jData =  JSON.stringify(this .WFargs);
+    console.log("72 jdata is %o", jData)
     let url = "http://blackboard-dev.partners.org/dev/FJL/QAdashBd/saveQAparams.php";	
           return this .http.post<WFData>(url, JSON.stringify(this .WFargs))
         }      

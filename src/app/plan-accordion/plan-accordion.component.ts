@@ -9,6 +9,10 @@ interface DD {
   value: string;
   viewValue: string;
 }
+interface NV {
+  name: string;
+  value: string;
+}
 @ Component({
   selector: 'app-plan-accordion',
   templateUrl: './plan-accordion.component.html',
@@ -25,6 +29,7 @@ export class PlanAccordionComponent implements OnInit {
   data: any;
   WFdata: any;
   gotData: boolean
+  gotParams: boolean                              // make sure UserParams are read
   showCustomDates: boolean
   public options
   subTitle = ''
@@ -37,11 +42,11 @@ export class PlanAccordionComponent implements OnInit {
   startStageList: string[]
   endStageList: string[]
   institutions: string[]; // this array will contain the selected pizzas
-  limitMDs: DD[] = [
+ /* limitMDs: DD[] = [
     {value:'MGH', viewValue: "MGH"},
     {value:'NWH', viewValue: "NWH"},
     {value:'Emerson', viewValue: "Emerson"},
-  ]
+  ]*/
   sortBys: DD[] = [
     {value: 'Modality', viewValue: 'Modality'},
     {value: 'SiteDesc', viewValue: 'Service'},
@@ -58,8 +63,16 @@ export class PlanAccordionComponent implements OnInit {
     {value: 'Pre-Treatment QA', viewValue: 'Pre-Treatment QA'},
   ];
   endStage: DD[] = [
+
     {value: 'Contours and Prescription', viewValue: 'Contours and Prescription'},
+    {value: 'Assign Dosimetrist', viewValue: 'Assign Dosimetrist'},
+    {value: 'Treatment Planning', viewValue: 'Treatment Planning'},
+    {value: 'Ready for MD', viewValue: 'Ready for MD'},
+    {value: 'MD Approved', viewValue: 'MD Approved'},
+    {value: 'Plan Write-up', viewValue: 'Plan Write-up'},
+    {value: 'Pre-Treatment QA', viewValue: 'Pre-Treatment QA'},
   ];
+
   relTimeRange: DD[] = [
     {value: 'Last Month', viewValue: 'Last Month'},
     {value: 'Last Two Months', viewValue: 'Last Two Months'},
@@ -85,6 +98,7 @@ export class PlanAccordionComponent implements OnInit {
   ngOnInit() {
     this .serviceList = ['Modality', 'Service', 'Physician']
     this .gotData = false
+    this .gotParams = false
     this .showCustomDates = false
     this .startDate = new FormControl();
     this .endDate = new FormControl();
@@ -94,6 +108,9 @@ export class PlanAccordionComponent implements OnInit {
       this .genSvce.getParams(params.userid).subscribe(
         (res) => {
           this .genSvce.WFargs = res;
+          this .selectedStartStage = this .genSvce.WFargs['startWF']
+          this .selectedEndStage = this .genSvce.WFargs['endWF']
+          console.log("97 params form file are %o", this .genSvce.WFargs)
           if (this .genSvce.WFargs['sortBy'] == 'Modality')
             this .subTitle = 'Groups are MGH, NWH,CDH,ACC, Emerson'
           else 
@@ -102,6 +119,7 @@ export class PlanAccordionComponent implements OnInit {
             this .byMD = true
           this .selectedSortBy = 'Modality'
           console.log("32 gggg WFargs %o", this .genSvce.WFargs)
+          this .gotParams = true;
           this .genSvce.getWFdata().subscribe(
             (wres) => {
               this .WFdata = wres
@@ -158,7 +176,7 @@ export class PlanAccordionComponent implements OnInit {
                 },
               }
 
-              console.log("182 res is %o", res)
+              console.log("182 WFdata is %o", this .WFdata)
               this .options.series = this .WFdata['data']
               this .options.xAxis['categories'] = ['0','1','2','3','4','5','6','7'];
               Highcharts.chart('container', this.options);
@@ -174,9 +192,14 @@ export class PlanAccordionComponent implements OnInit {
     console.log("148 maxdays %o", ev.target.value)
     this.genSvce.WFargs['maxDays'] = ev.target.value
   }
+  changeInst: string[] = Array()
   setInst(ev){
-    this .genSvce.WFargs['instSpec'] = this.institutions
-    console.log("148 maxdays %o", this .genSvce.WFargs)
+    console.log("193 ev %o", ev)
+    this. changeInst = ev
+  }
+  retInst(ev){                                                          // used to 'check' the selected MD institutions
+    if (this .genSvce.WFargs[ev])
+      return true
   }
   getWFdata(){
     this .genSvce.getWFdata().subscribe(
@@ -191,10 +214,10 @@ export class PlanAccordionComponent implements OnInit {
       })
   }
   submitFunc(){
-    console.log("98 WFargs %o", this.genSvce.WFargs);
+    console.log("98 WFargs at the Submit is %o", this.genSvce.WFargs);
     this .getWFdata();
  //   this .getWFData() 
-    this .genSvce. saveWFparams().subscribe(
+    this .genSvce. saveWFPparams(this.changeInst).subscribe(
       (res)=>{
         let savedParams = res
         console.log("111 saveParams %o", savedParams)
